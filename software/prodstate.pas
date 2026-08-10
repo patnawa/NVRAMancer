@@ -90,8 +90,8 @@ uses
 {$ENDIF}
 
 const
-  CHAIN_DOMAIN = 'AsProgrammer-ProX/prodstate/v1';
-  ANCHOR_DOMAIN = 'AsProgrammer-ProX/prodstate-anchor/v1';
+  CHAIN_DOMAIN = 'NVRAMancer/prodstate/v1';
+  ANCHOR_DOMAIN = 'NVRAMancer/prodstate-anchor/v1';
 
 type
   TStringArray = array of string;

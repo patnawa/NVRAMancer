@@ -937,7 +937,7 @@ begin
 end;
 
 begin
-  WriteLn('AsProgrammer SPI25 real-hardware adapter tests');
+  WriteLn('NVRAMancer SPI25 real-hardware adapter tests');
   WriteLn;
 
   TestStableIdentityAndSplitWireFormat;

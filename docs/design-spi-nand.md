@@ -39,7 +39,7 @@ The implementation is LCL-free below the command-line adapter:
 opened unless all of these conditions hold:
 
 1. A bench that has completed the live-validation checklist sets
-   `ASPROGRAMMER_NAND_LIVE_VALIDATED=1`.
+   `NVRAMANCER_NAND_LIVE_VALIDATED=1`.
 2. The invocation includes `--force`.
 3. `--nand-backup FILE` names a new file in an existing directory. Existing
    files are never overwritten.
@@ -70,9 +70,9 @@ success only when the full main area is blank.
 The read-only surface remains usable without the station gate:
 
 ```powershell
-AsProgrammer.exe --nand-info --hw ch347
-AsProgrammer.exe --nand-read recovery.bin --hw ch347
-AsProgrammer.exe --nand-read raw.bin --nand-raw --hw ch347
+NVRAMancer.exe --nand-info --hw ch347
+NVRAMancer.exe --nand-read recovery.bin --hw ch347
+NVRAMancer.exe --nand-read raw.bin --nand-raw --hw ch347
 ```
 
 After a station has independently satisfied the validation checklist, a
@@ -80,8 +80,8 @@ mutation invocation has this shape (do not set the environment gate merely to
 bypass the refusal):
 
 ```powershell
-$env:ASPROGRAMMER_NAND_LIVE_VALIDATED = '1'
-AsProgrammer.exe --nand-write image.bin --nand-backup recovery.bin `
+$env:NVRAMANCER_NAND_LIVE_VALIDATED = '1'
+NVRAMancer.exe --nand-write image.bin --nand-backup recovery.bin `
   --nand-bad-policy refuse --force --hw ch347
 ```
 
@@ -151,7 +151,7 @@ and 7 is that they happened to the same part in the same session as items 1
 to 3 — a restore verified against a backup some other run took last month is
 not a verified restore.
 
-The `ASPROGRAMMER_NAND_LIVE_VALIDATED` token is not a second way through the
+The `NVRAMANCER_NAND_LIVE_VALIDATED` token is not a second way through the
 gate. It is how the validation run itself is performed, since somebody has to
 issue destructive commands before any evidence can exist; a run that uses it
 while the capability is gated says so in as many words.

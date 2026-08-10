@@ -464,7 +464,7 @@ begin
 end;
 
 begin
-  WriteLn('AsProgrammer legacy protocol hardening tests');
+  WriteLn('NVRAMancer legacy protocol hardening tests');
   WriteLn;
 
   TestI2CGeometry;

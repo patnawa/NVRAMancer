@@ -820,7 +820,7 @@ begin
 end;
 
 begin
-  WriteLn('AsProgrammer preservation-aware NOR engine tests');
+  WriteLn('NVRAMancer preservation-aware NOR engine tests');
   WriteLn;
 
   TestLifecycleCancellation;

@@ -21,9 +21,9 @@ uses
   Classes, SysUtils, prodcrypto, electricalpreflight;
 
 const
-  PRODUCTION_JOB_FORMAT = 'AsProgrammer-ProX/job';
+  PRODUCTION_JOB_FORMAT = 'NVRAMancer/job';
   PRODUCTION_JOB_VERSION = 1;
-  PRODUCTION_JOB_AUTH_FORMAT = 'AsProgrammer-ProX/job-auth';
+  PRODUCTION_JOB_AUTH_FORMAT = 'NVRAMancer/job-auth';
   PRODUCTION_JOB_AUTH_VERSION = 1;
   PRODUCTION_JOB_AUTH_ALGORITHM = 'HMAC-SHA256';
   MAX_PRODUCTION_JOB_BYTES = 16 * 1024;
@@ -170,7 +170,7 @@ const
     'mac'
   );
 
-  AUTH_DOMAIN = 'AsProgrammer-ProX/job-auth/v1';
+  AUTH_DOMAIN = 'NVRAMancer/job-auth/v1';
 
 type
   TStringArray = array of string;

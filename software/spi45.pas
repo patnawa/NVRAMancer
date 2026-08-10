@@ -71,8 +71,8 @@ begin
 
   FillByte(Data[0], DataLen, $FF);
 
-  if AsProgrammer.Current_HW = CHW_BUZZPIRAT then
-    Got := AsProgrammer.Programmer.SPIWriteRead(1, CommandLen, Command,
+  if NVRAMancer.Current_HW = CHW_BUZZPIRAT then
+    Got := NVRAMancer.Programmer.SPIWriteRead(1, CommandLen, Command,
                                                 DataLen, Data)
   else
   begin

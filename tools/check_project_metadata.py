@@ -153,7 +153,7 @@ def main() -> int:
             r"PROX_VERSION\s*=\s*'([0-9.]+)'", read("software/appver.pas"),
             "PROX_VERSION",
         )
-        lpi_text = read("software/AsProgrammer.lpi")
+        lpi_text = read("software/NVRAMancer.lpi")
         lpi_version = require_match(
             r'ProductVersion="([0-9.]+)"', lpi_text,
             "Lazarus ProductVersion",
@@ -176,8 +176,8 @@ def main() -> int:
         )
         versions = {
             "software/appver.pas": app_version,
-            "software/AsProgrammer.lpi ProductVersion": lpi_version,
-            "software/AsProgrammer.lpi FileVersion": lpi_file_version,
+            "software/NVRAMancer.lpi ProductVersion": lpi_version,
+            "software/NVRAMancer.lpi FileVersion": lpi_file_version,
             "CHANGELOG newest entry": changelog_version,
         }
         if len(set(versions.values())) != 1:
@@ -261,7 +261,7 @@ def main() -> int:
                 "suite documentation drift: undocumented="
                 f"{sorted(win_set - doc_set)}, stale={sorted(doc_set - win_set)}"
             )
-        if "AsProgrammerCLI" not in docs or "ch347smoke" not in docs:
+        if "NVRAMancerCLI" not in docs or "ch347smoke" not in docs:
             failures.append("docs/testing.md must document the headless CLI and CH347 smoke compile checks")
         print(f"suite catalog: {len(win_set)} suites agree across Windows, POSIX, and docs")
     except (OSError, UnicodeError, ValueError) as exc:

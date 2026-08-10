@@ -77,13 +77,13 @@ type
     function MWIsBusy: boolean; override;
   end;
 
-//สร้าง AsProgrammer ที่ผูกกับฮาร์ดแวร์จำลอง คืนตัวจำลองไว้ให้ตรวจสอบ
+//สร้าง NVRAMancer ที่ผูกกับฮาร์ดแวร์จำลอง คืนตัวจำลองไว้ให้ตรวจสอบ
 function InstallMockProgrammer: TMockHardware;
 
 implementation
 
 var
-  //ตัวจำลองถูกยึดโดย TAsProgrammer ซึ่งจะ Free ให้เอง เก็บอ้างอิงไว้ตรวจสอบ
+  //ตัวจำลองถูกยึดโดย TNVRAMancer ซึ่งจะ Free ให้เอง เก็บอ้างอิงไว้ตรวจสอบ
   TheMock: TMockHardware = nil;
 
 constructor TMockHardware.Create;
@@ -281,15 +281,15 @@ end;
 
 function InstallMockProgrammer: TMockHardware;
 begin
-  if AsProgrammer = nil then AsProgrammer := TAsProgrammer.Create;
+  if NVRAMancer = nil then NVRAMancer := TNVRAMancer.Create;
 
   if TheMock = nil then
   begin
     TheMock := TMockHardware.Create;
-    AsProgrammer.AddHW(TheMock);
+    NVRAMancer.AddHW(TheMock);
   end;
 
-  AsProgrammer.Current_HW := CHW_CH341;
+  NVRAMancer.Current_HW := CHW_CH341;
   TheMock.Reset;
   Result := TheMock;
 end;

@@ -177,7 +177,7 @@ begin
 end;
 
 begin
-  WriteLn('AsProgrammer SPI NAND adapter tests');
+  WriteLn('NVRAMancer SPI NAND adapter tests');
   WriteLn;
   TestShortExecute;
   TestTimeoutThenDrain;

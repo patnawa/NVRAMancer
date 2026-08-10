@@ -88,7 +88,7 @@ adds it to the builds.
 
 The build scripts also validate every chip-list XML file. On Linux they
 compile-check `tools/ch347smoke.lpr` and the LCL-free
-`software/AsProgrammerCLI.lpr` entrypoint with its real CH347/libusb and
+`software/NVRAMancerCLI.lpr` entrypoint with its real CH347/libusb and
 operation-engine dependency graph. Ordinary CI does not open hardware.
 
 ## Live hardware tests

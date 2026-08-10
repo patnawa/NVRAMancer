@@ -6,7 +6,7 @@
     <BuildModes Active="Release"/>
     <Units Count="41">
       <Unit0>
-        <Filename Value="AsProgrammer.lpr"/>
+        <Filename Value="NVRAMancer.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="38" Y="11"/>

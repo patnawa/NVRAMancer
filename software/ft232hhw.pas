@@ -121,7 +121,7 @@ begin
   if not FTDIDriverPresent then
   begin
     FStrError := 'ftd2xx.dll (the FTDI D2XX driver) is not available, so ' +
-      'no FT232H can be opened. Put ftd2xx.dll next to AsProgrammer.exe ' +
+      'no FT232H can be opened. Put ftd2xx.dll next to NVRAMancer.exe ' +
       '(the release zip ships one) or install FTDI''s D2XX driver';
     FDevOpened := False;
     Exit(False);

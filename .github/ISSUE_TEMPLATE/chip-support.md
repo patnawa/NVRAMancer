@@ -7,7 +7,7 @@ labels: chip-support
 <!--
 The fastest way to get a chip added permanently:
 
-    AsProgrammer.exe --sfdp --export-chip MYCHIPNAME
+    NVRAMancer.exe --sfdp --export-chip MYCHIPNAME
 
 and attach BOTH files it writes:
   - MYCHIPNAME.export.txt  (the chiplist line)

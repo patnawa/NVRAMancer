@@ -91,16 +91,16 @@ uses basehw;
 
 procedure EnterProgModeI2C();
 begin
-  AsProgrammer.Programmer.I2CInit;
+  NVRAMancer.Programmer.I2CInit;
   sleep(50);
 end;
 
 function UsbAspI2C_BUSY(Address: byte): Boolean;
 begin
-  AsProgrammer.Programmer.I2CStart;
+  NVRAMancer.Programmer.I2CStart;
   //ACK polling ต้องเป็นคำสั่งเขียนเสมอ
-  Result := not AsProgrammer.Programmer.I2CWriteByte(Address and $FE);
-  AsProgrammer.Programmer.I2CStop;
+  Result := not NVRAMancer.Programmer.I2CWriteByte(Address and $FE);
+  NVRAMancer.Programmer.I2CStop;
 end;
 
 function UsbAspI2C_WaitReady(DevByte: byte; TimeoutMs: integer): boolean;
@@ -315,7 +315,7 @@ begin
       wBuffer[i] := A.AddrBytes[i];
     SetLength(rBuffer, Chunk);
 
-    Got := AsProgrammer.Programmer.I2CReadWrite(A.DevByte, A.AddrLen, wBuffer,
+    Got := NVRAMancer.Programmer.I2CReadWrite(A.DevByte, A.AddrLen, wBuffer,
                                                Chunk, rBuffer);
     if Got <> A.AddrLen + Chunk then Exit(-1);
 
@@ -356,7 +356,7 @@ begin
       wBuffer[i] := A.AddrBytes[i];
     Move(buffer[Total], wBuffer[A.AddrLen], Chunk);
 
-    Sent := AsProgrammer.Programmer.I2CReadWrite(A.DevByte, A.AddrLen + Chunk,
+    Sent := NVRAMancer.Programmer.I2CReadWrite(A.DevByte, A.AddrLen + Chunk,
                                                 wBuffer, 0, dummy);
     if Sent <> A.AddrLen + Chunk then Exit(-1);
 

@@ -102,7 +102,7 @@ end;
 procedure TestCanonicalFixture;
 const
   EXPECTED: RawByteString =
-    'format=AsProgrammer-ProX/spi-nor-profile'#10 +
+    'format=NVRAMancer/spi-nor-profile'#10 +
     'version=1'#10 +
     'name=W25Q64JV'#10 +
     'jedec_id=EF4017'#10 +

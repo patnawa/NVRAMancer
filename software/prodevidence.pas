@@ -25,7 +25,7 @@ uses
   {$IFDEF WINDOWS}, Windows{$ENDIF};
 
 const
-  EVIDENCE_FORMAT = 'AsProgrammer-ProX/evidence';
+  EVIDENCE_FORMAT = 'NVRAMancer/evidence';
   EVIDENCE_VERSION = 1;
   EVIDENCE_SIGNED_VERSION = 2;
   MAX_EVIDENCE_PAYLOAD = 64 * 1024 * 1024;
@@ -122,8 +122,8 @@ end;
 const
   // Domain separation: the content digest and the header MAC can never be
   // confused with each other or with the job-auth MAC.
-  EVIDENCE_CONTENT_DOMAIN = 'AsProgrammer-ProX/evidence-content/v1';
-  EVIDENCE_AUTH_DOMAIN = 'AsProgrammer-ProX/evidence-auth/v2';
+  EVIDENCE_CONTENT_DOMAIN = 'NVRAMancer/evidence-content/v1';
+  EVIDENCE_AUTH_DOMAIN = 'NVRAMancer/evidence-auth/v2';
   MAX_EVIDENCE_HEADER = 4096;
   V1_FIELD_COUNT = 5;
   V2_FIELD_COUNT = 7;

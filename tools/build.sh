@@ -28,16 +28,16 @@ die()  { printf '\033[31mFAILED: %s\033[0m\n' "$1" >&2; exit 1; }
 # --- the version has to agree in both places, same rule as the Windows build ---
 prox_version="$(sed -n "s/.*PROX_VERSION *= *'\([0-9.]*\)'.*/\1/p" software/appver.pas)"
 [ -n "$prox_version" ] || die "no PROX_VERSION in software/appver.pas"
-lpi_version="$(sed -n 's/.*ProductVersion="\([0-9.]*\)".*/\1/p' software/AsProgrammer.lpi | head -1)"
-[ -n "$lpi_version" ] || die "no ProductVersion in AsProgrammer.lpi"
+lpi_version="$(sed -n 's/.*ProductVersion="\([0-9.]*\)".*/\1/p' software/NVRAMancer.lpi | head -1)"
+[ -n "$lpi_version" ] || die "no ProductVersion in NVRAMancer.lpi"
 lpi_file_version="$(sed -n \
   -e 's/.*<MajorVersionNr Value="\([0-9]*\)".*/\1/p' \
   -e 's/.*<MinorVersionNr Value="\([0-9]*\)".*/.\1/p' \
   -e 's/.*<RevisionNr Value="\([0-9]*\)".*/.\1/p' \
   -e 's/.*<BuildNr Value="\([0-9]*\)".*/.\1/p' \
-  software/AsProgrammer.lpi | tr -d '\n')"
+  software/NVRAMancer.lpi | tr -d '\n')"
 [ "$prox_version" = "$lpi_version" ] && [ "$prox_version" = "$lpi_file_version" ] || \
-  die "version mismatch: appver.pas says $prox_version, AsProgrammer.lpi ProductVersion says $lpi_version and FileVersion says $lpi_file_version"
+  die "version mismatch: appver.pas says $prox_version, NVRAMancer.lpi ProductVersion says $lpi_version and FileVersion says $lpi_file_version"
 step "version $prox_version"
 
 # --- chip tables ---
@@ -298,7 +298,7 @@ headless="$tmp/headless-cli"
 mkdir -p "$headless/units"
 # -o names the binary for the program, not for the .lpr it was built from.
 fpc -Mobjfpc -Sh -Fusoftware -FU"$headless/units" -FE"$headless" \
-  -oNVRAMancerCLI software/AsProgrammerCLI.lpr >/dev/null \
+  -oNVRAMancerCLI software/NVRAMancerCLI.lpr >/dev/null \
   || die "the headless Linux CLI did not compile"
 [ -x "$headless/NVRAMancerCLI" ] \
   || die "the headless Linux CLI executable was not produced"

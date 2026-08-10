@@ -1,9 +1,9 @@
-﻿# สร้างไอคอนของโปรแกรม AsProgrammer ProX
+﻿# สร้างไอคอนของโปรแกรม NVRAMancer
 #
 #   powershell -ExecutionPolicy Bypass -File tools\make_appicon.ps1
 #
 # วาดรูปชิปแฟลชแบบ SOIC มองจากด้านบน แล้วประกอบเป็นไฟล์ .ico หลายขนาด
-# ที่ software\AsProgrammer.ico
+# ที่ software\NVRAMancer.ico
 #
 # ขนาด 16 ถึง 128 เก็บเป็น DIB 32 บิต ส่วน 256 เก็บเป็น PNG ตามที่ Windows
 # รองรับ วิธีนี้ทำให้ทั้ง Explorer และตัวอ่านไอคอนของ Lazarus เปิดได้ทั้งคู่
@@ -11,7 +11,7 @@
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path -Parent $PSScriptRoot
-$outIco = Join-Path $root "software\AsProgrammer.ico"
+$outIco = Join-Path $root "software\NVRAMancer.ico"
 
 $sizes = 16, 24, 32, 48, 64, 128, 256
 

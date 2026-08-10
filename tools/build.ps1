@@ -1,4 +1,4 @@
-﻿# Builds AsProgrammer ProX, runs the tests, and assembles a release folder.
+﻿# Builds NVRAMancer, runs the tests, and assembles a release folder.
 #
 #   powershell -ExecutionPolicy Bypass -File tools\build.ps1
 #   powershell -ExecutionPolicy Bypass -File tools\build.ps1 -Release
@@ -48,8 +48,8 @@ $verSrc = Get-Content "$root\software\appver.pas" -Raw
 if ($verSrc -notmatch "PROX_VERSION\s*=\s*'([0-9.]+)'") { Die "no PROX_VERSION in software\appver.pas" }
 $proxVersion = $Matches[1]
 
-$lpiSrc = Get-Content "$root\software\AsProgrammer.lpi" -Raw
-if ($lpiSrc -notmatch 'ProductVersion="([0-9.]+)"') { Die "no ProductVersion in AsProgrammer.lpi" }
+$lpiSrc = Get-Content "$root\software\NVRAMancer.lpi" -Raw
+if ($lpiSrc -notmatch 'ProductVersion="([0-9.]+)"') { Die "no ProductVersion in NVRAMancer.lpi" }
 $lpiProductVersion = $Matches[1]
 $lpiParts = @(
   @('MajorVersionNr', '<MajorVersionNr Value="([0-9]+)"'),
@@ -58,12 +58,12 @@ $lpiParts = @(
   @('BuildNr', '<BuildNr Value="([0-9]+)"')
 )
 $lpiFileVersionParts = foreach ($part in $lpiParts) {
-  if ($lpiSrc -notmatch $part[1]) { Die "no $($part[0]) in AsProgrammer.lpi" }
+  if ($lpiSrc -notmatch $part[1]) { Die "no $($part[0]) in NVRAMancer.lpi" }
   $Matches[1]
 }
 $lpiFileVersion = $lpiFileVersionParts -join '.'
 if (($lpiProductVersion -ne $proxVersion) -or ($lpiFileVersion -ne $proxVersion)) {
-  Die "version mismatch: appver.pas says $proxVersion, AsProgrammer.lpi ProductVersion says $lpiProductVersion and FileVersion says $lpiFileVersion. Bump all fields."
+  Die "version mismatch: appver.pas says $proxVersion, NVRAMancer.lpi ProductVersion says $lpiProductVersion and FileVersion says $lpiFileVersion. Bump all fields."
 }
 Step "version $proxVersion"
 
@@ -415,11 +415,11 @@ $headlessDir = Join-Path $env:TEMP "aspx-headless-cli-win32"
 Remove-Item -LiteralPath $headlessDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path (Join-Path $headlessDir "units") -Force | Out-Null
 # -o names the binary NVRAMancer CLI, not the .lpr it was built from. The
-# project file is still AsProgrammerCLI.lpr; the thing a user runs is not.
+# project file is still NVRAMancerCLI.lpr; the thing a user runs is not.
 & "$fpcBin\fpc.exe" -Twin32 -Pi386 -Mobjfpc -Sh `
   "-Fu$root\software" "-FU$headlessDir\units" "-FE$headlessDir" `
   "-oNVRAMancerCLI.exe" `
-  "$root\software\AsProgrammerCLI.lpr" | Out-Null
+  "$root\software\NVRAMancerCLI.lpr" | Out-Null
 $headlessExe = Join-Path $headlessDir "NVRAMancerCLI.exe"
 if (($LASTEXITCODE -ne 0) -or -not (Test-Path -LiteralPath $headlessExe)) {
   Die "the headless Windows CLI did not compile"
@@ -449,9 +449,9 @@ Write-Host "    unknown and duplicate options refused before USB open"
 
 # --- the program ---
 Step "building NVRAMancer.exe"
-& $lazbuild --build-mode=Release "$root\software\AsProgrammer.lpi" | Out-Null
+& $lazbuild --build-mode=Release "$root\software\NVRAMancer.lpi" | Out-Null
 if ($LASTEXITCODE -ne 0) { Die "the build failed" }
-# The Lazarus project file is still AsProgrammer.lpi, but its target filename
+# The Lazarus project file is still NVRAMancer.lpi, but its target filename
 # is NVRAMancer, so this is what an ordinary build produces -- not only what a
 # -Release package renames it to. Somebody who runs the build script and then
 # double-clicks the result should get the program this project ships.
@@ -473,7 +473,7 @@ New-Item -ItemType Directory -Force $out | Out-Null
 
 # Both binaries are already named for the program rather than for the project
 # files they were built from, so this is a copy and not a rename. It used to be
-# a rename, which meant an ordinary build left AsProgrammer.exe sitting in
+# a rename, which meant an ordinary build left NVRAMancer.exe sitting in
 # software\ and only the packaged copy carried the right name -- so the thing a
 # developer ran was never the thing a user ran.
 Copy-Item $exe (Join-Path $out "NVRAMancer.exe")

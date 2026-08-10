@@ -9,7 +9,7 @@ map is not uniform, and configurable maps that must not be guessed.
 
 A table dumped from a real chip is worth more than any of these. Get one with:
 
-    AsProgrammer.exe --sfdp-dump w25q128jv.bin --chip W25Q128JV
+    NVRAMancer.exe --sfdp-dump w25q128jv.bin --chip W25Q128JV
 
 then drop it in tests/sfdp/ and add a manifest line. The suite picks it up with
 no code change, and the parser can never silently regress on that part again.

@@ -3,6 +3,33 @@
 All notable changes to NVRAMancer are recorded here. The version in the
 first entry must match `software/appver.pas`; CI enforces that invariant.
 
+## 4.40.0.0 — the rename reaches everything: project files, identifiers, formats
+
+4.39.0.0 renamed what a user sees; this release renames what remains. It
+is a clean break — all releases before this one have been removed.
+
+- The Lazarus project files are now `NVRAMancer.lpi` / `NVRAMancer.lpr` /
+  `NVRAMancerCLI.lpr`, with the icon, manifest, resource script and
+  compiled `.res` renamed to match. The Windows assembly identity in the
+  manifest is `NVRAMancer`.
+- The core hub class and its global are now `TNVRAMancer` /
+  `NVRAMancer`.
+- Every on-disk format identifier and HMAC domain that carried the
+  `AsProgrammer-ProX/` prefix now uses `NVRAMancer/`: chip profiles,
+  production jobs and their authorization, evidence records and chains,
+  and production state. The saved-project format tag is now
+  `<nvramancer_project>`. **Files written by earlier versions will not
+  load or validate under this release.** Export or finish anything you
+  need before upgrading; there is no migration path, by design.
+- The environment variables moved from the `ASPROGRAMMER_` prefix to
+  `NVRAMANCER_`: `NVRAMANCER_PROD_KEY_ID`, `NVRAMANCER_PROD_HMAC_KEY`,
+  `NVRAMANCER_NAND_LIVE_VALIDATED`,
+  `NVRAMANCER_ENABLE_UNVALIDATED_CH347_WRITE`. Station scripts must be
+  updated.
+- The one thing that deliberately keeps the old name is the attribution:
+  NVRAMancer began as a fork of AsProgrammer by nofeletru, and the
+  LICENSE, About box and notices keep saying so.
+
 ## 4.39.0.0 — the program is now called NVRAMancer
 
 "Chipwright" turned out not to be ours to keep: a `ChipWright/chipwright`

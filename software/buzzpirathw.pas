@@ -260,7 +260,7 @@ begin
          just_i2c_scanner := 1;
     end;
 
-    LogPrint('keep pressing ESC key to cancel... keep pressing F1 to relaunch this console... ASProgrammer GUI will be unresponsive while BUS PIRATE is operating. BUS PIRATE is slow, please be (very) patient. If bus pirate console freezes(~2 mins without output)/crash : close this program, reconnect USB port and try again.');
+    LogPrint('keep pressing ESC key to cancel... keep pressing F1 to relaunch this console... NVRAMancer GUI will be unresponsive while BUS PIRATE is operating. BUS PIRATE is slow, please be (very) patient. If bus pirate console freezes(~2 mins without output)/crash : close this program, reconnect USB port and try again.');
 
     if BhlI2CInit(dbglvl, PChar(FCOMPort), power, pullups, khz, just_i2c_scanner) <> 1 then
     begin

@@ -43,7 +43,7 @@ if (Test-Path -LiteralPath $logPath) {
   Fail "refusing to replace an existing HIL log: $logPath"
 }
 
-# NVRAMancer.exe, not AsProgrammer.exe. This search has been looking for a name
+# NVRAMancer.exe, not NVRAMancer.exe. This search has been looking for a name
 # the release folder stopped containing some time ago, so it always fell through
 # to the source tree -- which meant a hardware-in-loop run could be exercising a
 # developer's last local build instead of the packaged release it reported on.

@@ -1,7 +1,7 @@
 # EZP2023+ Windows driver bundle
 
 This directory contains the complete signed driver material used by
-AsProgrammer ProX for the EZP2023+ (`USB\VID_1FC8&PID_310B`).
+NVRAMancer for the EZP2023+ (`USB\VID_1FC8&PID_310B`).
 
 ## Contents
 
@@ -64,7 +64,7 @@ Get-PnpDevice -PresentOnly |
 ```
 
 All three files should report `1.4.0.2`, and the device should report `OK`.
-Run `tools\ezpsmoke.exe` or an AsProgrammer read afterwards to verify actual
+Run `tools\ezpsmoke.exe` or an NVRAMancer read afterwards to verify actual
 bulk transfers.
 
 This bundle was validated on 64-bit Windows with EZP identity `90381CBC` and a

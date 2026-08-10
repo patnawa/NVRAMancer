@@ -1,6 +1,6 @@
 program unittests;
 
-{ Hardware-free tests for the parts of AsProgrammer ProX that are pure logic:
+{ Hardware-free tests for the parts of NVRAMancer that are pure logic:
   the SFDP parser, the JEDEC vendor table, the serial number generator, the
   write protection decoder, the operation result channel and the production
   log.
@@ -1601,7 +1601,7 @@ begin
 end;
 
 begin
-  WriteLn('AsProgrammer ProX unit tests');
+  WriteLn('NVRAMancer unit tests');
   WriteLn;
 
   TestWCHDeviceKind;

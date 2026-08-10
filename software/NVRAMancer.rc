@@ -1,17 +1,17 @@
-/* Resource script for AsProgrammer ProX
+/* Resource script for NVRAMancer
  *
- * Rebuild AsProgrammer.res after changing the icon or the version:
- *   windres -i AsProgrammer.rc -o AsProgrammer.res -O res
+ * Rebuild NVRAMancer.res after changing the icon or the version:
+ *   windres -i NVRAMancer.rc -o NVRAMancer.res -O res
  *
  * lazbuild does not regenerate the .res, only the Lazarus IDE does, so the
  * file is compiled by hand and committed.
  */
 
-MAINICON ICON "AsProgrammer.ico"
+MAINICON ICON "NVRAMancer.ico"
 
 /* RT_MANIFEST, so Windows uses themed controls and treats the app as
    DPI aware, both of which the project options ask for */
-1 24 "AsProgrammer.manifest"
+1 24 "NVRAMancer.manifest"
 
 /* No VERSIONINFO here on purpose: lazbuild builds its own from the
-   VersionInfo block in AsProgrammer.lpi, and two of them would collide. */
+   VersionInfo block in NVRAMancer.lpi, and two of them would collide. */

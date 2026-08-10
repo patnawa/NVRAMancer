@@ -16,7 +16,7 @@ uses
   SysUtils;
 
 const
-  SPI_NOR_PROFILE_FORMAT = 'AsProgrammer-ProX/spi-nor-profile';
+  SPI_NOR_PROFILE_FORMAT = 'NVRAMancer/spi-nor-profile';
   SPI_NOR_PROFILE_VERSION = 1;
   MAX_SPI_NOR_PROFILE_BYTES = 2048;
 

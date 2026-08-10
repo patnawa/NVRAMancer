@@ -18,7 +18,7 @@ removed. The Windows GUI remains the primary interactive application.
   Smart Write execution. It owns stable snapshots, planning, events,
   cancellation, and typed outcomes. The GUI uses the same lower-level
   planners and engines directly; it does not route through this runner.
-- `AsProgrammerCLI.lpr` plus `headlesscli.pas` provides a real LCL-free entry
+- `NVRAMancerCLI.lpr` plus `headlesscli.pas` provides a real LCL-free entry
   point. It no longer imports `Forms` or delegates to GUI event handlers.
 - `prodcrypto.pas` uses Windows CNG or the system OpenSSL `libcrypto`;
   `prodevidence.pas` and `prodstate.pas` have durable native Windows/POSIX
@@ -33,13 +33,13 @@ an atomic backup destination, and the exact sacrificial-chip environment token
 printed by `--help`.
 
 Linux needs FPC to build and the system libusb 1.0 runtime to run. Windows
-release ZIPs contain `AsProgrammerCLI.exe` and an exact hash-verified official
+release ZIPs contain `NVRAMancerCLI.exe` and an exact hash-verified official
 x86 `libusb-1.0.dll`.
 
 ```bash
-fpc -Mobjfpc -Sh -Fusoftware software/AsProgrammerCLI.lpr
-./software/AsProgrammerCLI --detect
-./software/AsProgrammerCLI --read dump.bin --size 8388608 --passes 2
+fpc -Mobjfpc -Sh -Fusoftware software/NVRAMancerCLI.lpr
+./software/NVRAMancerCLI --detect
+./software/NVRAMancerCLI --read dump.bin --size 8388608 --passes 2
 ```
 
 `tools/build.sh` compiles the actual entrypoint and dependency graph on every

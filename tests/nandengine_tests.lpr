@@ -959,7 +959,7 @@ begin
 end;
 
 begin
-  WriteLn('AsProgrammer SPI NAND engine tests');
+  WriteLn('NVRAMancer SPI NAND engine tests');
   WriteLn;
 
   TestCatalog;

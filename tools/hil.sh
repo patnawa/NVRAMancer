@@ -39,7 +39,7 @@ cp tools/ch347smoke.lpr software/ch347proto.pas software/ch347usb.pas \
 mkdir -p "$work/units"
 # -o names the binary for the program, not for the .lpr it was built from.
 fpc -Mobjfpc -Sh -Fusoftware -FU"$work/units" -FE"$work" -oNVRAMancerCLI \
-  software/AsProgrammerCLI.lpr >/dev/null
+  software/NVRAMancerCLI.lpr >/dev/null
 
 echo "HIL mode=readonly target=ch347-libusb"
 "$work/ch347smoke" 2>&1 | tee "$artifact_dir/ch347-libusb-readonly.log"

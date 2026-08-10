@@ -138,13 +138,13 @@ end;
 procedure TLegacyMockHardware.UseSplitTransport;
 begin
   FHardwareID := CHW_CH341;
-  AsProgrammer.Current_HW := CHW_CH341;
+  NVRAMancer.Current_HW := CHW_CH341;
 end;
 
 procedure TLegacyMockHardware.UseCombinedTransport;
 begin
   FHardwareID := CHW_BUZZPIRAT;
-  AsProgrammer.Current_HW := CHW_BUZZPIRAT;
+  NVRAMancer.Current_HW := CHW_BUZZPIRAT;
 end;
 
 procedure TLegacyMockHardware.SetSPIReply(const Bytes: array of byte);
@@ -398,14 +398,14 @@ end;
 
 function InstallLegacyMock: TLegacyMockHardware;
 begin
-  if AsProgrammer = nil then AsProgrammer := TAsProgrammer.Create;
+  if NVRAMancer = nil then NVRAMancer := TNVRAMancer.Create;
   if LegacyMock = nil then
   begin
     LegacyMock := TLegacyMockHardware.Create;
-    AsProgrammer.AddHW(LegacyMock);
+    NVRAMancer.AddHW(LegacyMock);
   end;
   LegacyMock.Reset;
-  AsProgrammer.Current_HW := CHW_CH341;
+  NVRAMancer.Current_HW := CHW_CH341;
   Result := LegacyMock;
 end;
 

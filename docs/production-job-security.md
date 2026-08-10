@@ -50,7 +50,7 @@ been verified.
 Version 1 uses detached HMAC-SHA-256:
 
 ```
-format=AsProgrammer-ProX/job-auth
+format=NVRAMancer/job-auth
 version=1
 algorithm=HMAC-SHA256
 key_id=<configured-key-id>
@@ -61,7 +61,7 @@ mac=<uppercase HMAC-SHA-256>
 The authenticated byte sequence is:
 
 ```
-"AsProgrammer-ProX/job-auth/v1" || NUL ||
+"NVRAMancer/job-auth/v1" || NUL ||
 key_id || NUL || canonical_manifest_bytes
 ```
 

@@ -194,7 +194,7 @@ end;
 begin
   if (ParamCount <> 5) or (ParamStr(5) <> '--already-blank') then
     Fail('usage: ezpwrite <image> <size> <page> <id-hex> --already-blank; ' +
-         'this lab tool does not erase or verify, so use AsProgrammer for ' +
+         'this lab tool does not erase or verify, so use NVRAMancer for ' +
          'normal writes');
   Size := StrToInt(ParamStr(2));
   Page := StrToInt(ParamStr(3));

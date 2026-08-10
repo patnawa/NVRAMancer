@@ -265,8 +265,8 @@ begin
   if DataLen = 0 then Exit(0);
   FillByte(Data[0], DataLen, $FF);
 
-  if AsProgrammer.Current_HW = CHW_BUZZPIRAT then
-    Got := AsProgrammer.Programmer.SPIWriteRead(
+  if NVRAMancer.Current_HW = CHW_BUZZPIRAT then
+    Got := NVRAMancer.Programmer.SPIWriteRead(
       CSR, CommandLen, Command, DataLen, Data)
   else
   begin
@@ -364,7 +364,7 @@ end;
 //เข้าสู่โหมดโปรแกรม
 function EnterProgMode25(spiSpeed: integer; SendAB: boolean = false): boolean;
 begin
-  result := AsProgrammer.Programmer.SPIInit(spiSpeed);
+  result := NVRAMancer.Programmer.SPIInit(spiSpeed);
   if not Result then Exit;
   sleep(50);
 
@@ -376,7 +376,7 @@ end;
 //ออกจากโหมดโปรแกรม
 procedure ExitProgMode25;
 begin
-  AsProgrammer.Programmer.SPIDeinit;
+  NVRAMancer.Programmer.SPIDeinit;
 end;
 
 //อ่าน id แล้วเติมลงโครงสร้าง
@@ -1004,7 +1004,7 @@ begin
   if not SPI25BufferLengthValid(BufferLen, Length(buffer)) then Exit;
   if BufferLen = 0 then Exit(0);
 
-  Result := AsProgrammer.Programmer.SPIRead(CS, BufferLen, buffer);
+  Result := NVRAMancer.Programmer.SPIRead(CS, BufferLen, buffer);
   if Result <> BufferLen then
   begin
     FillByte(buffer[0], BufferLen, $FF);
@@ -1018,7 +1018,7 @@ begin
   if not SPI25BufferLengthValid(BufferLen, Length(buffer)) then Exit;
   if BufferLen = 0 then Exit(0);
 
-  Result := AsProgrammer.Programmer.SPIWrite(CS, BufferLen, buffer);
+  Result := NVRAMancer.Programmer.SPIWrite(CS, BufferLen, buffer);
   if Result <> BufferLen then Result := -1;
 end;
 
@@ -1033,8 +1033,8 @@ begin
   if RBufferLen = 0 then Exit(0);
 
   FillByte(rbuffer[0], RBufferLen, $FF);
-  if AsProgrammer.Current_HW = CHW_BUZZPIRAT then
-    Got := AsProgrammer.Programmer.SPIWriteRead(
+  if NVRAMancer.Current_HW = CHW_BUZZPIRAT then
+    Got := NVRAMancer.Programmer.SPIWriteRead(
       CSR, WBufferLen, wbuffer, RBufferLen, rbuffer)
   else
   begin

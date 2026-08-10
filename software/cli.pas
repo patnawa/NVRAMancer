@@ -63,12 +63,12 @@ const
   //The secret source is station policy, not an arbitrary caller-selected
   //environment variable.  --prod-key-env is an assertion that the launcher
   //uses this fixed name; it cannot redirect trust to an attacker-owned key.
-  STATION_KEY_ID_ENV = 'ASPROGRAMMER_PROD_KEY_ID';
-  STATION_HMAC_KEY_ENV = 'ASPROGRAMMER_PROD_HMAC_KEY';
+  STATION_KEY_ID_ENV = 'NVRAMANCER_PROD_KEY_ID';
+  STATION_HMAC_KEY_ENV = 'NVRAMANCER_PROD_HMAC_KEY';
 
   //Phase 3 intentionally ships fail-closed until the mutation path has been
   //validated on each programmer/part combination. Read/info need no gate.
-  NAND_LIVE_GATE_ENV = 'ASPROGRAMMER_NAND_LIVE_VALIDATED';
+  NAND_LIVE_GATE_ENV = 'NVRAMANCER_NAND_LIVE_VALIDATED';
   NAND_LIVE_GATE_VALUE = '1';
   MOVEFILE_WRITE_THROUGH_FLAG = $00000008;
 
@@ -211,12 +211,12 @@ procedure Usage;
 begin
   Say('NVRAMancer ' + PROX_VERSION + ', command line mode');
   Say('');
-  Say('  AsProgrammer.exe --read out.bin  --chip W25Q64BV');
-  Say('  AsProgrammer.exe --write in.bin  --chip W25Q64BV --erase --verify');
-  Say('  AsProgrammer.exe --write patch.bin --chip W25Q64BV --smart');
-  Say('  AsProgrammer.exe --verify in.bin --chip W25Q64BV');
-  Say('  AsProgrammer.exe --erase --chip W25Q64BV');
-  Say('  AsProgrammer.exe --detect');
+  Say('  NVRAMancer.exe --read out.bin  --chip W25Q64BV');
+  Say('  NVRAMancer.exe --write in.bin  --chip W25Q64BV --erase --verify');
+  Say('  NVRAMancer.exe --write patch.bin --chip W25Q64BV --smart');
+  Say('  NVRAMancer.exe --verify in.bin --chip W25Q64BV');
+  Say('  NVRAMancer.exe --erase --chip W25Q64BV');
+  Say('  NVRAMancer.exe --detect');
   Say('');
   Say('  --chip NAME     pick a chip from the chip list');
   Say('  --sfdp          take the chip parameters from SFDP instead of the list');
@@ -323,13 +323,13 @@ begin
   Say('');
   Say('  Authenticated production (implies SPI NOR Smart Write):');
   Say('  --prod-job F --prod-auth F --prod-key-id ID');
-  Say('  --prod-key-env ASPROGRAMMER_PROD_HMAC_KEY --evidence-dir DIR');
+  Say('  --prod-key-env NVRAMANCER_PROD_HMAC_KEY --evidence-dir DIR');
   Say('                  authenticate a canonical job, retain its verified image');
   Say('                  handle, enforce measured electrical admission, UID binding,');
   Say('                  full physical verification, then durably commit evidence');
   Say('                  before returning success. Station policy supplies the fixed');
-  Say('                  key ID and secret through ASPROGRAMMER_PROD_KEY_ID and');
-  Say('                  ASPROGRAMMER_PROD_HMAC_KEY; no secret is accepted on argv.');
+  Say('                  key ID and secret through NVRAMANCER_PROD_KEY_ID and');
+  Say('                  NVRAMANCER_PROD_HMAC_KEY; no secret is accepted on argv.');
   Say('');
   Say('  Files may be .bin, .hex or Motorola S-record; the format is taken');
   Say('  from the extension.');
@@ -393,10 +393,10 @@ begin
   FillChar(Obs, SizeOf(Obs), 0);
   CapsValid := False;
   ObsValid := False;
-  if AsProgrammer.Programmer <> nil then
+  if NVRAMancer.Programmer <> nil then
   begin
-    CapsValid := AsProgrammer.Programmer.GetElectricalCapabilities(Caps);
-    ObsValid := AsProgrammer.Programmer.GetElectricalObservation(Obs);
+    CapsValid := NVRAMancer.Programmer.GetElectricalCapabilities(Caps);
+    ObsValid := NVRAMancer.Programmer.GetElectricalObservation(Obs);
   end;
   Report := BuildRailReport(Caps, Obs, CapsValid, ObsValid);
 
@@ -451,12 +451,12 @@ begin
   else
     J.AddString('result', CLIOutcomeName(CurrentCLIOutcome));
 
-  //ต้อง "เจอจริง" ไม่ใช่แค่ "ถูกเลือกไว้" เพราะ AsProgrammer.Programmer
+  //ต้อง "เจอจริง" ไม่ใช่แค่ "ถูกเลือกไว้" เพราะ NVRAMancer.Programmer
   //ชี้ไปที่ backend ที่ติ๊กไว้ในเมนูเสมอ แม้ไม่มีอะไรเสียบอยู่เลย การรายงาน
   //ชื่อรุ่นคู่กับ "no_programmer" อ่านแล้วขัดกันเอง และทำให้ผู้เรียกที่เป็น
   //เครื่องเชื่อว่ามีของอยู่
-  if ProgrammerPresent and (AsProgrammer.Programmer <> nil) then
-    J.AddString('programmer', AsProgrammer.Programmer.HardwareName)
+  if ProgrammerPresent and (NVRAMancer.Programmer <> nil) then
+    J.AddString('programmer', NVRAMancer.Programmer.HardwareName)
   else
     J.AddNull('programmer');
   J.AddString('chip', CurrentICParam.Name);
@@ -775,9 +775,9 @@ begin
     FillChar(ProgrammerCaps, SizeOf(ProgrammerCaps), 0);
     ProgrammerCaps.ProgrammerID := '';
     ProgrammerCaps.FirmwareVersion := '';
-    AsProgrammer.Programmer.GetElectricalCapabilities(ProgrammerCaps);
+    NVRAMancer.Programmer.GetElectricalCapabilities(ProgrammerCaps);
     FillChar(Observation, SizeOf(Observation), 0);
-    AsProgrammer.Programmer.GetElectricalObservation(Observation);
+    NVRAMancer.Programmer.GetElectricalObservation(Observation);
     FillChar(AdapterCaps, SizeOf(AdapterCaps), 0);
     AdapterCaps.Present := False;
     AdapterCaps.AdapterID := '';
@@ -1132,7 +1132,7 @@ begin
       Exit(Fail('the programmer could not initialize the SPI bus'));
 
     Config := DefaultSPINANDConfig;
-    if AsProgrammer.Current_HW = CHW_BUZZPIRAT then
+    if NVRAMancer.Current_HW = CHW_BUZZPIRAT then
       Config.ReadTransport := sntCombinedWriteRead;
 
     //ยังไม่รู้ว่าชิปตัวไหน: reset กับอ่าน ID ไม่พึ่ง geometry จริง
@@ -1140,7 +1140,7 @@ begin
     if not BuildNANDGeometry(2048, 64, 64, 1, Layout, Geo, Err) then
       Exit(Fail('internal geometry error: ' + Err));
 
-    Dev := TSPINANDDevice.Create(AsProgrammer.Programmer, Geo, Config);
+    Dev := TSPINANDDevice.Create(NVRAMancer.Programmer, Geo, Config);
     try
       IO := Dev.Reset;
       if not IO.Success then
@@ -1170,7 +1170,7 @@ begin
          Geo.PagesPerBlock, Geo.PageSize, Geo.SpareSize,
          NANDMainSize(Geo) div (1024 * 1024)]));
 
-    Dev := TSPINANDDevice.Create(AsProgrammer.Programmer, Geo, Config);
+    Dev := TSPINANDDevice.Create(NVRAMancer.Programmer, Geo, Config);
     try
       //Known vendors expose three redundant ONFI copies through a checked
       //configuration-register mode. A geometry contradiction always stops;
@@ -1396,7 +1396,7 @@ begin
     end;
   finally
     ExitProgMode25;
-    AsProgrammer.Programmer.DevClose;
+    NVRAMancer.Programmer.DevClose;
   end;
 end;
 
@@ -1634,7 +1634,7 @@ begin
     if Json then SayJson('connect');
     Exit(CLIExitCode(coNoProgrammer));
   end;
-  Say('programmer: ' + AsProgrammer.Programmer.HardwareName);
+  Say('programmer: ' + NVRAMancer.Programmer.HardwareName);
 
   if ProdMode then
     Exit(RunAuthenticatedProduction(SwitchValue('chip'), Json));
@@ -1743,7 +1743,7 @@ begin
     ErrMsg := '';
     with TStringList.Create do
     try
-      Add('This bundle was generated by AsProgrammer --export-chip.');
+      Add('This bundle was generated by NVRAMancer --export-chip.');
       Add('To share the chip with everyone, open a pull request that:');
       Add('');
       Add('1. adds this line to chiplist.xml under the right vendor:');
@@ -1795,7 +1795,7 @@ begin
       end;
     finally
       ExitProgMode25;
-      AsProgrammer.Programmer.DevClose;
+      NVRAMancer.Programmer.DevClose;
     end;
     DumpLog;
     Say('exported ' + FileName + '.export.txt and ' + FileName +
@@ -1842,7 +1842,7 @@ begin
       Exit(EXIT_OK);
     finally
       ExitProgMode25;
-      AsProgrammer.Programmer.DevClose;
+      NVRAMancer.Programmer.DevClose;
     end;
   end;
 

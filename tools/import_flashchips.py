@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""แปลงตารางชิปของ flashrom ให้เป็น chiplist ของ AsProgrammer ProX
+"""แปลงตารางชิปของ flashrom ให้เป็น chiplist ของ NVRAMancer
 
 ผลลัพธ์คือ chiplist-flashrom.xml ซึ่งเป็นงานดัดแปลงจากตารางชิปของ flashrom
 ไฟล์นั้นจึงยังคงสัญญาอนุญาต GPL-2.0-or-later ไม่ใช่ MIT เหมือนโค้ดโปรแกรม
@@ -210,7 +210,7 @@ def main():
                 skipped_dup += 1
                 continue
 
-            # ชิป 1.8 โวลต์ ตั้งชื่อตามธรรมเนียมของ AsProgrammer
+            # ชิป 1.8 โวลต์ ตั้งชื่อตามธรรมเนียมของ NVRAMancer
             volt = field(block, "voltage") or ""
             mv = re.findall(r"\d+", volt)
             if mv and int(mv[0]) < 1900:

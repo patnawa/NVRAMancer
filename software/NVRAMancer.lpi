@@ -25,11 +25,11 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="4"/>
-      <MinorVersionNr Value="39"/>
+      <MinorVersionNr Value="40"/>
       <RevisionNr Value="0"/>
       <BuildNr Value="0"/>
       <Language Value="0409"/>
-      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="NVRAMancer" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="NVRAMancer.exe" ProductName="NVRAMancer" ProductVersion="4.39.0.0"/>
+      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="NVRAMancer" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="NVRAMancer.exe" ProductName="NVRAMancer" ProductVersion="4.40.0.0"/>
     </VersionInfo>
     <MacroValues Count="2">
       <Macro1 Name="LCLWidgetType" Value="win32"/>
@@ -106,7 +106,7 @@
     </RequiredPackages>
     <Units Count="21">
       <Unit0>
-        <Filename Value="AsProgrammer.lpr"/>
+        <Filename Value="NVRAMancer.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>

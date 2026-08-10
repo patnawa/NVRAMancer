@@ -333,7 +333,7 @@ begin
   if not LibUSBAvailable(LoadError) then
   begin
     FStrError := LoadError + ', so no EZP2023+ can be opened. Put ' +
-      'libusb0.dll next to AsProgrammer.exe (the release zip ships one)';
+      'libusb0.dll next to NVRAMancer.exe (the release zip ships one)';
     Exit;
   end;
 

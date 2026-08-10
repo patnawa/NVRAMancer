@@ -128,8 +128,8 @@ begin
 
   FillByte(buffer[0], bufflen, $FF);
 
-  if AsProgrammer.Current_HW = CHW_BUZZPIRAT then
-    Got := AsProgrammer.Programmer.SPIWriteRead(1, len, buff,
+  if NVRAMancer.Current_HW = CHW_BUZZPIRAT then
+    Got := NVRAMancer.Programmer.SPIWriteRead(1, len, buff,
                                                 bufflen, buffer)
   else
   begin
@@ -228,8 +228,8 @@ begin
   opcode := $05;
   value := $FF;
 
-  if AsProgrammer.Current_HW = CHW_BUZZPIRAT then
-    Got := AsProgrammer.Programmer.SPIWriteRead(1, 1, opcode, 1, value)
+  if NVRAMancer.Current_HW = CHW_BUZZPIRAT then
+    Got := NVRAMancer.Programmer.SPIWriteRead(1, 1, opcode, 1, value)
   else
   begin
     Sent := SPIWrite(0, 1, opcode);

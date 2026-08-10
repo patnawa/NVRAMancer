@@ -319,12 +319,12 @@ end;
 
 begin
   Sim := TSimulatedHardware.Create;
-  AsProgrammer := TAsProgrammer.Create;
+  NVRAMancer := TNVRAMancer.Create;
   try
-    AsProgrammer.AddHW(Sim);
-    AsProgrammer.Current_HW := CHW_SIM;
+    NVRAMancer.AddHW(Sim);
+    NVRAMancer.Current_HW := CHW_SIM;
     Check('the simulator is selectable',
-          AsProgrammer.Programmer = TBaseHardware(Sim));
+          NVRAMancer.Programmer = TBaseHardware(Sim));
     Check('and opens', Sim.DevOpen);
     Check('and initialises SPI', Sim.SPIInit(0));
 
@@ -339,8 +339,8 @@ begin
     TestStatusRegisters;
     TestItNeverPretendsToMeasureAnything;
   finally
-    //TAsProgrammer owns what it is given.
-    AsProgrammer.Free;
+    //TNVRAMancer owns what it is given.
+    NVRAMancer.Free;
   end;
 
   WriteLn(Assertions, ' assertions, ', Failures, ' failures');
