@@ -43,19 +43,19 @@ if (Test-Path -LiteralPath $logPath) {
   Fail "refusing to replace an existing HIL log: $logPath"
 }
 
-# Chipwright.exe, not AsProgrammer.exe. This search has been looking for a name
+# NVRAMancer.exe, not AsProgrammer.exe. This search has been looking for a name
 # the release folder stopped containing some time ago, so it always fell through
 # to the source tree -- which meant a hardware-in-loop run could be exercising a
 # developer's last local build instead of the packaged release it reported on.
 if ([string]::IsNullOrWhiteSpace($ProgramPath)) {
   $candidate = Get-ChildItem -LiteralPath (Join-Path $root 'release') `
-    -Filter Chipwright.exe -File -Recurse -ErrorAction SilentlyContinue |
+    -Filter NVRAMancer.exe -File -Recurse -ErrorAction SilentlyContinue |
     Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
   if ($candidate) { $ProgramPath = $candidate.FullName }
-  else { $ProgramPath = Join-Path $root 'software\Chipwright.exe' }
+  else { $ProgramPath = Join-Path $root 'software\NVRAMancer.exe' }
 }
 if (-not (Test-Path -LiteralPath $ProgramPath -PathType Leaf)) {
-  Fail "Chipwright.exe was not found; run tools\build.ps1 -Release first"
+  Fail "NVRAMancer.exe was not found; run tools\build.ps1 -Release first"
 }
 $ProgramPath = (Resolve-Path -LiteralPath $ProgramPath).Path
 $runtimeDir = Split-Path -Parent $ProgramPath

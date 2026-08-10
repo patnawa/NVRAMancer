@@ -1,7 +1,32 @@
 # Changelog
 
-All notable changes to Chipwright are recorded here. The version in the
+All notable changes to NVRAMancer are recorded here. The version in the
 first entry must match `software/appver.pas`; CI enforces that invariant.
+
+## 4.39.0.0 — the program is now called NVRAMancer
+
+"Chipwright" turned out not to be ours to keep: a `ChipWright/chipwright`
+repository now exists on GitHub, and ChipWrights, Inc. is a semiconductor
+company. The new name is **NVRAMancer** — a necromancer for non-volatile
+memory, which is exactly what a chip programmer does all day — and at the
+time of this rename it appears nowhere on GitHub and nowhere a web search
+can see.
+
+What changes for a user or a script:
+
+- The window title, About box, reports and CLI banner all say NVRAMancer.
+- The build produces `NVRAMancer.exe` and `NVRAMancerCLI.exe`; release
+  packages are named `NVRAMancer-<version>.zip`. Scripts that invoke
+  `Chipwright*.exe` must be updated.
+- The repository moves to `patnawa/NVRAMancer`; GitHub redirects the old
+  URLs.
+- The write-journal magic is now `nvramancer-write-journal/1`, so a
+  journal left behind by an interrupted write under the old name will not
+  be offered for resume after upgrading — finish or recover in-flight
+  writes before updating.
+
+Entries below this one keep the names that were true when they were
+written.
 
 ## 4.38.0.0 — a whole-project bug hunt: safe mode covers every bus, and failures stop impersonating success
 

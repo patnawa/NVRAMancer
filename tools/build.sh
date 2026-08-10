@@ -298,14 +298,14 @@ headless="$tmp/headless-cli"
 mkdir -p "$headless/units"
 # -o names the binary for the program, not for the .lpr it was built from.
 fpc -Mobjfpc -Sh -Fusoftware -FU"$headless/units" -FE"$headless" \
-  -oChipwrightCLI software/AsProgrammerCLI.lpr >/dev/null \
+  -oNVRAMancerCLI software/AsProgrammerCLI.lpr >/dev/null \
   || die "the headless Linux CLI did not compile"
-[ -x "$headless/ChipwrightCLI" ] \
+[ -x "$headless/NVRAMancerCLI" ] \
   || die "the headless Linux CLI executable was not produced"
 
 # These QWord values would wrap to plausible 32-bit geometry without an
 # explicit bound check. Both invocations must fail as usage before USB opens.
-if "$headless/ChipwrightCLI" --smart-preview unused.bin --size 8388608 \
+if "$headless/NVRAMancerCLI" --smart-preview unused.bin --size 8388608 \
     --address 0 --page-size 4294967552 --erase-size 4096 \
     --erase-opcode 20 >/dev/null 2>&1; then
   die "headless CLI admitted overflowing page geometry"
@@ -313,7 +313,7 @@ else
   code=$?
   [ "$code" -eq 2 ] || die "headless CLI returned $code for overflowing page geometry"
 fi
-if "$headless/ChipwrightCLI" --smart-preview unused.bin --size 8388608 \
+if "$headless/NVRAMancerCLI" --smart-preview unused.bin --size 8388608 \
     --address 0 --page-size 256 --erase-size 4294971392 \
     --erase-opcode 20 >/dev/null 2>&1; then
   die "headless CLI admitted overflowing erase geometry"
@@ -321,13 +321,13 @@ else
   code=$?
   [ "$code" -eq 2 ] || die "headless CLI returned $code for overflowing erase geometry"
 fi
-if "$headless/ChipwrightCLI" --detect --speeed 1 >/dev/null 2>&1; then
+if "$headless/NVRAMancerCLI" --detect --speeed 1 >/dev/null 2>&1; then
   die "headless CLI ignored an unknown option"
 else
   code=$?
   [ "$code" -eq 2 ] || die "headless CLI returned $code for an unknown option"
 fi
-if "$headless/ChipwrightCLI" --detect --detect >/dev/null 2>&1; then
+if "$headless/NVRAMancerCLI" --detect --detect >/dev/null 2>&1; then
   die "headless CLI accepted a duplicate option"
 else
   code=$?

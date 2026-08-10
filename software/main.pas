@@ -12243,7 +12243,7 @@ begin
     try
       Dlg.Filter := 'Markdown|*.md|Text file|*.txt|All files|*.*';
       Dlg.DefaultExt := 'md';
-      Dlg.FileName := 'chipwright-session.md';
+      Dlg.FileName := 'nvramancer-session.md';
       if not Dlg.Execute then Exit;
 
       Lines := Report.Render;
@@ -13333,7 +13333,7 @@ begin
   //ชี้มาที่โครงการนี้ ไม่ใช่ต้นทางที่ fork มา ผู้ใช้ที่กด Help ในโปรแกรมนี้
   //ต้องการเอกสารของโปรแกรมนี้
   ExecuteProcess('cmd.exe',
-    '/c start https://github.com/patnawa/Chipwright', []);
+    '/c start https://github.com/patnawa/NVRAMancer', []);
 end;
 
 //นับจำนวนชิปในไฟล์ฐานข้อมูล ใช้โชว์ในหน้าต่างข้อมูลรุ่น
@@ -13378,8 +13378,8 @@ begin
 
     if ShowCredits then
     begin
-      s.Add('Chipwright ' + PROX_VERSION);
-      s.Add('https://github.com/patnawa/Chipwright');
+      s.Add('NVRAMancer ' + PROX_VERSION);
+      s.Add('https://github.com/patnawa/NVRAMancer');
       s.Add('');
       s.Add('Written by Patnawa.');
       s.Add('');
@@ -13392,7 +13392,7 @@ begin
       s.Add('');
       s.Add('--- Prior work this began from ---');
       s.Add('');
-      s.Add('Chipwright started as a fork of AsProgrammer by nofeletru, later');
+      s.Add('NVRAMancer started as a fork of AsProgrammer by nofeletru, later');
       s.Add('by way of the dregmod fork. The SPI, I2C and MicroWire protocol');
       s.Add('units, several hardware backends, the script engine and the chip');
       s.Add('catalogue descend from that work and are used under its MIT');
@@ -13416,11 +13416,11 @@ begin
     end
     else
     begin
-      s.Add('Chipwright');
+      s.Add('NVRAMancer');
       s.Add('Version ' + PROX_VERSION);
       s.Add('');
       s.Add('Serial flash and EEPROM programmer for SPI, I2C and MicroWire.');
-      s.Add('https://github.com/patnawa/Chipwright');
+      s.Add('https://github.com/patnawa/NVRAMancer');
       s.Add('');
       s.Add('--- Build ---');
       s.Add('Executable   ' + ExeName);
@@ -13553,8 +13553,8 @@ var
 begin
   //เครดิตย้ายมาอยู่ที่นี่ที่เดียว แถบ log ตอนเปิดโปรแกรมไม่ต้องแสดงแล้ว
   credits :=
-    'Chipwright ' + PROX_VERSION + LineEnding +
-    'https://github.com/patnawa/Chipwright' + LineEnding + LineEnding +
+    'NVRAMancer ' + PROX_VERSION + LineEnding +
+    'https://github.com/patnawa/NVRAMancer' + LineEnding + LineEnding +
     'Written by Patnawa.' + LineEnding + LineEnding +
     'Forked from AsProgrammer by nofeletru; the protocol units, several' +
     LineEnding +
@@ -13721,9 +13721,9 @@ begin
   LoadLangList();
 
   //เลขเวอร์ชันมาจาก appver ที่เดียว แถบชื่อหน้าต่างกับ log จึงไม่มีวันค้างเลขเก่า
-  Caption := 'Chipwright ' + PROX_VERSION;
+  Caption := 'NVRAMancer ' + PROX_VERSION;
   if Log.Lines.Count > 0 then
-    Log.Lines[0] := 'Chipwright ' + PROX_VERSION;
+    Log.Lines[0] := 'NVRAMancer ' + PROX_VERSION;
 
   LoadModernIcons;
   CreateWorkflowBar;

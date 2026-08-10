@@ -135,7 +135,7 @@ silicon.
 
 The seven items above are not prose. They are the contents of
 `NAND_CHECKLIST` in `software/validationgate.pas`, and the gate in `cli.pas`
-reads them: `ChipwrightCLI --gates` prints the list with the covered items
+reads them: `NVRAMancerCLI --gates` prints the list with the covered items
 ticked, and a refused `--nand-write` names the outstanding ones rather than
 saying "pending live validation".
 

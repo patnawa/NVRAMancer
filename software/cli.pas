@@ -209,7 +209,7 @@ end;
 
 procedure Usage;
 begin
-  Say('Chipwright ' + PROX_VERSION + ', command line mode');
+  Say('NVRAMancer ' + PROX_VERSION + ', command line mode');
   Say('');
   Say('  AsProgrammer.exe --read out.bin  --chip W25Q64BV');
   Say('  AsProgrammer.exe --write in.bin  --chip W25Q64BV --erase --verify');

@@ -3,7 +3,7 @@ The MIT License (MIT)
 Copyright (c) 2026 Patnawa
 Copyright (c) 2015 nofeletru and contributors
 
-Chipwright began as a fork of AsProgrammer. Both copyright lines above apply
+NVRAMancer began as a fork of AsProgrammer. Both copyright lines above apply
 to the combined work: the second covers the inherited protocol units, hardware
 backends, script engine and chip catalogue, and must be retained for as long
 as those remain. The first covers everything added since.

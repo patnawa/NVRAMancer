@@ -108,7 +108,7 @@ After publication, download the ZIP and checksum file on a separate machine:
 
 ```bash
 sha256sum -c SHA256SUMS.txt
-gh attestation verify AsProgrammer-ProX-*.zip --repo patnawa/Chipwright
+gh attestation verify NVRAMancer-*.zip --repo patnawa/NVRAMancer
 ```
 
 Smoke-start both executables from the extracted ZIP with no programmers

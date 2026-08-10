@@ -47,7 +47,7 @@ uses
   SysUtils, Classes, StrUtils;
 
 const
-  JOURNAL_MAGIC = 'chipwright-write-journal/1';
+  JOURNAL_MAGIC = 'nvramancer-write-journal/1';
   // Long enough for a whole-chip plan on the largest part this program
   // handles, and short enough that a corrupt length field cannot ask for a
   // gigabyte of records.

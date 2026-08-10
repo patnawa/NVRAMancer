@@ -399,7 +399,7 @@ var
   Reason: string;
 begin
   WriteLn('The same thing, through an actual file');
-  FileName := GetTempDir + 'chipwright-journal-test.txt';
+  FileName := GetTempDir + 'nvramancer-journal-test.txt';
   DeleteFile(FileName);
 
   //A job that was never interrupted has no journal, and that is the ordinary

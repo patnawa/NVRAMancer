@@ -822,7 +822,7 @@ object MainForm: TMainForm
     Align = alBottom
     Lines.Strings = (
       'AsProgrammer ProX v4'
-      'https://github.com/patnawa/Chipwright'
+      'https://github.com/patnawa/NVRAMancer'
     )
     ParentFont = False
     PopupMenu = LogPopupMenu

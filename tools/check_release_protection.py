@@ -26,7 +26,7 @@ import shutil
 import subprocess
 import sys
 
-DEFAULT_REPO = "patnawa/Chipwright"
+DEFAULT_REPO = "patnawa/NVRAMancer"
 ENVIRONMENT = "github-release"
 REQUIRED_TAG_PATTERN = "v*"
 

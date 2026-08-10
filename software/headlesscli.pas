@@ -43,22 +43,22 @@ procedure Usage;
 var
   I: integer;
 begin
-  Say('Chipwright headless CLI (no LCL)');
+  Say('NVRAMancer headless CLI (no LCL)');
   Say;
   Say('Read-only hardware commands (CH347 over libusb):');
-  Say('  ChipwrightCLI --detect [--speed 2]');
-  Say('  ChipwrightCLI --read dump.bin --size BYTES [--passes 2]');
-  Say('  ChipwrightCLI --smart-preview patch.bin --size BYTES');
+  Say('  NVRAMancerCLI --detect [--speed 2]');
+  Say('  NVRAMancerCLI --read dump.bin --size BYTES [--passes 2]');
+  Say('  NVRAMancerCLI --smart-preview patch.bin --size BYTES');
   Say('      --address N --page-size N --erase-size N --erase-opcode 20');
   Say;
   Say('Destructive hardware command:');
-  Say('  ChipwrightCLI --smart-write patch.bin ... --backup original.bin --yes');
+  Say('  NVRAMancerCLI --smart-write patch.bin ... --backup original.bin --yes');
   Say('  While the capability is gated, also set ' +
       WRITE_GATE_ENV + '=' + WRITE_GATE_VALUE);
   Say;
   Say('Offline commands:');
-  Say('  ChipwrightCLI --scan image.bin');
-  Say('  ChipwrightCLI --sfdp-decode table.bin');
+  Say('  NVRAMancerCLI --scan image.bin');
+  Say('  NVRAMancerCLI --sfdp-decode table.bin');
   Say;
   Say('Options: --hw ch347 --speed 0..7 --native-4byte | --enter-4byte');
   Say('         --replace (allow replacing read output; never backup output)');

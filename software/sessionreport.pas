@@ -385,11 +385,11 @@ var
 begin
   Lines := nil;
 
-  Add('# Chipwright session report');
+  Add('# NVRAMancer session report');
   Add('');
   Add('| | |');
   Add('|---|---|');
-  Add('| Program | Chipwright ' + OrNotRecorded(FProgramVersion) + ' |');
+  Add('| Program | NVRAMancer ' + OrNotRecorded(FProgramVersion) + ' |');
   Add('| Started (UTC) | ' + OrNotRecorded(FStartedUtc) + ' |');
   Add('| Programmer | ' + OrNotRecorded(FProgrammer) + ' |');
   Add('| Programmer firmware | ' + OrNotRecorded(FProgrammerFirmware) + ' |');

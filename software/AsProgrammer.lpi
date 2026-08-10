@@ -8,7 +8,7 @@
         <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="Chipwright"/>
+      <Title Value="NVRAMancer"/>
       <Scaled Value="True"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
@@ -25,11 +25,11 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="4"/>
-      <MinorVersionNr Value="38"/>
+      <MinorVersionNr Value="39"/>
       <RevisionNr Value="0"/>
       <BuildNr Value="0"/>
       <Language Value="0409"/>
-      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="Chipwright" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="Chipwright.exe" ProductName="Chipwright" ProductVersion="4.38.0.0"/>
+      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="NVRAMancer" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="NVRAMancer.exe" ProductName="NVRAMancer" ProductVersion="4.39.0.0"/>
     </VersionInfo>
     <MacroValues Count="2">
       <Macro1 Name="LCLWidgetType" Value="win32"/>
@@ -42,7 +42,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="Chipwright"/>
+            <Filename Value="NVRAMancer"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);JediInc"/>
@@ -208,7 +208,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="Chipwright"/>
+      <Filename Value="NVRAMancer"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);JediInc"/>
