@@ -762,7 +762,7 @@ msgstr "2  Open image"
 msgid "3  Smart write"
 msgstr "3  Smart write"
 
-#: msgstr.str_workflow_read
+#: msgstr.str_workflow_read msgstr.str_workspace_action_read_chip
 msgid "Read chip"
 msgstr "Read chip"
 
@@ -1281,3 +1281,755 @@ msgstr "Job file rejected the buffer: "
 #: msgstr.str_job_ok
 msgid "Job file check passed"
 msgstr "Job file check passed"
+
+#: msgstr.str_workspace_repair
+msgid "Repair"
+msgstr "Repair"
+
+#: msgstr.str_workspace_bench
+msgid "Bench"
+msgstr "Bench"
+
+#: msgstr.str_workspace_production
+msgid "Production"
+msgstr "Production"
+
+#: msgstr.str_workspace_repair_desc
+msgid "Guided backup and restoration for one-off repairs"
+msgstr "Guided backup and restoration for one-off repairs"
+
+#: msgstr.str_workspace_bench_desc
+msgid "Inspect, edit, compare and diagnose with full controls"
+msgstr "Inspect, edit, compare and diagnose with full controls"
+
+#: msgstr.str_workspace_production_desc
+msgid "Repeat the configured batch with traceable results"
+msgstr "Repeat the configured batch with traceable results"
+
+#: msgstr.str_workspace_operation_running
+msgid "OPERATION RUNNING"
+msgstr "OPERATION RUNNING"
+
+#: msgstr.str_workspace_operation_running_title
+msgid "The current operation is in progress"
+msgstr "The current operation is in progress"
+
+#: msgstr.str_workspace_operation_running_detail
+msgid "Progress and the safe cancellation state remain visible below."
+msgstr "Progress and the safe cancellation state remain visible below."
+
+#: msgstr.str_workspace_action_safe_stop
+msgid "Request safe stop"
+msgstr "Request safe stop"
+
+#: msgstr.str_workspace_repair_connect
+msgid "STEP 1 OF 4  /  CONNECT"
+msgstr "STEP 1 OF 4  /  CONNECT"
+
+#: msgstr.str_workspace_repair_connect_title
+msgid "Connect your programmer"
+msgstr "Connect your programmer"
+
+#: msgstr.str_workspace_repair_connect_detail
+msgid "Plug in the programmer, then scan again. No command is sent to a chip during this step."
+msgstr "Plug in the programmer, then scan again. No command is sent to a chip during this step."
+
+#: msgstr.str_workspace_action_scan_programmer
+msgid "Scan for programmer"
+msgstr "Scan for programmer"
+
+#: msgstr.str_workspace_action_open_technical
+msgid "Open technical workspace"
+msgstr "Open technical workspace"
+
+#: msgstr.str_workspace_repair_identify
+msgid "STEP 2 OF 4  /  IDENTIFY"
+msgstr "STEP 2 OF 4  /  IDENTIFY"
+
+#: msgstr.str_workspace_repair_identify_title
+msgid "Identify the chip in the socket"
+msgstr "Identify the chip in the socket"
+
+#: msgstr.str_workspace_repair_identify_spi
+msgid "Read the live chip ID first. Selecting a model from the catalogue is not the same as confirming what answered."
+msgstr "Read the live chip ID first. Selecting a model from the catalogue is not the same as confirming what answered."
+
+#: msgstr.str_workspace_repair_identify_other
+msgid "This protocol has no standard live ID command. Choose the exact part from its marking or datasheet."
+msgstr "This protocol has no standard live ID command. Choose the exact part from its marking or datasheet."
+
+#: msgstr.str_workspace_repair_select_profile
+msgid "STEP 2 OF 4  /  SELECT PROFILE"
+msgstr "STEP 2 OF 4  /  SELECT PROFILE"
+
+#: msgstr.str_workspace_repair_select_profile_title
+msgid "Match the live ID to the exact chip"
+msgstr "Match the live ID to the exact chip"
+
+#: msgstr.str_workspace_repair_select_profile_detail
+msgid "A chip answered with live ID %s, but no exact catalogue profile was selected. Match the full part marking before reading or writing."
+msgstr "A chip answered with live ID %s, but no exact catalogue profile was selected. Match the full part marking before reading or writing."
+
+#: msgstr.str_workspace_action_choose_matching
+msgid "Choose matching chip profile..."
+msgstr "Choose matching chip profile..."
+
+#: msgstr.str_workspace_action_read_id_again
+msgid "Read chip ID again"
+msgstr "Read chip ID again"
+
+#: msgstr.str_workspace_action_detect_chip
+msgid "Detect chip now"
+msgstr "Detect chip now"
+
+#: msgstr.str_workspace_action_choose_catalogue
+msgid "Choose chip from catalogue"
+msgstr "Choose chip from catalogue"
+
+#: msgstr.str_workspace_action_choose_manually
+msgid "Choose chip manually"
+msgstr "Choose chip manually"
+
+#: msgstr.str_workspace_repair_confirm
+msgid "STEP 2 OF 4  /  CONFIRM"
+msgstr "STEP 2 OF 4  /  CONFIRM"
+
+#: msgstr.str_workspace_repair_confirm_title
+msgid "Confirm the selected chip against the socket"
+msgstr "Confirm the selected chip against the socket"
+
+#: msgstr.str_workspace_repair_confirm_detail
+msgid "The profile was selected by name, but the live chip identity has not been confirmed on the current setup."
+msgstr "The profile was selected by name, but the live chip identity has not been confirmed on the current setup."
+
+#: msgstr.str_workspace_action_confirm_live_id
+msgid "Confirm with live chip ID"
+msgstr "Confirm with live chip ID"
+
+#: msgstr.str_workspace_action_choose_different
+msgid "Choose a different chip"
+msgstr "Choose a different chip"
+
+#: msgstr.str_workspace_repair_choose_task
+msgid "STEP 3 OF 4  /  CHOOSE TASK"
+msgstr "STEP 3 OF 4  /  CHOOSE TASK"
+
+#: msgstr.str_workspace_repair_choose_title
+msgid "Back up this chip or prepare a restoration"
+msgstr "Back up this chip or prepare a restoration"
+
+#: msgstr.str_workspace_repair_choose_detail
+msgid "Reading is the safest next step because it establishes what is on this chip before any replacement image is considered."
+msgstr "Reading is the safest next step because it establishes what is on this chip before any replacement image is considered."
+
+#: msgstr.str_workspace_action_open_firmware
+msgid "Open firmware image..."
+msgstr "Open firmware image..."
+
+#: msgstr.str_workspace_repair_preserve
+msgid "STEP 4 OF 4  /  PRESERVE"
+msgstr "STEP 4 OF 4  /  PRESERVE"
+
+#: msgstr.str_workspace_repair_preserve_title
+msgid "The chip has been read"
+msgstr "The chip has been read"
+
+#: msgstr.str_workspace_repair_preserve_detail
+msgid "Save a copy before editing or loading another image. Saving the buffer does not change the chip."
+msgstr "Save a copy before editing or loading another image. Saving the buffer does not change the chip."
+
+#: msgstr.str_workspace_action_save_backup
+msgid "Save backup copy..."
+msgstr "Save backup copy..."
+
+#: msgstr.str_workspace_action_open_replacement
+msgid "Open replacement image..."
+msgstr "Open replacement image..."
+
+#: msgstr.str_workspace_action_inspect_read
+msgid "Inspect the read"
+msgstr "Inspect the read"
+
+#: msgstr.str_workspace_repair_review
+msgid "STEP 4 OF 4  /  REVIEW"
+msgstr "STEP 4 OF 4  /  REVIEW"
+
+#: msgstr.str_workspace_repair_review_title
+msgid "Review the image before changing the chip"
+msgstr "Review the image before changing the chip"
+
+#: msgstr.str_workspace_repair_review_detail
+msgid "Smart Write will calculate the minimum erase and program work, preserve neighbouring bytes, create a trusted backup, and verify the result."
+msgstr "Smart Write will calculate the minimum erase and program work, preserve neighbouring bytes, create a trusted backup, and verify the result."
+
+#: msgstr.str_workspace_blocked_prefix
+msgid "Blocked: "
+msgstr "Blocked: "
+
+#: msgstr.str_workspace_action_review_smart
+msgid "Review Smart Write plan..."
+msgstr "Review Smart Write plan..."
+
+#: msgstr.str_workspace_action_preview_only
+msgid "Preview only"
+msgstr "Preview only"
+
+#: msgstr.str_workspace_action_verify_image
+msgid "Verify chip against image"
+msgstr "Verify chip against image"
+
+#: msgstr.str_workspace_prod_running
+msgid "PRODUCTION  /  UNIT RUNNING"
+msgstr "PRODUCTION  /  UNIT RUNNING"
+
+#: msgstr.str_workspace_prod_running_title
+msgid "Do not remove the current unit"
+msgstr "Do not remove the current unit"
+
+#: msgstr.str_workspace_prod_running_detail
+msgid "The result is not PASS until programming and read-back verification have completed. Stopping cancels this unit safely; the batch controller then returns to its unit prompt."
+msgstr "The result is not PASS until programming and read-back verification have completed. Stopping cancels this unit safely; the batch controller then returns to its unit prompt."
+
+#: msgstr.str_workspace_action_stop_unit
+msgid "Stop current unit safely"
+msgstr "Stop current unit safely"
+
+#: msgstr.str_workspace_prod_refused
+msgid "PRODUCTION  /  CONFIGURATION REFUSED"
+msgstr "PRODUCTION  /  CONFIGURATION REFUSED"
+
+#: msgstr.str_workspace_prod_refused_title
+msgid "The configured job file could not be loaded"
+msgstr "The configured job file could not be loaded"
+
+#: msgstr.str_workspace_action_review_prod
+msgid "Review production settings..."
+msgstr "Review production settings..."
+
+#: msgstr.str_workspace_action_inspect_bench
+msgid "Inspect image in Bench"
+msgstr "Inspect image in Bench"
+
+#: msgstr.str_workspace_prod_prepare
+msgid "PRODUCTION  /  PREPARE"
+msgstr "PRODUCTION  /  PREPARE"
+
+#: msgstr.str_workspace_prod_prepare_title
+msgid "Load the production image"
+msgstr "Load the production image"
+
+#: msgstr.str_workspace_prod_prepare_detail
+msgid "This workspace runs the configured GUI batch flow. Authenticated HMAC jobs remain the stricter command-line workflow."
+msgstr "This workspace runs the configured GUI batch flow. Authenticated HMAC jobs remain the stricter command-line workflow."
+
+#: msgstr.str_workspace_action_open_prod_image
+msgid "Open production image..."
+msgstr "Open production image..."
+
+#: msgstr.str_workspace_action_configure_batch
+msgid "Configure batch..."
+msgstr "Configure batch..."
+
+#: msgstr.str_workspace_action_inspect_in_bench
+msgid "Inspect in Bench"
+msgstr "Inspect in Bench"
+
+#: msgstr.str_workspace_prod_configure
+msgid "PRODUCTION  /  CONFIGURE"
+msgstr "PRODUCTION  /  CONFIGURE"
+
+#: msgstr.str_workspace_prod_configure_title
+msgid "Configure the repeat batch"
+msgstr "Configure the repeat batch"
+
+#: msgstr.str_workspace_prod_configure_detail
+msgid "Set the unit count, operator, optional GUI job file, serial policy, and evidence log before starting."
+msgstr "Set the unit count, operator, optional GUI job file, serial policy, and evidence log before starting."
+
+#: msgstr.str_workspace_action_configure_prod
+msgid "Configure production batch..."
+msgstr "Configure production batch..."
+
+#: msgstr.str_workspace_action_replace_image
+msgid "Replace image..."
+msgstr "Replace image..."
+
+#: msgstr.str_workspace_prod_ready
+msgid "PRODUCTION  /  CONFIGURED"
+msgstr "PRODUCTION  /  CONFIGURED"
+
+#: msgstr.str_workspace_prod_ready_title
+msgid "Batch configured - checks pending"
+msgstr "Batch configured - checks pending"
+
+#: msgstr.str_workspace_prod_ready_detail
+msgid "Starting the batch opens the unit prompt. Each unit still runs the checks provided by its selected protocol and backend, and is logged PASS only after a successful write and read-back comparison. Live-ID and optional GUI job checks apply where supported; authenticated HMAC production remains CLI-only."
+msgstr "Starting the batch opens the unit prompt. Each unit still runs the checks provided by its selected protocol and backend, and is logged PASS only after a successful write and read-back comparison. Live-ID and optional GUI job checks apply where supported; authenticated HMAC production remains CLI-only."
+
+#: msgstr.str_workspace_action_run_prod
+msgid "Run production batch..."
+msgstr "Run production batch..."
+
+#: msgstr.str_workspace_action_review_config
+msgid "Review configuration..."
+msgstr "Review configuration..."
+
+#: msgstr.str_shell_workspace_access
+msgid "%s workspace"
+msgstr "%s workspace"
+
+#: msgstr.str_shell_current_workspace_access
+msgid "Current workspace. %s"
+msgstr "Current workspace. %s"
+
+#: msgstr.str_shell_safe_mode_access
+msgid "Read-only safe mode"
+msgstr "Read-only safe mode"
+
+#: msgstr.str_shell_quick_setup
+msgid "QUICK SETUP"
+msgstr "QUICK SETUP"
+
+#: msgstr.str_shell_protocol_label
+msgid "Protocol"
+msgstr "Protocol"
+
+#: msgstr.str_shell_protocol_spi
+msgid "SPI flash"
+msgstr "SPI flash"
+
+#: msgstr.str_shell_protocol_i2c
+msgid "I2C EEPROM"
+msgstr "I2C EEPROM"
+
+#: msgstr.str_shell_protocol_mw
+msgid "Microwire (16-bit)"
+msgstr "Microwire (16-bit)"
+
+#: msgstr.str_shell_protocol_access
+msgid "Memory protocol"
+msgstr "Memory protocol"
+
+#: msgstr.str_shell_target_voltage
+msgid "Target voltage (applies now)"
+msgstr "Target voltage (applies now)"
+
+#: msgstr.str_shell_rail_auto
+msgid "Auto (match selected chip)"
+msgstr "Auto (match selected chip)"
+
+#: msgstr.str_shell_rail_fixed
+msgid "Not adjustable on this programmer"
+msgstr "Not adjustable on this programmer"
+
+#: msgstr.str_shell_rail_access
+msgid "Requested target voltage"
+msgstr "Requested target voltage"
+
+#: msgstr.str_shell_rail_access_desc
+msgid "A fixed CH347 level is applied immediately when available. This is a request, not a measurement."
+msgstr "A fixed CH347 level is applied immediately when available. This is a request, not a measurement."
+
+#: msgstr.str_shell_actions
+msgid "ACTIONS"
+msgstr "ACTIONS"
+
+#: msgstr.str_shell_bench_detect
+msgid "Detect chip"
+msgstr "Detect chip"
+
+#: msgstr.str_shell_bench_open
+msgid "Open image..."
+msgstr "Open image..."
+
+#: msgstr.str_shell_bench_save
+msgid "Save image..."
+msgstr "Save image..."
+
+#: msgstr.str_shell_bench_preview
+msgid "Preview Smart Write"
+msgstr "Preview Smart Write"
+
+#: msgstr.str_shell_bench_smart
+msgid "Smart Write and verify..."
+msgstr "Smart Write and verify..."
+
+#: msgstr.str_shell_destructive_admission
+msgid "DESTRUCTIVE ADMISSION"
+msgstr "DESTRUCTIVE ADMISSION"
+
+#: msgstr.str_shell_editor_access
+msgid "Firmware data editor"
+msgstr "Firmware data editor"
+
+#: msgstr.str_shell_editor_access_desc
+msgid "View and edit the firmware buffer. Changes here do not reach the chip until an operation is started."
+msgstr "View and edit the firmware buffer. Changes here do not reach the chip until an operation is started."
+
+#: msgstr.str_shell_log_access
+msgid "Operation log, read-only"
+msgstr "Operation log, read-only"
+
+#: msgstr.str_shell_log_access_desc
+msgid "Detailed programmer messages and operation evidence."
+msgstr "Detailed programmer messages and operation evidence."
+
+#: msgstr.str_shell_protocol_changed_log
+msgid "Protocol changed: the existing bytes were kept for inspection, but they are no longer treated as a backup of the current chip."
+msgstr "Protocol changed: the existing bytes were kept for inspection, but they are no longer treated as a backup of the current chip."
+
+#: msgstr.str_shell_voltage_33_title
+msgid "Switch target voltage to 3.3 V?"
+msgstr "Switch target voltage to 3.3 V?"
+
+#: msgstr.str_shell_voltage_33_warning
+msgid "3.3 V can permanently damage a 1.8 V memory chip. Confirm the full part marking or datasheet before applying this rail.\r\n\r\nApply 3.3 V now?"
+msgstr "3.3 V can permanently damage a 1.8 V memory chip. Confirm the full part marking or datasheet before applying this rail.\r\n\r\nApply 3.3 V now?"
+
+#: msgstr.str_shell_voltage_auto_title
+msgid "Enable automatic target voltage?"
+msgstr "Enable automatic target voltage?"
+
+#: msgstr.str_shell_voltage_auto_warning
+msgid "Auto applies the voltage inferred from the selected chip profile immediately, and that may be 3.3 V. Confirm that the profile matches the physical part before continuing.\r\n\r\nEnable Auto now?"
+msgstr "Auto applies the voltage inferred from the selected chip profile immediately, and that may be 3.3 V. Confirm that the profile matches the physical part before continuing.\r\n\r\nEnable Auto now?"
+
+#: msgstr.str_shell_safe_on_caption
+msgid "READ-ONLY SAFE MODE: ON"
+msgstr "READ-ONLY SAFE MODE: ON"
+
+#: msgstr.str_shell_safe_on_desc
+msgid "Chip changes are blocked at the protocol layer."
+msgstr "Chip changes are blocked at the protocol layer."
+
+#: msgstr.str_shell_safe_off_caption
+msgid "Read-only safe mode: Off"
+msgstr "Read-only safe mode: Off"
+
+#: msgstr.str_shell_safe_off_desc
+msgid "Chip changes are allowed after all required safety checks."
+msgstr "Chip changes are allowed after all required safety checks."
+
+#: msgstr.str_shell_safe_reason
+msgid "read-only safe mode is on; erase, write, unlock and status edits are blocked"
+msgstr "read-only safe mode is on; erase, write, unlock and status edits are blocked"
+
+#: msgstr.str_shell_programmer_check
+msgid "Programmer connection: selected; checked when the operation starts"
+msgstr "Programmer connection: selected; checked when the operation starts"
+
+#: msgstr.str_shell_attempt_cancelled
+msgid "Last attempt cancelled: %s"
+msgstr "Last attempt cancelled: %s"
+
+#: msgstr.str_shell_attempt_failed
+msgid "Last attempt failed: %s"
+msgstr "Last attempt failed: %s"
+
+#: msgstr.str_shell_job_refused
+msgid "Job refused: %s"
+msgstr "Job refused: %s"
+
+#: msgstr.str_shell_job_loaded
+msgid "Loaded GUI job: %s (validated against each unit when the operation starts)"
+msgstr "Loaded GUI job: %s (validated against each unit when the operation starts)"
+
+#: msgstr.str_shell_job_chip
+msgid " / chip %s"
+msgstr " / chip %s"
+
+#: msgstr.str_shell_job_configured
+msgid "Configured job: %s"
+msgstr "Configured job: %s"
+
+#: msgstr.str_shell_job_none
+msgid "No GUI job file is configured (optional legacy check)"
+msgstr "No GUI job file is configured (optional legacy check)"
+
+#: msgstr.str_shell_job_batch_target
+msgid "Batch target: %d unit(s)"
+msgstr "Batch target: %d unit(s)"
+
+#: msgstr.str_shell_job_operator
+msgid " / operator %s"
+msgstr " / operator %s"
+
+#: msgstr.str_shell_identity_none
+msgid "Caution: no chip profile is selected"
+msgstr "Caution: no chip profile is selected"
+
+#: msgstr.str_shell_identity_unconfirmed
+msgid "Caution: selected profile is not live-confirmed"
+msgstr "Caution: selected profile is not live-confirmed"
+
+#: msgstr.str_shell_identity_ready
+msgid "Ready: chip identity is confirmed or has no live ID"
+msgstr "Ready: chip identity is confirmed or has no live ID"
+
+#: msgstr.str_shell_bench_safe_on
+msgid "Read-only safe mode: ON - destructive actions blocked"
+msgstr "Read-only safe mode: ON - destructive actions blocked"
+
+#: msgstr.str_shell_bench_safe_off
+msgid "Read-only safe mode: Off - safety checks still required"
+msgstr "Read-only safe mode: Off - safety checks still required"
+
+#: msgstr.str_shell_bench_electrical
+msgid "Electrical facts: checked when the backend exposes them; unavailable facts remain visible above"
+msgstr "Electrical facts: checked when the backend exposes them; unavailable facts remain visible above"
+
+#: msgstr.str_shell_bench_connection
+msgid "Connection: rechecked when an operation opens the programmer"
+msgstr "Connection: rechecked when an operation opens the programmer"
+
+#: msgstr.str_shell_bench_backup
+msgid "Backup: confirm a trusted copy before erase or program"
+msgstr "Backup: confirm a trusted copy before erase or program"
+
+#: msgstr.str_shell_tel_programmer
+msgid "PROGRAMMER"
+msgstr "PROGRAMMER"
+
+#: msgstr.str_shell_tel_interface
+msgid "INTERFACE / CLOCK"
+msgstr "INTERFACE / CLOCK"
+
+#: msgstr.str_shell_tel_power
+msgid "TARGET POWER / SAFETY"
+msgstr "TARGET POWER / SAFETY"
+
+#: msgstr.str_shell_tel_chip
+msgid "CHIP IDENTITY"
+msgstr "CHIP IDENTITY"
+
+#: msgstr.str_shell_tel_last
+msgid "LAST OPERATION"
+msgstr "LAST OPERATION"
+
+#: msgstr.str_shell_tel_initial
+msgid "No completed operation yet\r\nLive effective rate and ETA appear in the status bar"
+msgstr "No completed operation yet\r\nLive effective rate and ETA appear in the status bar"
+
+#: msgstr.str_shell_tel_no_programmer
+msgid "Unavailable: no programmer selected"
+msgstr "Unavailable: no programmer selected"
+
+#: msgstr.str_shell_tel_no_protocol
+msgid "Protocol not available"
+msgstr "Protocol not available"
+
+#: msgstr.str_shell_tel_requested_not_set
+msgid "Requested: not set"
+msgstr "Requested: not set"
+
+#: msgstr.str_shell_tel_measured_unavailable
+msgid "Measured: unavailable"
+msgstr "Measured: unavailable"
+
+#: msgstr.str_shell_tel_safe_on_short
+msgid "Safe mode: ON"
+msgstr "Safe mode: ON"
+
+#: msgstr.str_shell_tel_safe_off_short
+msgid "Safe mode: Off"
+msgstr "Safe mode: Off"
+
+#: msgstr.str_shell_tel_not_selected
+msgid "Not selected"
+msgstr "Not selected"
+
+#: msgstr.str_shell_tel_ezp_transport
+msgid "USB 1FC8:310B | libusb-win32 1.4.0.2"
+msgstr "USB 1FC8:310B | libusb-win32 1.4.0.2"
+
+#: msgstr.str_shell_tel_ezp_clock
+msgid "12 MHz requested (firmware setting)"
+msgstr "12 MHz requested (firmware setting)"
+
+#: msgstr.str_shell_tel_ezp_interface
+msgid "SPI NOR | %s\r\nNative erase | whole-chip read/write | full read-back verify"
+msgstr "SPI NOR | %s\r\nNative erase | whole-chip read/write | full read-back verify"
+
+#: msgstr.str_shell_tel_ezp_hint
+msgid "12 MHz is the configured EZP2023+ firmware clock. It is not a measured oscilloscope frequency. Measured effective operation throughput is shown separately."
+msgstr "12 MHz is the configured EZP2023+ firmware clock. It is not a measured oscilloscope frequency. Measured effective operation throughput is shown separately."
+
+#: msgstr.str_shell_tel_serprog_transport
+msgid "Serial/USB-CDC transport"
+msgstr "Serial/USB-CDC transport"
+
+#: msgstr.str_shell_tel_serprog_interface
+msgid "SPI | clock controlled by serprog firmware"
+msgstr "SPI | clock controlled by serprog firmware"
+
+#: msgstr.str_shell_tel_serial_transport
+msgid "Serial transport"
+msgstr "Serial transport"
+
+#: msgstr.str_shell_tel_usb_transport
+msgid "USB transport"
+msgstr "USB transport"
+
+#: msgstr.str_shell_tel_clock_default
+msgid "firmware/default"
+msgstr "firmware/default"
+
+#: msgstr.str_shell_tel_interface_requested
+msgid "SPI | %s requested\r\nMeasured effective throughput is reported per operation"
+msgstr "SPI | %s requested\r\nMeasured effective throughput is reported per operation"
+
+#: msgstr.str_shell_tel_clock_hint
+msgid "The menu value is the requested bus clock, not a measured waveform. Operation speed is measured from bytes and time."
+msgstr "The menu value is the requested bus clock, not a measured waveform. Operation speed is measured from bytes and time."
+
+#: msgstr.str_shell_tel_connection_selected
+msgid "SELECTED | %s\r\nConnection is checked when an operation starts"
+msgstr "SELECTED | %s\r\nConnection is checked when an operation starts"
+
+#: msgstr.str_shell_tel_connection_available
+msgid "AVAILABLE | %s"
+msgstr "AVAILABLE | %s"
+
+#: msgstr.str_shell_tel_connection_disconnected
+msgid "DISCONNECTED | %s"
+msgstr "DISCONNECTED | %s"
+
+#: msgstr.str_shell_tel_requested
+msgid "Requested: %s"
+msgstr "Requested: %s"
+
+#: msgstr.str_shell_tel_requested_auto
+msgid "Requested: Auto - resolved from the selected chip"
+msgstr "Requested: Auto - resolved from the selected chip"
+
+#: msgstr.str_shell_tel_measured
+msgid "Measured: %s"
+msgstr "Measured: %s"
+
+#: msgstr.str_shell_tel_measured_unknown
+msgid "Measured: unknown"
+msgstr "Measured: unknown"
+
+#: msgstr.str_shell_tel_measured_not_measurable
+msgid "Measured: not measurable"
+msgstr "Measured: not measurable"
+
+#: msgstr.str_shell_tel_safe_on
+msgid "Safe mode: ON - changes blocked"
+msgstr "Safe mode: ON - changes blocked"
+
+#: msgstr.str_shell_tel_safe_off
+msgid "Safe mode: Off - checks required"
+msgstr "Safe mode: Off - checks required"
+
+#: msgstr.str_shell_tel_id_confirmed
+msgid "live confirmed"
+msgstr "live confirmed"
+
+#: msgstr.str_shell_tel_id_read
+msgid "live read"
+msgstr "live read"
+
+#: msgstr.str_shell_tel_id_selected
+msgid "selected, not read"
+msgstr "selected, not read"
+
+#: msgstr.str_shell_tel_id_unavailable
+msgid "ID unavailable"
+msgstr "ID unavailable"
+
+#: msgstr.str_shell_tel_id_unconfirmed
+msgid "unconfirmed"
+msgstr "unconfirmed"
+
+#: msgstr.str_shell_tel_addr_4
+msgid "4-byte address"
+msgstr "4-byte address"
+
+#: msgstr.str_shell_tel_addr_3
+msgid "3-byte address"
+msgstr "3-byte address"
+
+#: msgstr.str_shell_tel_addr_protocol
+msgid "addressing by selected protocol"
+msgstr "addressing by selected protocol"
+
+#: msgstr.str_shell_tel_vcc_unspecified
+msgid "VCC not specified"
+msgstr "VCC not specified"
+
+#: msgstr.str_shell_tel_profile_none
+msgid "PROFILE NOT SELECTED"
+msgstr "PROFILE NOT SELECTED"
+
+#: msgstr.str_shell_tel_live_id
+msgid "Live ID read: %s"
+msgstr "Live ID read: %s"
+
+#: msgstr.str_shell_tel_live_id_none
+msgid "No live chip identity has been established"
+msgstr "No live chip identity has been established"
+
+#: msgstr.str_shell_tel_page
+msgid "page %d B"
+msgstr "page %d B"
+
+#: msgstr.str_shell_tel_sector
+msgid "sector %s/%sh"
+msgstr "sector %s/%sh"
+
+#: msgstr.str_shell_tel_running
+msgid "%s RUNNING\r\nLive effective rate and ETA: status bar"
+msgstr "%s RUNNING\r\nLive effective rate and ETA: status bar"
+
+#: msgstr.str_shell_tel_cancelled
+msgid "CANCELLED"
+msgstr "CANCELLED"
+
+#: msgstr.str_shell_tel_failed
+msgid "FAILED"
+msgstr "FAILED"
+
+#: msgstr.str_shell_tel_ok
+msgid "OK"
+msgstr "OK"
+
+#: msgstr.str_shell_tel_effective
+msgid "%s effective"
+msgstr "%s effective"
+
+#: msgstr.str_shell_tel_failure_address
+msgid "Failure address 0x%s"
+msgstr "Failure address 0x%s"
+
+#: msgstr.str_shell_op_operation
+msgid "OPERATION"
+msgstr "OPERATION"
+
+#: msgstr.str_shell_op_read
+msgid "READ"
+msgstr "READ"
+
+#: msgstr.str_shell_op_write
+msgid "WRITE"
+msgstr "WRITE"
+
+#: msgstr.str_shell_op_erase
+msgid "ERASE"
+msgstr "ERASE"
+
+#: msgstr.str_shell_op_verify
+msgid "VERIFY"
+msgstr "VERIFY"
+
+#: msgstr.str_shell_op_blank_check
+msgid "BLANK CHECK"
+msgstr "BLANK CHECK"
+
+#: msgstr.str_shell_op_detect
+msgid "DETECT"
+msgstr "DETECT"
+
+#: msgstr.str_shell_shortcuts
+msgid "Alt+1 %s   Alt+2 %s   Alt+3 %s"
+msgstr "Alt+1 %s   Alt+2 %s   Alt+3 %s"

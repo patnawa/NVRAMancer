@@ -173,6 +173,14 @@ $sessionDir = Join-Path $env:TEMP "aspx-tests-session-state"
 Run-Suite "sessionstate_tests" $sessionDir @(
   "$root\tests\sessionstate_tests.lpr", "$root\software\sessionstate.pas")
 
+# The task-first Repair and Production surfaces are pure projections of
+# application state.  Keep their next actions and refusals testable without
+# loading LCL or opening a programmer.
+$workspaceDir = Join-Path $env:TEMP "aspx-tests-workspace-model"
+Run-Suite "workspacemodel_tests" $workspaceDir @(
+  "$root\tests\workspacemodel_tests.lpr",
+  "$root\software\workspacemodel.pas", "$root\software\msgstr.pas")
+
 # What the operator is told about the target rail, and which electrical facts
 # stop bench work rather than merely warning it.
 $railDir = Join-Path $env:TEMP "aspx-tests-rail-report"

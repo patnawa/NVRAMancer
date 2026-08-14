@@ -7,8 +7,8 @@ object MainForm: TMainForm
   Caption = 'NVRAMancer'
   ClientHeight = 780
   ClientWidth = 1120
-  Constraints.MinHeight = 560
-  Constraints.MinWidth = 860
+  Constraints.MinHeight = 640
+  Constraints.MinWidth = 960
   Menu = MainMenu
   OnCloseQuery = FormCloseQuery
   AllowDropFiles = True

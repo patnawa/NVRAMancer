@@ -116,6 +116,14 @@ session="$tmp/session-state"
 run_suite sessionstate_tests "$session" \
   tests/sessionstate_tests.lpr software/sessionstate.pas
 
+# The task-first Repair and Production surfaces are pure projections of
+# application state. Keep their next actions and refusals testable without
+# loading LCL or opening a programmer.
+workspace="$tmp/workspace-model"
+run_suite workspacemodel_tests "$workspace" \
+  tests/workspacemodel_tests.lpr software/workspacemodel.pas \
+  software/msgstr.pas
+
 # What the operator is told about the target rail, and which electrical facts
 # stop bench work rather than merely warning it.
 rail="$tmp/rail-report"

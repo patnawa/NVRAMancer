@@ -3,6 +3,30 @@
 All notable changes to NVRAMancer are recorded here. The version in the
 first entry must match `software/appver.pas`; CI enforces that invariant.
 
+## 4.41.0.0 — task-first workspaces keep the next safe action visible
+
+- The default Repair workspace now guides occasional users through connecting,
+  identifying, reading, preserving and restoring one chip at a time. Blocked
+  actions stay visible with the exact reason instead of disappearing.
+- Bench keeps the complete editor, protocol controls and operation log for
+  technicians, with a responsive, correctly clamped settings pane. Wrapped chip
+  identity details now move Scripts and the electrical controls below them
+  instead of being clipped. Its admission summary does not claim facts a
+  backend cannot measure.
+- Production presents the configured GUI batch honestly: per-unit checks remain
+  pending until a run begins, while authenticated HMAC production is still
+  identified as the stricter command-line workflow.
+- Five persistent telemetry cards separate programmer availability, requested
+  bus settings, requested versus measured target power, selected versus live
+  chip identity, and the last operation result. Preflight/open failures are now
+  visible even when the detailed log is hidden.
+- Workspace controls lock during operations. Protocol changes invalidate stale
+  chip identity and buffer provenance, while 3.3 V and Auto rail changes require
+  explicit hazard confirmation before they are applied.
+- The new shell supports keyboard navigation, screen-reader descriptions,
+  runtime translation catalogs and DPI-aware compact layouts. Its presentation
+  model adds 198 hardware-free assertions to the 34-suite release pipeline.
+
 ## 4.40.0.0 — the rename reaches everything: project files, identifiers, formats
 
 4.39.0.0 renamed what a user sees; this release renames what remains. It

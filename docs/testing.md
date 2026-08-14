@@ -34,6 +34,7 @@ adds it to the builds.
 - `hardwarecapability_tests`
 - `simhw_tests`
 - `sessionstate_tests`
+- `workspacemodel_tests`
 - `sessionreport_tests`
 - `railreport_tests`
 - `signalchar_tests`
@@ -83,6 +84,7 @@ adds it to the builds.
 | Simulated programmer | Driven through the real protocol layer: no write-enable does nothing silently, programming only clears bits, a page program wraps within its own page, an erase aligns down to its sector, and nothing electrical is ever claimed to be measured |
 | Voltage warning | Across every combination of production mode, external power, rail selectability and Auto resolution, a high rail is never approved for a 1.8 V part and a board that cannot switch is never offered a switch |
 | Session admission | The ladder from Disconnected to Armed, and the revocations that matter: a rail change invalidates chip detection and arming, a fresh image invalidates the preflight, and one arming buys one destructive run |
+| Workspace presentation | Repair and Production state map to one deterministic next action, blocked actions stay visible but disabled, operation cancellation takes priority, and no surface offers the same action twice |
 | Production | Canonical chip profiles, HMAC-authenticated jobs, electrical admission, durable signed evidence, and anti-replay state |
 | Shared operation interface | Read, Smart Write preview, and execution use one presentation-neutral request/result/event contract |
 

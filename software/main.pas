@@ -21,6 +21,7 @@ uses
   norgeometrybuild, sfdpprofile, quadpolicy, sessionreport,
   labtools, synaser, Spin,
   writeadmission, voltagewarning, writejournal,
+  workspacemodel,
   baseHW, UsbAspHW, ch341hw, ch347hw, avrisphw, arduinohw, buzzpirathw,
   serproghw, ezphw, simhw;
 
@@ -363,6 +364,40 @@ type
     procedure StartAddressEditKeyPress(Sender: TObject; var Key: char);
     procedure VerifyFlash(BlankCheck: boolean = false);
   private
+    FWorkspaceMode: TWorkspaceMode;
+    FWorkspaceControlsUpdating: boolean;
+    FWorkspaceBar: TPanel;
+    FWorkspaceBrand: TLabel;
+    FWorkspaceHeading: TLabel;
+    FWorkspaceDescription: TLabel;
+    FWorkspaceButtons: array[TWorkspaceMode] of TButton;
+    FWorkspaceSafeMode: TButton;
+    FTaskPanel: TScrollBox;
+    FTaskCard: TPanel;
+    FTaskEyebrow: TLabel;
+    FTaskTitle: TLabel;
+    FTaskDetail: TLabel;
+    FTaskPrimary: TButton;
+    FTaskSecondary: TButton;
+    FTaskTertiary: TButton;
+    FTaskSetupLabel: TLabel;
+    FTaskProtocolLabel: TLabel;
+    FTaskProtocol: TComboBox;
+    FTaskRailLabel: TLabel;
+    FTaskRail: TComboBox;
+    FBenchSettingsScroll: TScrollBox;
+    FBenchActions: TScrollBox;
+    FBenchTitle: TLabel;
+    FBenchState: TLabel;
+    FBenchDetect: TButton;
+    FBenchRead: TButton;
+    FBenchOpen: TButton;
+    FBenchSave: TButton;
+    FBenchPreview: TButton;
+    FBenchSmart: TButton;
+    FBenchVerify: TButton;
+    FBenchAdmissionTitle: TLabel;
+    FBenchAdmission: TLabel;
     FWorkflowPanel: TPanel;
     FWorkflowTitle: TLabel;
     FWorkflowState: TLabel;
@@ -373,12 +408,22 @@ type
     FWorkflowRead: TButton;
     FWorkflowVerify: TButton;
     FTelemetryPanel: TPanel;
-    FTelemetryCards: array[0..3] of TPanel;
-    FTelemetryTitles: array[0..3] of TLabel;
-    FTelemetryValues: array[0..3] of TLabel;
+    FTelemetryCards: array[0..4] of TPanel;
+    FTelemetryTitles: array[0..4] of TLabel;
+    FTelemetryValues: array[0..4] of TLabel;
     FOperationStartedAt: TDateTime;
     FLastOperationText: string;
     FLastOperationHint: string;
+    procedure CreateWorkspaceShell;
+    procedure LayoutWorkspaceShell(Sender: TObject);
+    procedure SetWorkspaceMode(Mode: TWorkspaceMode);
+    procedure WorkspaceModeClick(Sender: TObject);
+    procedure WorkspaceSafeModeClick(Sender: TObject);
+    procedure WorkspaceActionClick(Sender: TObject);
+    procedure WorkspaceProtocolChange(Sender: TObject);
+    procedure WorkspaceRailChange(Sender: TObject);
+    procedure UpdateWorkspaceShell;
+    procedure ApplyWorkspaceTheme(Dark: boolean);
     procedure CreateWorkflowBar;
     procedure LayoutWorkflowBar;
     procedure UpdateWorkflowText;
@@ -902,6 +947,20 @@ begin
   else
     Result := Format('%d:%.2d', [Milliseconds div 60000,
                                  (Milliseconds div 1000) mod 60]);
+end;
+
+function ShellOpKindName(Kind: TOpKind): string;
+begin
+  case Kind of
+    opkRead:       Result := STR_SHELL_OP_READ;
+    opkWrite:      Result := STR_SHELL_OP_WRITE;
+    opkErase:      Result := STR_SHELL_OP_ERASE;
+    opkVerify:     Result := STR_SHELL_OP_VERIFY;
+    opkBlankCheck: Result := STR_SHELL_OP_BLANK_CHECK;
+    opkDetect:     Result := STR_SHELL_OP_DETECT;
+  else
+    Result := STR_SHELL_OP_OPERATION;
+  end;
 end;
 
 //ตั้งค่า progress แบบปลอดภัยต่อ thread
@@ -1455,6 +1514,8 @@ end;
 //ตัวช่วยที่แถบ Safe workflow ต้องใช้ แต่นิยามอยู่ท้ายไฟล์
 function IsEEPROMSmartWriteTarget: boolean; forward;
 function CurrentSectorSize: cardinal; forward;
+procedure UpdateChipInfo; forward;
+procedure LayoutLeftPanel; forward;
 function CurrentSectorOpcode: byte; forward;
 
 //กุญแจของ "ชิปตัวที่ตั้งค่าไว้ตอนนี้"
@@ -1567,6 +1628,887 @@ begin
   BufferSource := bsFile;
   BufferSourceName := ExtractFileName(FileName);
   MainForm.UpdateWorkflowState;
+end;
+
+//------------------------------------------------------------------------
+// Task-first application shell
+//------------------------------------------------------------------------
+
+procedure TMainForm.CreateWorkspaceShell;
+const
+  WorkspaceBarHeight = 64;
+var
+  Mode: TWorkspaceMode;
+
+  procedure MakeTaskButton(out Button: TButton; ATabOrder: integer);
+  begin
+    Button := TButton.Create(Self);
+    Button.Parent := FTaskCard;
+    Button.Height := Scale96ToForm(42);
+    Button.TabStop := True;
+    Button.TabOrder := ATabOrder;
+    Button.OnClick := @WorkspaceActionClick;
+  end;
+
+  procedure MakeBenchButton(out Button: TButton; ATop: integer;
+    Action: TWorkspaceAction; const CaptionText: string);
+  begin
+    Button := TButton.Create(Self);
+    Button.Parent := FBenchActions;
+    Button.SetBounds(Scale96ToForm(16), Scale96ToForm(ATop),
+      Scale96ToForm(248), Scale96ToForm(32));
+    Button.Caption := CaptionText;
+    Button.Tag := Ord(Action);
+    Button.TabStop := True;
+    Button.TabOrder := ATop div 10;
+    Button.OnClick := @WorkspaceActionClick;
+  end;
+
+begin
+  if FWorkspaceBar <> nil then Exit;
+
+  FWorkspaceMode := wmRepair;
+  FWorkspaceControlsUpdating := False;
+
+  FWorkspaceBar := TPanel.Create(Self);
+  FWorkspaceBar.Parent := Self;
+  FWorkspaceBar.Name := 'WorkspaceBar';
+  FWorkspaceBar.Caption := '';
+  FWorkspaceBar.BevelOuter := bvNone;
+  FWorkspaceBar.ParentColor := False;
+  FWorkspaceBar.Height := Scale96ToForm(WorkspaceBarHeight);
+  FWorkspaceBar.Top := ToolBar.Height;
+  FWorkspaceBar.Align := alTop;
+  FWorkspaceBar.TabOrder := 0;
+  FWorkspaceBar.OnResize := @LayoutWorkspaceShell;
+
+  FWorkspaceBrand := TLabel.Create(Self);
+  FWorkspaceBrand.Parent := FWorkspaceBar;
+  FWorkspaceBrand.Caption := 'NVRAMancer';
+  FWorkspaceBrand.AutoSize := False;
+  FWorkspaceBrand.Layout := tlCenter;
+  FWorkspaceBrand.Font.Size := 12;
+  FWorkspaceBrand.Font.Style := [fsBold];
+
+  for Mode := Low(TWorkspaceMode) to High(TWorkspaceMode) do
+  begin
+    FWorkspaceButtons[Mode] := TButton.Create(Self);
+    FWorkspaceButtons[Mode].Parent := FWorkspaceBar;
+    FWorkspaceButtons[Mode].Caption := WorkspaceModeName(Mode);
+    FWorkspaceButtons[Mode].Tag := Ord(Mode);
+    FWorkspaceButtons[Mode].TabStop := True;
+    FWorkspaceButtons[Mode].TabOrder := Ord(Mode);
+    FWorkspaceButtons[Mode].OnClick := @WorkspaceModeClick;
+    FWorkspaceButtons[Mode].AccessibleName :=
+      Format(STR_SHELL_WORKSPACE_ACCESS, [WorkspaceModeName(Mode)]);
+    FWorkspaceButtons[Mode].AccessibleDescription :=
+      WorkspaceModeDescription(Mode);
+  end;
+
+  FWorkspaceHeading := TLabel.Create(Self);
+  FWorkspaceHeading.Parent := FWorkspaceBar;
+  FWorkspaceHeading.AutoSize := False;
+  FWorkspaceHeading.Layout := tlCenter;
+  FWorkspaceHeading.Font.Style := [fsBold];
+
+  FWorkspaceDescription := TLabel.Create(Self);
+  FWorkspaceDescription.Parent := FWorkspaceBar;
+  FWorkspaceDescription.AutoSize := False;
+  FWorkspaceDescription.Layout := tlCenter;
+
+  FWorkspaceSafeMode := TButton.Create(Self);
+  FWorkspaceSafeMode.Parent := FWorkspaceBar;
+  FWorkspaceSafeMode.TabStop := True;
+  FWorkspaceSafeMode.TabOrder := 3;
+  FWorkspaceSafeMode.OnClick := @WorkspaceSafeModeClick;
+  FWorkspaceSafeMode.AccessibleName := STR_SHELL_SAFE_MODE_ACCESS;
+
+  FTaskPanel := TScrollBox.Create(Self);
+  FTaskPanel.Parent := Self;
+  FTaskPanel.Name := 'TaskWorkspace';
+  FTaskPanel.Align := alClient;
+  FTaskPanel.BorderStyle := TBorderStyle(0);
+  FTaskPanel.ParentColor := False;
+  FTaskPanel.TabOrder := 1;
+  FTaskPanel.OnResize := @LayoutWorkspaceShell;
+
+  FTaskCard := TPanel.Create(Self);
+  FTaskCard.Parent := FTaskPanel;
+  FTaskCard.Caption := '';
+  FTaskCard.BevelOuter := bvLowered;
+  FTaskCard.ParentColor := False;
+  FTaskCard.TabOrder := 0;
+
+  FTaskEyebrow := TLabel.Create(Self);
+  FTaskEyebrow.Parent := FTaskCard;
+  FTaskEyebrow.AutoSize := False;
+  FTaskEyebrow.Font.Style := [fsBold];
+
+  FTaskTitle := TLabel.Create(Self);
+  FTaskTitle.Parent := FTaskCard;
+  FTaskTitle.AutoSize := False;
+  FTaskTitle.WordWrap := True;
+  FTaskTitle.Font.Size := 18;
+  FTaskTitle.Font.Style := [fsBold];
+
+  FTaskDetail := TLabel.Create(Self);
+  FTaskDetail.Parent := FTaskCard;
+  FTaskDetail.AutoSize := False;
+  FTaskDetail.WordWrap := True;
+  FTaskDetail.ShowHint := True;
+
+  MakeTaskButton(FTaskPrimary, 0);
+  FTaskPrimary.Font.Style := [fsBold];
+  MakeTaskButton(FTaskSecondary, 1);
+  MakeTaskButton(FTaskTertiary, 2);
+
+  FTaskSetupLabel := TLabel.Create(Self);
+  FTaskSetupLabel.Parent := FTaskCard;
+  FTaskSetupLabel.Caption := STR_SHELL_QUICK_SETUP;
+  FTaskSetupLabel.AutoSize := False;
+  FTaskSetupLabel.Font.Style := [fsBold];
+
+  FTaskProtocolLabel := TLabel.Create(Self);
+  FTaskProtocolLabel.Parent := FTaskCard;
+  FTaskProtocolLabel.Caption := STR_SHELL_PROTOCOL_LABEL;
+  FTaskProtocolLabel.AutoSize := False;
+
+  FTaskProtocol := TComboBox.Create(Self);
+  FTaskProtocol.Parent := FTaskCard;
+  FTaskProtocol.Style := csDropDownList;
+  FTaskProtocol.Items.Add(STR_SHELL_PROTOCOL_SPI);
+  FTaskProtocol.Items.Add(STR_SHELL_PROTOCOL_I2C);
+  FTaskProtocol.Items.Add(STR_SHELL_PROTOCOL_MW);
+  FTaskProtocol.TabStop := True;
+  FTaskProtocol.TabOrder := 3;
+  FTaskProtocol.OnChange := @WorkspaceProtocolChange;
+  FTaskProtocol.AccessibleName := STR_SHELL_PROTOCOL_ACCESS;
+  FTaskProtocolLabel.FocusControl := FTaskProtocol;
+
+  FTaskRailLabel := TLabel.Create(Self);
+  FTaskRailLabel.Parent := FTaskCard;
+  FTaskRailLabel.Caption := STR_SHELL_TARGET_VOLTAGE;
+  FTaskRailLabel.AutoSize := False;
+
+  FTaskRail := TComboBox.Create(Self);
+  FTaskRail.Parent := FTaskCard;
+  FTaskRail.Style := csDropDownList;
+  FTaskRail.Items.Add('1.8 V');
+  FTaskRail.Items.Add('3.3 V');
+  FTaskRail.Items.Add(STR_SHELL_RAIL_AUTO);
+  FTaskRail.Items.Add(STR_SHELL_RAIL_FIXED);
+  FTaskRail.TabStop := True;
+  FTaskRail.TabOrder := 4;
+  FTaskRail.OnChange := @WorkspaceRailChange;
+  FTaskRail.AccessibleName := STR_SHELL_RAIL_ACCESS;
+  FTaskRail.AccessibleDescription := STR_SHELL_RAIL_ACCESS_DESC;
+  FTaskRailLabel.FocusControl := FTaskRail;
+
+  //Bench has more vertical controls than a small laptop window can show.
+  //Keep the established GroupChipSettings and handlers intact, but host the
+  //group inside a scrolling viewport so voltage and clock controls never
+  //become unreachable below the window edge.
+  FBenchSettingsScroll := TScrollBox.Create(Self);
+  FBenchSettingsScroll.Parent := Self;
+  FBenchSettingsScroll.Name := 'BenchSettingsScroll';
+  FBenchSettingsScroll.Align := alLeft;
+  FBenchSettingsScroll.Width := Scale96ToForm(216);
+  FBenchSettingsScroll.BorderStyle := TBorderStyle(0);
+  FBenchSettingsScroll.ParentColor := False;
+  FBenchSettingsScroll.TabOrder := 2;
+  FBenchSettingsScroll.Visible := False;
+  FBenchSettingsScroll.HorzScrollBar.Visible := False;
+
+  GroupChipSettings.Align := alNone;
+  GroupChipSettings.Parent := FBenchSettingsScroll;
+  GroupChipSettings.SetBounds(0, 0, Scale96ToForm(200),
+    Scale96ToForm(720));
+  //Keep LCL auto-ranging active. Assigning Range disables AutoScroll and
+  //leaves the scrollbar page stuck at its 80 px default after a resize.
+  FBenchSettingsScroll.AutoScroll := True;
+
+  FBenchActions := TScrollBox.Create(Self);
+  FBenchActions.Parent := Self;
+  FBenchActions.Name := 'BenchActions';
+  FBenchActions.Align := alRight;
+  FBenchActions.Width := Scale96ToForm(280);
+  FBenchActions.BorderStyle := TBorderStyle(0);
+  FBenchActions.ParentColor := False;
+  FBenchActions.TabOrder := 3;
+  FBenchActions.Visible := False;
+  FBenchActions.HorzScrollBar.Visible := False;
+
+  FBenchTitle := TLabel.Create(Self);
+  FBenchTitle.Parent := FBenchActions;
+  FBenchTitle.SetBounds(Scale96ToForm(16), Scale96ToForm(16),
+    Scale96ToForm(248), Scale96ToForm(24));
+  FBenchTitle.Caption := STR_SHELL_ACTIONS;
+  FBenchTitle.AutoSize := False;
+  FBenchTitle.Font.Style := [fsBold];
+
+  FBenchState := TLabel.Create(Self);
+  FBenchState.Parent := FBenchActions;
+  FBenchState.SetBounds(Scale96ToForm(16), Scale96ToForm(44),
+    Scale96ToForm(248), Scale96ToForm(72));
+  FBenchState.AutoSize := False;
+  FBenchState.WordWrap := True;
+  FBenchState.ShowHint := True;
+
+  MakeBenchButton(FBenchDetect, 124, waDetectChip, STR_SHELL_BENCH_DETECT);
+  MakeBenchButton(FBenchRead, 162, waReadChip, STR_WORKSPACE_ACTION_READ_CHIP);
+  MakeBenchButton(FBenchOpen, 200, waOpenImage, STR_SHELL_BENCH_OPEN);
+  MakeBenchButton(FBenchSave, 238, waSaveBuffer, STR_SHELL_BENCH_SAVE);
+  MakeBenchButton(FBenchPreview, 290, waPreviewSmartWrite,
+    STR_SHELL_BENCH_PREVIEW);
+  MakeBenchButton(FBenchSmart, 328, waReviewSmartWrite,
+    STR_SHELL_BENCH_SMART);
+  MakeBenchButton(FBenchVerify, 366, waVerify,
+    STR_WORKSPACE_ACTION_VERIFY_IMAGE);
+
+  FBenchAdmissionTitle := TLabel.Create(Self);
+  FBenchAdmissionTitle.Parent := FBenchActions;
+  FBenchAdmissionTitle.SetBounds(Scale96ToForm(16), Scale96ToForm(420),
+    Scale96ToForm(248), Scale96ToForm(22));
+  FBenchAdmissionTitle.Caption := STR_SHELL_DESTRUCTIVE_ADMISSION;
+  FBenchAdmissionTitle.AutoSize := False;
+  FBenchAdmissionTitle.Font.Style := [fsBold];
+
+  FBenchAdmission := TLabel.Create(Self);
+  FBenchAdmission.Parent := FBenchActions;
+  FBenchAdmission.SetBounds(Scale96ToForm(16), Scale96ToForm(446),
+    Scale96ToForm(248), Scale96ToForm(170));
+  FBenchAdmission.AutoSize := False;
+  FBenchAdmission.WordWrap := True;
+  FBenchActions.AutoScroll := True;
+
+  //Expose the existing data surface and its field labels to keyboard and
+  //assistive-technology users when the Bench workspace is selected.
+  MPHexEditorEx.AccessibleName := STR_SHELL_EDITOR_ACCESS;
+  MPHexEditorEx.AccessibleDescription := STR_SHELL_EDITOR_ACCESS_DESC;
+  Log.AccessibleName := STR_SHELL_LOG_ACCESS;
+  Log.AccessibleDescription := STR_SHELL_LOG_ACCESS_DESC;
+  Label2.FocusControl := ComboChipSize;
+  Label1.FocusControl := ComboPageSize;
+  LabelSPICMD.FocusControl := ComboSPICMD;
+  Label4.FocusControl := ComboAddrType;
+  Label5.FocusControl := ComboMWBitLen;
+  Label_chip_scripts.FocusControl := ComboBox_chip_scriptrun;
+  Label_StartAddress.FocusControl := StartAddressEdit;
+
+  LayoutWorkspaceShell(nil);
+end;
+
+procedure TMainForm.LayoutWorkspaceShell(Sender: TObject);
+var
+  Mode: TWorkspaceMode;
+  ButtonWidths: array[TWorkspaceMode] of integer;
+  X, HeadingLeft, HeadingWidth, SafeWidth, CardWidth, CardLeft,
+  Margin, ButtonGap, NavStart, NavWidth, TextWidth: integer;
+begin
+  if FWorkspaceBar = nil then Exit;
+
+  Margin := Scale96ToForm(12);
+  ButtonGap := Scale96ToForm(6);
+  FWorkspaceBrand.SetBounds(Margin, Scale96ToForm(8),
+    Scale96ToForm(132), Scale96ToForm(46));
+
+  ButtonWidths[wmRepair] := Scale96ToForm(96);
+  ButtonWidths[wmBench] := Scale96ToForm(92);
+  ButtonWidths[wmProduction] := Scale96ToForm(112);
+  for Mode := Low(TWorkspaceMode) to High(TWorkspaceMode) do
+  begin
+    Canvas.Font.Assign(FWorkspaceButtons[Mode].Font);
+    TextWidth := Canvas.TextWidth(FWorkspaceButtons[Mode].Caption) +
+      Scale96ToForm(32);
+    if TextWidth > ButtonWidths[Mode] then
+      ButtonWidths[Mode] := TextWidth;
+  end;
+
+  Canvas.Font.Assign(FWorkspaceSafeMode.Font);
+  SafeWidth := Canvas.TextWidth(FWorkspaceSafeMode.Caption) +
+    Scale96ToForm(32);
+  if SafeWidth < Scale96ToForm(210) then
+    SafeWidth := Scale96ToForm(210);
+  Canvas.Font.Assign(Font);
+
+  NavWidth := ButtonWidths[wmRepair] + ButtonWidths[wmBench] +
+    ButtonWidths[wmProduction] + (ButtonGap * 2);
+  NavStart := Scale96ToForm(150);
+  if NavStart + NavWidth + Margin >
+     FWorkspaceBar.ClientWidth - SafeWidth - Margin then
+  begin
+    //The brand is decorative. On a narrow translated header, give its space
+    //to the workspace and safety controls before allowing them to collide.
+    FWorkspaceBrand.Visible := False;
+    NavStart := Margin;
+  end
+  else
+    FWorkspaceBrand.Visible := True;
+
+  X := NavStart;
+  for Mode := Low(TWorkspaceMode) to High(TWorkspaceMode) do
+  begin
+    FWorkspaceButtons[Mode].SetBounds(X, Scale96ToForm(12),
+      ButtonWidths[Mode], Scale96ToForm(38));
+    Inc(X, ButtonWidths[Mode] + ButtonGap);
+  end;
+  Dec(X, ButtonGap);
+
+  FWorkspaceSafeMode.SetBounds(
+    FWorkspaceBar.ClientWidth - SafeWidth - Margin,
+    Scale96ToForm(12), SafeWidth, Scale96ToForm(38));
+
+  HeadingLeft := X + Margin;
+  HeadingWidth := FWorkspaceSafeMode.Left - HeadingLeft - Margin;
+  if HeadingWidth < 0 then HeadingWidth := 0;
+  Canvas.Font.Assign(FWorkspaceHeading.Font);
+  FWorkspaceHeading.Visible := HeadingWidth >=
+    Canvas.TextWidth(FWorkspaceHeading.Caption) + Scale96ToForm(8);
+  Canvas.Font.Assign(FWorkspaceDescription.Font);
+  FWorkspaceDescription.Visible := FWorkspaceHeading.Visible and
+    (HeadingWidth >= Canvas.TextWidth(FWorkspaceDescription.Caption) +
+      Scale96ToForm(8));
+  Canvas.Font.Assign(Font);
+  if FWorkspaceDescription.Visible then
+  begin
+    FWorkspaceHeading.SetBounds(HeadingLeft, Scale96ToForm(7),
+      HeadingWidth, Scale96ToForm(25));
+    FWorkspaceDescription.SetBounds(HeadingLeft, Scale96ToForm(31),
+      HeadingWidth, Scale96ToForm(22));
+  end
+  else
+  begin
+    //Keep the current workspace heading readable when there is only room for
+    //one line; the longer descriptive sentence is the first item to collapse.
+    FWorkspaceHeading.SetBounds(HeadingLeft, Scale96ToForm(12),
+      HeadingWidth, Scale96ToForm(38));
+    FWorkspaceDescription.SetBounds(HeadingLeft, Scale96ToForm(31),
+      HeadingWidth, 0);
+  end;
+
+  if FTaskPanel <> nil then
+  begin
+    CardWidth := FTaskPanel.ClientWidth - Scale96ToForm(80);
+    if CardWidth > Scale96ToForm(800) then
+      CardWidth := Scale96ToForm(800);
+    if CardWidth < Scale96ToForm(620) then
+      CardWidth := Scale96ToForm(620);
+    CardLeft := (FTaskPanel.ClientWidth - CardWidth) div 2;
+    if CardLeft < Scale96ToForm(16) then CardLeft := Scale96ToForm(16);
+    FTaskCard.SetBounds(CardLeft, Scale96ToForm(12), CardWidth,
+      Scale96ToForm(384));
+    FTaskPanel.VertScrollBar.Range := Scale96ToForm(408);
+
+    FTaskEyebrow.SetBounds(Scale96ToForm(32), Scale96ToForm(20),
+      CardWidth - Scale96ToForm(64), Scale96ToForm(22));
+    FTaskTitle.SetBounds(Scale96ToForm(32), Scale96ToForm(46),
+      CardWidth - Scale96ToForm(64), Scale96ToForm(48));
+    FTaskDetail.SetBounds(Scale96ToForm(32), Scale96ToForm(100),
+      CardWidth - Scale96ToForm(64), Scale96ToForm(118));
+
+    FTaskPrimary.SetBounds(Scale96ToForm(32), Scale96ToForm(228),
+      Scale96ToForm(238), Scale96ToForm(42));
+    FTaskSecondary.SetBounds(Scale96ToForm(280), Scale96ToForm(228),
+      Scale96ToForm(210), Scale96ToForm(42));
+    FTaskTertiary.SetBounds(Scale96ToForm(500), Scale96ToForm(228),
+      CardWidth - Scale96ToForm(532), Scale96ToForm(42));
+
+    FTaskSetupLabel.SetBounds(Scale96ToForm(32), Scale96ToForm(290),
+      CardWidth - Scale96ToForm(64), Scale96ToForm(20));
+    FTaskProtocolLabel.SetBounds(Scale96ToForm(32), Scale96ToForm(320),
+      Scale96ToForm(62), Scale96ToForm(24));
+    FTaskProtocol.SetBounds(Scale96ToForm(98), Scale96ToForm(316),
+      Scale96ToForm(176), Scale96ToForm(28));
+    FTaskRailLabel.SetBounds(Scale96ToForm(310), Scale96ToForm(320),
+      Scale96ToForm(174), Scale96ToForm(24));
+    FTaskRail.SetBounds(Scale96ToForm(488), Scale96ToForm(316),
+      CardWidth - Scale96ToForm(520), Scale96ToForm(28));
+  end;
+
+  if FBenchSettingsScroll <> nil then LayoutLeftPanel;
+end;
+
+procedure TMainForm.SetWorkspaceMode(Mode: TWorkspaceMode);
+var
+  PreviousMode: TWorkspaceMode;
+begin
+  if OperationRunning and (Mode <> FWorkspaceMode) then Exit;
+  PreviousMode := FWorkspaceMode;
+  FWorkspaceMode := Mode;
+
+  //The workspace changes presentation only.  Every action still enters the
+  //existing handlers and the same protocol-layer safety gates.
+  ToolBar.Visible := Mode = wmBench;
+  GroupChipSettings.Visible := Mode = wmBench;
+  FBenchSettingsScroll.Visible := Mode = wmBench;
+  MPHexEditorEx.Visible := Mode = wmBench;
+  Log.Visible := Mode = wmBench;
+  Splitter1.Visible := Mode = wmBench;
+  FBenchActions.Visible := Mode = wmBench;
+  FTaskPanel.Visible := Mode <> wmBench;
+
+  //The old workflow strip remains the canonical state calculator, but its
+  //duplicated command row is replaced by the task surface and Bench actions.
+  if FWorkflowPanel <> nil then FWorkflowPanel.Visible := False;
+
+  if Mode = wmBench then
+  begin
+    if PreviousMode <> wmBench then
+    begin
+      FBenchSettingsScroll.VertScrollBar.Position := 0;
+      FBenchActions.VertScrollBar.Position := 0;
+    end;
+    FBenchActions.BringToFront;
+    MPHexEditorEx.BringToFront;
+  end
+  else
+    FTaskPanel.BringToFront;
+
+  UpdateWorkspaceShell;
+  Realign;
+
+  if Visible and (not OperationRunning) then
+  begin
+    if (Mode <> wmBench) and FTaskPrimary.Visible and
+       FTaskPrimary.Enabled and FTaskPrimary.CanFocus then
+      FTaskPrimary.SetFocus
+    else if Mode = wmBench then
+    begin
+      if FBenchDetect.Enabled and FBenchDetect.CanFocus then
+        FBenchDetect.SetFocus
+      else if FBenchRead.Enabled and FBenchRead.CanFocus then
+        FBenchRead.SetFocus
+      else if FBenchOpen.Enabled and FBenchOpen.CanFocus then
+        FBenchOpen.SetFocus
+      else if MPHexEditorEx.CanFocus then
+        MPHexEditorEx.SetFocus;
+    end;
+  end;
+end;
+
+procedure TMainForm.WorkspaceModeClick(Sender: TObject);
+begin
+  if OperationRunning then Exit;
+  if not (Sender is TButton) then Exit;
+  if (TButton(Sender).Tag < Ord(Low(TWorkspaceMode))) or
+     (TButton(Sender).Tag > Ord(High(TWorkspaceMode))) then Exit;
+  SetWorkspaceMode(TWorkspaceMode(TButton(Sender).Tag));
+end;
+
+procedure TMainForm.WorkspaceSafeModeClick(Sender: TObject);
+begin
+  if OperationRunning then Exit;
+  MenuSafeMode.Checked := not SafeModeActive;
+  MenuSafeModeClick(FWorkspaceSafeMode);
+  UpdateWorkflowState;
+end;
+
+procedure TMainForm.WorkspaceActionClick(Sender: TObject);
+var
+  RequestedAction: TWorkspaceAction;
+begin
+  if not (Sender is TButton) then Exit;
+  if (TButton(Sender).Tag < Ord(Low(TWorkspaceAction))) or
+     (TButton(Sender).Tag > Ord(High(TWorkspaceAction))) then Exit;
+  RequestedAction := TWorkspaceAction(TButton(Sender).Tag);
+
+  if OperationRunning and (RequestedAction <> waCancelOperation) then Exit;
+  case RequestedAction of
+    waScanProgrammer:
+      PollProgrammer(True, False);
+    waDetectChip:
+      ButtonReadIDClick(Sender);
+    waChooseChip:
+      MenuFindChipClick(Sender);
+    waReadChip:
+      ButtonReadClick(Sender);
+    waSaveBuffer:
+      ButtonSaveHexClick(Sender);
+    waOpenImage:
+      ButtonOpenHexClick(Sender);
+    waReviewSmartWrite:
+      MenuSmartWriteClick(Sender);
+    waPreviewSmartWrite:
+      MenuSmartWritePreviewClick(Sender);
+    waVerify:
+      ButtonVerifyClick(Sender);
+    waInspectBuffer:
+      begin
+        SetWorkspaceMode(wmBench);
+        if MPHexEditorEx.CanFocus then MPHexEditorEx.SetFocus;
+      end;
+    waOpenBench:
+      SetWorkspaceMode(wmBench);
+    waConfigureProduction:
+      MenuProdConfigClick(Sender);
+    waRunProduction:
+      MenuRunBatchClick(Sender);
+    waCancelOperation:
+      ButtonCancelClick(Sender);
+  end;
+  UpdateWorkflowState;
+end;
+
+procedure TMainForm.WorkspaceProtocolChange(Sender: TObject);
+begin
+  if FWorkspaceControlsUpdating or OperationRunning then Exit;
+  case FTaskProtocol.ItemIndex of
+    0: RadioSPI.Checked := True;
+    1: RadioI2C.Checked := True;
+    2: RadioMw.Checked := True;
+  end;
+  //A chip profile belongs to one protocol.  Keeping it when this selector
+  //changes would make Repair describe an SPI chip as an identified I2C part
+  //or vice versa, so return to the honest Identify step.
+  CurrentICParam := Default(TCurrentICParam);
+  ForgetChipKnowledge;
+  ChipDetected := False;
+  LabelChipName.Caption := '';
+  if BufferSource = bsChip then
+  begin
+    BufferSource := bsEdited;
+    BufferSourceName := '';
+    LogPrint(STR_SHELL_PROTOCOL_CHANGED_LOG);
+  end;
+  UpdateChipInfo;
+end;
+
+procedure TMainForm.WorkspaceRailChange(Sender: TObject);
+var
+  WarningTitle, WarningText: string;
+  NeedsWarning: boolean;
+begin
+  if FWorkspaceControlsUpdating or OperationRunning then Exit;
+  NeedsWarning := False;
+  if (FTaskRail.ItemIndex = 1) and (not RadioCH347Vcc3V3.Checked) then
+  begin
+    NeedsWarning := True;
+    WarningTitle := STR_SHELL_VOLTAGE_33_TITLE;
+    WarningText := STR_SHELL_VOLTAGE_33_WARNING;
+  end
+  else if (FTaskRail.ItemIndex = 2) and
+          (not RadioCH347VccAuto.Checked) then
+  begin
+    NeedsWarning := True;
+    WarningTitle := STR_SHELL_VOLTAGE_AUTO_TITLE;
+    WarningText := STR_SHELL_VOLTAGE_AUTO_WARNING;
+  end;
+  if NeedsWarning then
+    if MessageDlg(WarningTitle, WarningText, mtWarning,
+      [mbYes, mbNo], 0) <> mrYes then
+    begin
+      UpdateWorkflowState;
+      Exit;
+    end;
+  case FTaskRail.ItemIndex of
+    0: RadioCH347Vcc1V8.Checked := True;
+    1: RadioCH347Vcc3V3.Checked := True;
+    2: RadioCH347VccAuto.Checked := True;
+  end;
+  UpdateWorkflowState;
+end;
+
+procedure TMainForm.UpdateWorkspaceShell;
+var
+  Mode: TWorkspaceMode;
+  RepairContext: TRepairContext;
+  ProductionContext: TProductionContext;
+  Presentation: TWorkspacePresentation;
+  IdentityLine, JobLine, SafeLine: string;
+
+  procedure ApplyCommand(Button: TButton;
+    const Command: TWorkspaceCommand);
+  begin
+    Button.Tag := Ord(Command.Action);
+    Button.Caption := Command.Caption;
+    Button.Visible := Command.Action <> waNone;
+    Button.Enabled := Command.Enabled and
+                      ((not OperationRunning) or
+                       (Command.Action = waCancelOperation));
+    Button.AccessibleName := Command.Caption;
+    Button.AccessibleDescription := Presentation.Detail;
+  end;
+
+begin
+  if (FWorkspaceBar = nil) or (FTaskPanel = nil) then Exit;
+
+  //These controls are created at runtime, so the normal form-resource
+  //translation pass cannot update them. Refresh every static label here;
+  //UpdateWorkflowText reaches this method after a runtime language change.
+  FWorkspaceSafeMode.AccessibleName := STR_SHELL_SAFE_MODE_ACCESS;
+  FTaskSetupLabel.Caption := STR_SHELL_QUICK_SETUP;
+  FTaskProtocolLabel.Caption := STR_SHELL_PROTOCOL_LABEL;
+  FTaskProtocol.AccessibleName := STR_SHELL_PROTOCOL_ACCESS;
+  FTaskRailLabel.Caption := STR_SHELL_TARGET_VOLTAGE;
+  FTaskRail.AccessibleName := STR_SHELL_RAIL_ACCESS;
+  FTaskRail.AccessibleDescription := STR_SHELL_RAIL_ACCESS_DESC;
+  FWorkspaceControlsUpdating := True;
+  try
+    if FTaskProtocol.Items.Count >= 3 then
+    begin
+      FTaskProtocol.Items[0] := STR_SHELL_PROTOCOL_SPI;
+      FTaskProtocol.Items[1] := STR_SHELL_PROTOCOL_I2C;
+      FTaskProtocol.Items[2] := STR_SHELL_PROTOCOL_MW;
+    end;
+    if FTaskRail.Items.Count >= 4 then
+    begin
+      FTaskRail.Items[2] := STR_SHELL_RAIL_AUTO;
+      FTaskRail.Items[3] := STR_SHELL_RAIL_FIXED;
+    end;
+  finally
+    FWorkspaceControlsUpdating := False;
+  end;
+  FBenchTitle.Caption := STR_SHELL_ACTIONS;
+  FBenchDetect.Caption := STR_SHELL_BENCH_DETECT;
+  FBenchRead.Caption := STR_WORKSPACE_ACTION_READ_CHIP;
+  FBenchOpen.Caption := STR_SHELL_BENCH_OPEN;
+  FBenchSave.Caption := STR_SHELL_BENCH_SAVE;
+  FBenchPreview.Caption := STR_SHELL_BENCH_PREVIEW;
+  FBenchSmart.Caption := STR_SHELL_BENCH_SMART;
+  FBenchVerify.Caption := STR_WORKSPACE_ACTION_VERIFY_IMAGE;
+  FBenchAdmissionTitle.Caption := STR_SHELL_DESTRUCTIVE_ADMISSION;
+  FBenchDetect.AccessibleName := FBenchDetect.Caption;
+  FBenchRead.AccessibleName := FBenchRead.Caption;
+  FBenchOpen.AccessibleName := FBenchOpen.Caption;
+  FBenchSave.AccessibleName := FBenchSave.Caption;
+  FBenchPreview.AccessibleName := FBenchPreview.Caption;
+  FBenchSmart.AccessibleName := FBenchSmart.Caption;
+  FBenchVerify.AccessibleName := FBenchVerify.Caption;
+  MPHexEditorEx.AccessibleName := STR_SHELL_EDITOR_ACCESS;
+  MPHexEditorEx.AccessibleDescription := STR_SHELL_EDITOR_ACCESS_DESC;
+  Log.AccessibleName := STR_SHELL_LOG_ACCESS;
+  Log.AccessibleDescription := STR_SHELL_LOG_ACCESS_DESC;
+
+  FWorkspaceHeading.Caption := WorkspaceModeName(FWorkspaceMode);
+  FWorkspaceDescription.Caption := WorkspaceModeDescription(FWorkspaceMode);
+  for Mode := Low(TWorkspaceMode) to High(TWorkspaceMode) do
+  begin
+    FWorkspaceButtons[Mode].AccessibleName :=
+      Format(STR_SHELL_WORKSPACE_ACCESS, [WorkspaceModeName(Mode)]);
+    if Mode = FWorkspaceMode then
+    begin
+      FWorkspaceButtons[Mode].Caption := WorkspaceModeName(Mode) +
+        ' *';
+      FWorkspaceButtons[Mode].Font.Style := [fsBold];
+      FWorkspaceButtons[Mode].AccessibleDescription :=
+        Format(STR_SHELL_CURRENT_WORKSPACE_ACCESS,
+          [WorkspaceModeDescription(Mode)]);
+    end
+    else
+    begin
+      FWorkspaceButtons[Mode].Caption := WorkspaceModeName(Mode);
+      FWorkspaceButtons[Mode].Font.Style := [];
+      FWorkspaceButtons[Mode].AccessibleDescription :=
+        WorkspaceModeDescription(Mode);
+    end;
+    FWorkspaceButtons[Mode].Enabled := not OperationRunning;
+  end;
+
+  if SafeModeActive then
+  begin
+    FWorkspaceSafeMode.Caption := STR_SHELL_SAFE_ON_CAPTION;
+    FWorkspaceSafeMode.AccessibleDescription := STR_SHELL_SAFE_ON_DESC;
+  end
+  else
+  begin
+    FWorkspaceSafeMode.Caption := STR_SHELL_SAFE_OFF_CAPTION;
+    FWorkspaceSafeMode.AccessibleDescription := STR_SHELL_SAFE_OFF_DESC;
+  end;
+  FWorkspaceSafeMode.Enabled := not OperationRunning;
+
+  FWorkspaceControlsUpdating := True;
+  try
+    if RadioI2C.Checked then FTaskProtocol.ItemIndex := 1
+    else if RadioMw.Checked then FTaskProtocol.ItemIndex := 2
+    else FTaskProtocol.ItemIndex := 0;
+    FTaskProtocol.Enabled := not OperationRunning;
+
+    if not GroupCH347Vcc.Visible then FTaskRail.ItemIndex := 3
+    else if RadioCH347Vcc3V3.Checked then FTaskRail.ItemIndex := 1
+    else if RadioCH347VccAuto.Checked then FTaskRail.ItemIndex := 2
+    else FTaskRail.ItemIndex := 0;
+    FTaskRail.Enabled := GroupCH347Vcc.Visible and (not OperationRunning);
+  finally
+    FWorkspaceControlsUpdating := False;
+  end;
+
+  RepairContext := Default(TRepairContext);
+  RepairContext.OperationRunning := OperationRunning;
+  RepairContext.ProgrammerPresent := ProgrammerPresent;
+  RepairContext.SPISelected := RadioSPI.Checked;
+  RepairContext.ChipSelected := ChipDetected;
+  RepairContext.LiveIdentityRead := LastID9F <> '';
+  RepairContext.LiveIdentityText := LastID9F;
+  RepairContext.IdentityProven := ChipDetected and
+    (not (RadioSPI.Checked and ChipIdentityUnproven));
+  RepairContext.HasBuffer := MPHexEditorEx.DataSize > 0;
+  RepairContext.BufferFromChip := BufferSource = bsChip;
+  RepairContext.BufferFromFileOrEdit := BufferSource in [bsFile, bsEdited];
+  RepairContext.CanDetect := (FWorkflowDetect <> nil) and
+                             FWorkflowDetect.Enabled;
+  RepairContext.CanRead := (FWorkflowRead <> nil) and
+                           FWorkflowRead.Enabled;
+  RepairContext.CanVerify := (FWorkflowVerify <> nil) and
+                             FWorkflowVerify.Enabled;
+  RepairContext.SmartWritePreviewAvailable :=
+    (FWorkflowSmart <> nil) and FWorkflowSmart.Enabled;
+  RepairContext.SmartWriteAvailable :=
+    RepairContext.SmartWritePreviewAvailable and (not SafeModeActive);
+  if SafeModeActive then
+    RepairContext.SmartWriteReason := STR_SHELL_SAFE_REASON
+  else if FWorkflowSmart <> nil then
+    RepairContext.SmartWriteReason := FWorkflowSmart.Hint;
+  if FWorkflowState <> nil then
+    RepairContext.StateDetail := FWorkflowState.Caption;
+  if ProgrammerPresent and (NVRAMancer <> nil) and
+     (NVRAMancer.Current_HW in [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG]) then
+  begin
+    if RepairContext.StateDetail <> '' then
+      RepairContext.StateDetail := RepairContext.StateDetail + LineEnding;
+    RepairContext.StateDetail := RepairContext.StateDetail +
+      STR_SHELL_PROGRAMMER_CHECK;
+  end;
+  if LastOp.Started and LastOp.Failed and (not OperationRunning) and
+     (LastOp.ErrorText <> '') then
+  begin
+    if RepairContext.StateDetail <> '' then
+      RepairContext.StateDetail := RepairContext.StateDetail + LineEnding;
+    if LastOp.Cancelled then
+      RepairContext.StateDetail := RepairContext.StateDetail +
+        Format(STR_SHELL_ATTEMPT_CANCELLED, [LastOp.ErrorText])
+    else
+      RepairContext.StateDetail := RepairContext.StateDetail +
+        Format(STR_SHELL_ATTEMPT_FAILED, [LastOp.ErrorText]);
+  end;
+
+  if FWorkspaceMode = wmProduction then
+  begin
+    ProductionContext := Default(TProductionContext);
+    ProductionContext.OperationRunning := OperationRunning;
+    ProductionContext.HasBuffer := MPHexEditorEx.DataSize > 0;
+    ProductionContext.BatchEnabled := ProdSettings.BatchEnabled;
+    ProductionContext.JobLoaded := CurrentJob.Loaded;
+    ProductionContext.JobRejected := CurrentJobLoadError <> '';
+
+    if CurrentJobLoadError <> '' then
+      JobLine := Format(STR_SHELL_JOB_REFUSED, [CurrentJobLoadError])
+    else if CurrentJob.Loaded then
+    begin
+      JobLine := Format(STR_SHELL_JOB_LOADED,
+        [ExtractFileName(ProdSettings.JobFile)]);
+      if CurrentJob.ChipName <> '' then
+        JobLine := JobLine + Format(STR_SHELL_JOB_CHIP,
+          [CurrentJob.ChipName]);
+      if CurrentJob.Size > 0 then
+        JobLine := JobLine + ' / ' + FormatTelemetryBytes(CurrentJob.Size);
+    end
+    else if ProdSettings.JobFile <> '' then
+      JobLine := Format(STR_SHELL_JOB_CONFIGURED,
+        [ExtractFileName(ProdSettings.JobFile)])
+    else
+      JobLine := STR_SHELL_JOB_NONE;
+
+    if ProdSettings.BatchEnabled then
+      JobLine := JobLine + LineEnding + Format(STR_SHELL_JOB_BATCH_TARGET,
+        [ProdSettings.BatchTarget]);
+    if ProdSettings.Operator_ <> '' then
+      JobLine := JobLine + Format(STR_SHELL_JOB_OPERATOR,
+        [ProdSettings.Operator_]);
+    ProductionContext.JobDetail := JobLine;
+    Presentation := BuildProductionPresentation(ProductionContext);
+  end
+  else
+    Presentation := BuildRepairPresentation(RepairContext);
+
+  FTaskEyebrow.Caption := Presentation.Eyebrow;
+  FTaskTitle.Caption := Presentation.Title;
+  FTaskDetail.Caption := Presentation.Detail;
+  FTaskDetail.Hint := Presentation.Detail;
+  ApplyCommand(FTaskPrimary, Presentation.Primary);
+  ApplyCommand(FTaskSecondary, Presentation.Secondary);
+  ApplyCommand(FTaskTertiary, Presentation.Tertiary);
+  FTaskSetupLabel.Visible := FWorkspaceMode = wmRepair;
+  FTaskProtocolLabel.Visible := FWorkspaceMode = wmRepair;
+  FTaskProtocol.Visible := FWorkspaceMode = wmRepair;
+  FTaskRailLabel.Visible := FWorkspaceMode = wmRepair;
+  FTaskRail.Visible := FWorkspaceMode = wmRepair;
+
+  if not ChipDetected then
+    IdentityLine := STR_SHELL_IDENTITY_NONE
+  else if RadioSPI.Checked and ChipIdentityUnproven then
+    IdentityLine := STR_SHELL_IDENTITY_UNCONFIRMED
+  else
+    IdentityLine := STR_SHELL_IDENTITY_READY;
+
+  if SafeModeActive then
+    SafeLine := STR_SHELL_BENCH_SAFE_ON
+  else
+    SafeLine := STR_SHELL_BENCH_SAFE_OFF;
+
+  FBenchState.Caption := RepairContext.StateDetail;
+  FBenchState.Hint := FBenchState.Caption;
+  FBenchDetect.Enabled := RepairContext.CanDetect and (not OperationRunning);
+  FBenchRead.Enabled := RepairContext.CanRead and (not OperationRunning);
+  FBenchOpen.Enabled := not OperationRunning;
+  FBenchSave.Enabled := RepairContext.HasBuffer and (not OperationRunning);
+  FBenchPreview.Enabled := RepairContext.SmartWritePreviewAvailable and
+                           (not OperationRunning);
+  FBenchSmart.Enabled := RepairContext.SmartWriteAvailable and
+                         (not OperationRunning);
+  FBenchVerify.Enabled := RepairContext.CanVerify and (not OperationRunning);
+  FBenchSmart.AccessibleDescription := RepairContext.SmartWriteReason;
+  FBenchAdmission.Caption := IdentityLine + LineEnding +
+    STR_SHELL_BENCH_ELECTRICAL + LineEnding +
+    STR_SHELL_BENCH_CONNECTION + LineEnding +
+    STR_SHELL_BENCH_BACKUP + LineEnding +
+    SafeLine;
+  //Captions can change with both workspace state and the active translation.
+  //Re-measure the header buttons after those changes so they do not clip.
+  LayoutWorkspaceShell(nil);
+end;
+
+procedure TMainForm.ApplyWorkspaceTheme(Dark: boolean);
+var
+  ChromeColor, SurfaceColor, TextColor, AccentColor: TColor;
+begin
+  if FWorkspaceBar = nil then Exit;
+  if Dark then
+  begin
+    ChromeColor := DARK_CHROME;
+    SurfaceColor := DARK_SURFACE;
+    TextColor := DARK_TEXT;
+    AccentColor := DARK_ACCENT;
+  end
+  else
+  begin
+    ChromeColor := LIGHT_CHROME;
+    SurfaceColor := LIGHT_SURFACE;
+    TextColor := LIGHT_TEXT;
+    AccentColor := LIGHT_ACCENT;
+  end;
+
+  FWorkspaceBar.Color := ChromeColor;
+  FWorkspaceBrand.Font.Color := AccentColor;
+  FWorkspaceHeading.Font.Color := TextColor;
+  FWorkspaceDescription.Font.Color := TextColor;
+  FWorkspaceSafeMode.Font.Color := TextColor;
+
+  FTaskPanel.Color := ChromeColor;
+  FTaskCard.Color := SurfaceColor;
+  FTaskEyebrow.Font.Color := AccentColor;
+  FTaskTitle.Font.Color := TextColor;
+  FTaskDetail.Font.Color := TextColor;
+  FTaskSetupLabel.Font.Color := AccentColor;
+  FTaskProtocolLabel.Font.Color := TextColor;
+  FTaskRailLabel.Font.Color := TextColor;
+
+  FBenchSettingsScroll.Color := ChromeColor;
+  FBenchActions.Color := SurfaceColor;
+  FBenchTitle.Font.Color := AccentColor;
+  FBenchState.Font.Color := TextColor;
+  FBenchAdmissionTitle.Font.Color := AccentColor;
+  FBenchAdmission.Font.Color := TextColor;
+  FBenchSmart.Font.Color := AccentColor;
 end;
 
 procedure ApplyTheme(Dark: boolean);
@@ -1689,6 +2631,8 @@ begin
     MainForm.LayoutTelemetryPanel(nil);
     MainForm.UpdateTelemetry;
   end;
+
+  MainForm.ApplyWorkspaceTheme(Dark);
 end;
 
 //แถบนี้ทำให้เส้นทางที่ปลอดภัยมองเห็นได้ตลอดเวลา แทนที่จะซ่อน Smart Write
@@ -1851,6 +2795,10 @@ begin
   FWorkflowRead.ShowHint := True;
   FWorkflowVerify.Hint := STR_WORKFLOW_VERIFY + ' (Ctrl+Shift+V)';
   FWorkflowVerify.ShowHint := True;
+  if StatusBar.Panels.Count > 3 then
+    StatusBar.Panels.Items[3].Text := STR_HINT_KEYS + '   ' +
+      Format(STR_SHELL_SHORTCUTS, [STR_WORKSPACE_REPAIR,
+        STR_WORKSPACE_BENCH, STR_WORKSPACE_PRODUCTION]);
 
   LayoutWorkflowBar;
   UpdateWorkflowState;
@@ -2083,10 +3031,7 @@ end;
 //"selected" because the programmers do not measure the physical SCK waveform.
 procedure TMainForm.CreateTelemetryPanel;
 const
-  PanelHeight = 112;
-  Titles: array[0..3] of string = (
-    'CONNECTION', 'INTERFACE / CLOCK', 'CHIP PROFILE', 'LAST OPERATION'
-  );
+  PanelHeight = 124;
 var
   i: integer;
 begin
@@ -2099,7 +3044,7 @@ begin
   FTelemetryPanel.BevelOuter := bvNone;
   FTelemetryPanel.ParentColor := False;
   FTelemetryPanel.DoubleBuffered := True;
-  FTelemetryPanel.Height := PanelHeight;
+  FTelemetryPanel.Height := Scale96ToForm(PanelHeight);
   if FWorkflowPanel <> nil then
     FTelemetryPanel.Top := FWorkflowPanel.Top + FWorkflowPanel.Height;
   FTelemetryPanel.Align := alTop;
@@ -2115,7 +3060,7 @@ begin
 
     FTelemetryTitles[i] := TLabel.Create(Self);
     FTelemetryTitles[i].Parent := FTelemetryCards[i];
-    FTelemetryTitles[i].Caption := Titles[i];
+    FTelemetryTitles[i].Caption := '';
     FTelemetryTitles[i].AutoSize := False;
     FTelemetryTitles[i].Font.Style := [fsBold];
     FTelemetryTitles[i].Transparent := True;
@@ -2129,25 +3074,24 @@ begin
   end;
 
   FOperationStartedAt := 0;
-  FLastOperationText := 'No completed operation yet' + LineEnding +
-                        'Live effective rate and ETA appear in the status bar';
+  FLastOperationText := STR_SHELL_TEL_INITIAL;
   FLastOperationHint := FLastOperationText;
   LayoutTelemetryPanel(nil);
   UpdateTelemetry;
 end;
 
 procedure TMainForm.LayoutTelemetryPanel(Sender: TObject);
-const
-  Gap = 6;
-  Outer = 8;
 var
-  i, X, W, LastW: integer;
+  i, X, W, LastW, Gap, Outer, MinimumWidth: integer;
 begin
   if FTelemetryPanel = nil then Exit;
 
+  Gap := Scale96ToForm(6);
+  Outer := Scale96ToForm(8);
+  MinimumWidth := Scale96ToForm(90);
   W := (FTelemetryPanel.ClientWidth - (Outer * 2) -
         (Gap * High(FTelemetryCards))) div Length(FTelemetryCards);
-  if W < 90 then W := 90;
+  if W < MinimumWidth then W := MinimumWidth;
   X := Outer;
   for i := 0 to High(FTelemetryCards) do
   begin
@@ -2155,14 +3099,15 @@ begin
       LastW := FTelemetryPanel.ClientWidth - Outer - X
     else
       LastW := W;
-    if LastW < 90 then LastW := 90;
-    FTelemetryCards[i].SetBounds(X, 5, LastW,
-      FTelemetryPanel.ClientHeight - 10);
-    FTelemetryTitles[i].SetBounds(10, 7,
-      FTelemetryCards[i].ClientWidth - 20, 18);
-    FTelemetryValues[i].SetBounds(10, 27,
-      FTelemetryCards[i].ClientWidth - 20,
-      FTelemetryCards[i].ClientHeight - 33);
+    if LastW < MinimumWidth then LastW := MinimumWidth;
+    FTelemetryCards[i].SetBounds(X, Scale96ToForm(5), LastW,
+      FTelemetryPanel.ClientHeight - Scale96ToForm(10));
+    FTelemetryTitles[i].SetBounds(Scale96ToForm(10), Scale96ToForm(7),
+      FTelemetryCards[i].ClientWidth - Scale96ToForm(20),
+      Scale96ToForm(18));
+    FTelemetryValues[i].SetBounds(Scale96ToForm(10), Scale96ToForm(27),
+      FTelemetryCards[i].ClientWidth - Scale96ToForm(20),
+      FTelemetryCards[i].ClientHeight - Scale96ToForm(33));
     Inc(X, W + Gap);
   end;
 end;
@@ -2176,12 +3121,25 @@ begin
                         CurrentICParam.ID);
 end;
 
+//Implemented with the CH347 rail controls below.  Telemetry is constructed
+//earlier in this unit and needs the configured request even while the device
+//handle is closed.
+function SelectedCH347Vcc: cardinal; forward;
+
 procedure TMainForm.UpdateTelemetry;
 var
   ConnectionText, InterfaceText, ChipText, IDText, IdentityText: string;
-  ClockText, TransportText, AddressText, VoltageText: string;
+  ClockText, TransportText, AddressText, ProfileVoltageText: string;
+  PowerText, PowerHint, SafeText: string;
   ChipSize: QWord;
   ClockMenu: TMenuItem;
+  Caps: TProgrammerElectricalCapabilities;
+  Obs: TElectricalObservation;
+  Report: TRailReport;
+  RailLines: TRailLines;
+  CapsValid, ObsValid: boolean;
+  RailIndex: integer;
+  ConfiguredTargetMv: cardinal;
 
   function CheckedCaption(Root: TMenuItem): string;
   var
@@ -2195,32 +3153,55 @@ var
   end;
 
 begin
+  if FTelemetryPanel = nil then Exit;
+
+  FTelemetryTitles[0].Caption := STR_SHELL_TEL_PROGRAMMER;
+  FTelemetryTitles[1].Caption := STR_SHELL_TEL_INTERFACE;
+  FTelemetryTitles[2].Caption := STR_SHELL_TEL_POWER;
+  FTelemetryTitles[3].Caption := STR_SHELL_TEL_CHIP;
+  FTelemetryTitles[4].Caption := STR_SHELL_TEL_LAST;
+  if not LastOp.Started then
+  begin
+    FLastOperationText := STR_SHELL_TEL_INITIAL;
+    FLastOperationHint := FLastOperationText;
+  end;
+
   //Programmer เป็น nil ได้ตอน Current_HW = CHW_NONE แผงข้อมูลห้ามพาแอป
-  //ล้มเพราะเรื่องแค่นี้
-  if (FTelemetryPanel = nil) or (NVRAMancer = nil) or
-     (NVRAMancer.Programmer = nil) then Exit;
+  //ล้มเพราะเรื่องแค่นี้ และห้ามทิ้งข้อเท็จจริงเก่าค้างอยู่บนหน้าจอ
+  if (NVRAMancer = nil) or (NVRAMancer.Programmer = nil) then
+  begin
+    FTelemetryValues[0].Caption := STR_SHELL_TEL_NO_PROGRAMMER;
+    FTelemetryValues[1].Caption := STR_SHELL_TEL_NO_PROTOCOL;
+    if SafeModeActive then
+      SafeText := STR_SHELL_TEL_SAFE_ON_SHORT
+    else
+      SafeText := STR_SHELL_TEL_SAFE_OFF_SHORT;
+    FTelemetryValues[2].Caption := STR_SHELL_TEL_REQUESTED_NOT_SET +
+      LineEnding + STR_SHELL_TEL_MEASURED_UNAVAILABLE + LineEnding + SafeText;
+    FTelemetryValues[3].Caption := STR_SHELL_TEL_NOT_SELECTED;
+    FTelemetryValues[4].Caption := FLastOperationText;
+    UpdateWorkspaceShell;
+    Exit;
+  end;
 
   case NVRAMancer.Current_HW of
     CHW_EZP:
       begin
-        TransportText := 'USB 1FC8:310B | libusb-win32 1.4.0.2';
-        ClockText := '12 MHz requested (firmware setting)';
-        InterfaceText := 'SPI NOR | ' + ClockText + LineEnding +
-          'Native erase | whole-chip read/write | full read-back verify';
-        FTelemetryValues[1].Hint := '12 MHz is the configured EZP2023+ ' +
-          'firmware clock. It is not a measured oscilloscope frequency. ' +
-          'Measured effective operation throughput is shown separately.';
+        TransportText := STR_SHELL_TEL_EZP_TRANSPORT;
+        ClockText := STR_SHELL_TEL_EZP_CLOCK;
+        InterfaceText := Format(STR_SHELL_TEL_EZP_INTERFACE, [ClockText]);
+        FTelemetryValues[1].Hint := STR_SHELL_TEL_EZP_HINT;
       end;
     CHW_SERPROG:
       begin
-        TransportText := 'Serial/USB-CDC transport';
-        InterfaceText := 'SPI | clock controlled by serprog firmware';
+        TransportText := STR_SHELL_TEL_SERPROG_TRANSPORT;
+        InterfaceText := STR_SHELL_TEL_SERPROG_INTERFACE;
         FTelemetryValues[1].Hint := InterfaceText;
       end;
     CHW_ARDUINO, CHW_BUZZPIRAT, CHW_AVRISP:
-      TransportText := 'Serial transport';
+      TransportText := STR_SHELL_TEL_SERIAL_TRANSPORT;
   else
-    TransportText := 'USB transport';
+    TransportText := STR_SHELL_TEL_USB_TRANSPORT;
   end;
 
   if NVRAMancer.Current_HW <> CHW_EZP then
@@ -2237,27 +3218,83 @@ begin
           ClockMenu := TMenuItem(FindComponent('MenuBuzzpiratSPIClock'));
     end;
     ClockText := CheckedCaption(ClockMenu);
-    if ClockText = '' then ClockText := 'firmware/default';
+    if ClockText = '' then ClockText := STR_SHELL_TEL_CLOCK_DEFAULT;
     if InterfaceText = '' then
     begin
-      InterfaceText := 'SPI | ' + ClockText + ' selected' + LineEnding +
-        'Measured effective throughput is reported per operation';
+      InterfaceText := Format(STR_SHELL_TEL_INTERFACE_REQUESTED,
+        [ClockText]);
       //เขียน hint เฉพาะตอนที่ประกอบข้อความเองตรงนี้ ตัวที่มีคำอธิบายเฉพาะ
       //ของมันแล้ว (เช่น serprog) ต้องไม่โดนทับ
-      FTelemetryValues[1].Hint := 'The menu value is the requested bus ' +
-        'clock, not a measured waveform. Operation speed is measured from ' +
-        'bytes and time.';
+      FTelemetryValues[1].Hint := STR_SHELL_TEL_CLOCK_HINT;
     end;
   end;
 
-  if ProgrammerPresent then
-    ConnectionText := 'CONNECTED | ' + NVRAMancer.Programmer.HardwareName
+  if ProgrammerPresent and (NVRAMancer.Current_HW in
+     [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG]) then
+    ConnectionText := Format(STR_SHELL_TEL_CONNECTION_SELECTED,
+      [NVRAMancer.Programmer.HardwareName])
+  else if ProgrammerPresent then
+    ConnectionText := Format(STR_SHELL_TEL_CONNECTION_AVAILABLE,
+      [NVRAMancer.Programmer.HardwareName])
   else
-    ConnectionText := 'DISCONNECTED | ' + NVRAMancer.Programmer.HardwareName;
-  ConnectionText := ConnectionText + LineEnding + TransportText;
+    ConnectionText := Format(STR_SHELL_TEL_CONNECTION_DISCONNECTED,
+      [NVRAMancer.Programmer.HardwareName]);
+  if not (ProgrammerPresent and (NVRAMancer.Current_HW in
+     [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG])) then
+    ConnectionText := ConnectionText + LineEnding + TransportText;
   FTelemetryValues[0].Caption := ConnectionText;
   FTelemetryValues[0].Hint := ConnectionText;
   FTelemetryValues[1].Caption := InterfaceText;
+
+  Caps := Default(TProgrammerElectricalCapabilities);
+  Obs := Default(TElectricalObservation);
+  CapsValid := NVRAMancer.Programmer.GetElectricalCapabilities(Caps);
+  ObsValid := NVRAMancer.Programmer.GetElectricalObservation(Obs);
+  Report := BuildRailReport(Caps, Obs, CapsValid, ObsValid);
+  //A closed CH347 cannot return an observation, but the menu still records
+  //the voltage the user asked for.  Fill only the requested side of the
+  //report; the measured side must remain explicitly unmeasurable.
+  if (not Report.RequestedKnown) and
+     (NVRAMancer.Current_HW = CHW_CH347) then
+  begin
+    ConfiguredTargetMv := SelectedCH347Vcc;
+    if ConfiguredTargetMv > 0 then
+    begin
+      Report.RequestedKnown := True;
+      Report.RequestedMv := ConfiguredTargetMv;
+    end;
+  end;
+  if Report.RequestedKnown then
+    PowerText := Format(STR_SHELL_TEL_REQUESTED,
+      [railreport.VoltageText(Report.RequestedMv)])
+  else if (NVRAMancer.Current_HW = CHW_CH347) and
+          MenuCH347VccAuto.Checked then
+    PowerText := STR_SHELL_TEL_REQUESTED_AUTO
+  else
+    PowerText := STR_SHELL_TEL_REQUESTED_NOT_SET;
+  if Report.MeasuredKnown then
+    PowerText := PowerText + LineEnding + Format(STR_SHELL_TEL_MEASURED,
+      [railreport.VoltageText(Report.MeasuredMv)])
+  else if Report.MeasuredSupported then
+    PowerText := PowerText + LineEnding + STR_SHELL_TEL_MEASURED_UNKNOWN
+  else
+    PowerText := PowerText + LineEnding + STR_SHELL_TEL_MEASURED_NOT_MEASURABLE;
+  if SafeModeActive then
+    SafeText := STR_SHELL_TEL_SAFE_ON
+  else
+    SafeText := STR_SHELL_TEL_SAFE_OFF;
+  PowerText := PowerText + LineEnding + SafeText;
+  RailLines := RailReportLines(Report);
+  PowerHint := '';
+  for RailIndex := 0 to High(RailLines) do
+  begin
+    if PowerHint <> '' then PowerHint := PowerHint + LineEnding;
+    PowerHint := PowerHint + RailLines[RailIndex];
+  end;
+  if PowerHint <> '' then PowerHint := PowerHint + LineEnding;
+  PowerHint := PowerHint + SafeText;
+  FTelemetryValues[2].Caption := PowerText;
+  FTelemetryValues[2].Hint := PowerHint;
 
   ChipSize := CurrentICParam.Size;
   if (ChipSize = 0) and IsNumber(ComboChipSize.Text) then
@@ -2268,65 +3305,79 @@ begin
     IDText := LastID9F;
     if ChipIdentityConfirmed or
        SameText(LastID9F, CurrentICParam.ID) then
-      IdentityText := 'live confirmed'
+      IdentityText := STR_SHELL_TEL_ID_CONFIRMED
     else
-      IdentityText := 'live read';
+      IdentityText := STR_SHELL_TEL_ID_READ;
   end
   else if CurrentICParam.ID <> '' then
   begin
     IDText := CurrentICParam.ID;
-    IdentityText := 'selected, not read';
+    IdentityText := STR_SHELL_TEL_ID_SELECTED;
   end
   else
   begin
-    IDText := 'ID unavailable';
-    IdentityText := 'unconfirmed';
+    IDText := STR_SHELL_TEL_ID_UNAVAILABLE;
+    IdentityText := STR_SHELL_TEL_ID_UNCONFIRMED;
   end;
 
   if RadioSPI.Checked and (ComboSPICMD.ItemIndex = SPI_CMD_25) then
   begin
     if ChipSize > QWord(16) * 1024 * 1024 then
-      AddressText := '4-byte address'
+      AddressText := STR_SHELL_TEL_ADDR_4
     else
-      AddressText := '3-byte address';
+      AddressText := STR_SHELL_TEL_ADDR_3;
   end
   else
-    AddressText := 'addressing by selected protocol';
+    AddressText := STR_SHELL_TEL_ADDR_PROTOCOL;
 
-  VoltageText := CatalogVccDisplay(CurrentChipVccText);
-  if VoltageText = '' then VoltageText := 'VCC not specified';
+  ProfileVoltageText := CatalogVccDisplay(CurrentChipVccText);
+  if ProfileVoltageText = '' then
+    ProfileVoltageText := STR_SHELL_TEL_VCC_UNSPECIFIED;
 
-  if CurrentICParam.Name <> '' then
-    ChipText := CurrentICParam.Name
-  else
-    ChipText := STR_NO_CHIP_SELECTED;
-  ChipText := ChipText + ' | ' + IDText + ' (' + IdentityText + ')';
-  if ChipSize > 0 then
+  if not ChipDetected then
   begin
-    ChipText := ChipText + LineEnding + FormatTelemetryBytes(ChipSize);
-    if CurrentICParam.Page > 0 then
-      ChipText := ChipText + ' | page ' + IntToStr(CurrentICParam.Page) + ' B';
-    if RadioSPI.Checked and (ComboSPICMD.ItemIndex = SPI_CMD_25) then
-      ChipText := ChipText + ' | sector ' +
-        FormatTelemetryBytes(CurrentSectorSize) + '/' +
-        IntToHex(CurrentSectorOpcode, 2) + 'h';
-    ChipText := ChipText + ' | ' + AddressText + ' | ' + VoltageText;
+    ChipText := STR_SHELL_TEL_PROFILE_NONE;
+    if LastID9F <> '' then
+      ChipText := ChipText + LineEnding +
+        Format(STR_SHELL_TEL_LIVE_ID, [LastID9F])
+    else
+      ChipText := ChipText + LineEnding + STR_SHELL_TEL_LIVE_ID_NONE;
+  end
+  else
+  begin
+    if CurrentICParam.Name <> '' then
+      ChipText := CurrentICParam.Name
+    else
+      ChipText := STR_NO_CHIP_SELECTED;
+    ChipText := ChipText + ' | ' + IDText + ' (' + IdentityText + ')';
+    if ChipSize > 0 then
+    begin
+      ChipText := ChipText + LineEnding + FormatTelemetryBytes(ChipSize);
+      if CurrentICParam.Page > 0 then
+        ChipText := ChipText + ' | ' + Format(STR_SHELL_TEL_PAGE,
+          [CurrentICParam.Page]);
+      if RadioSPI.Checked and (ComboSPICMD.ItemIndex = SPI_CMD_25) then
+        ChipText := ChipText + ' | ' + Format(STR_SHELL_TEL_SECTOR,
+          [FormatTelemetryBytes(CurrentSectorSize),
+           IntToHex(CurrentSectorOpcode, 2)]);
+      ChipText := ChipText + ' | ' + AddressText + ' | ' + ProfileVoltageText;
+    end;
   end;
-  FTelemetryValues[2].Caption := ChipText;
-  FTelemetryValues[2].Hint := ChipText;
+  FTelemetryValues[3].Caption := ChipText;
+  FTelemetryValues[3].Hint := ChipText;
 
   if OperationRunning then
   begin
-    FTelemetryValues[3].Caption := UpperCase(OpKindName(LastOp.Kind)) +
-      ' RUNNING' + LineEnding +
-      'Live effective rate and ETA: status bar';
-    FTelemetryValues[3].Hint := FTelemetryValues[3].Caption;
+    FTelemetryValues[4].Caption := Format(STR_SHELL_TEL_RUNNING,
+      [ShellOpKindName(LastOp.Kind)]);
+    FTelemetryValues[4].Hint := FTelemetryValues[4].Caption;
   end
   else
   begin
-    FTelemetryValues[3].Caption := FLastOperationText;
-    FTelemetryValues[3].Hint := FLastOperationHint;
+    FTelemetryValues[4].Caption := FLastOperationText;
+    FTelemetryValues[4].Hint := FLastOperationHint;
   end;
+  UpdateWorkspaceShell;
 end;
 
 procedure TMainForm.BeginOperationTelemetry;
@@ -2341,41 +3392,44 @@ var
   Bytes: QWord;
   StateText, DetailText: string;
 begin
-  if FOperationStartedAt = 0 then
+  if not LastOp.Started then
   begin
     UpdateTelemetry;
     Exit;
   end;
 
-  ElapsedMs := Abs(MilliSecondsBetween(Now, FOperationStartedAt));
+  if FOperationStartedAt = 0 then
+    ElapsedMs := 0
+  else
+    ElapsedMs := Abs(MilliSecondsBetween(Now, FOperationStartedAt));
   Bytes := LastOp.BytesDone;
   if (Bytes = 0) and (not LastOp.Failed) then Bytes := LastOp.BytesTotal;
 
   if LastOp.Cancelled then
-    StateText := 'CANCELLED'
+    StateText := STR_SHELL_TEL_CANCELLED
   else if LastOp.Failed then
-    StateText := 'FAILED'
+    StateText := STR_SHELL_TEL_FAILED
   else
-    StateText := 'OK';
+    StateText := STR_SHELL_TEL_OK;
 
   DetailText := FormatTelemetryElapsed(ElapsedMs);
+  if LastOp.Failed and (LastOp.ErrorText <> '') then
+    DetailText := LastOp.ErrorText + LineEnding + DetailText;
   if Bytes > 0 then
   begin
     DetailText := FormatTelemetryBytes(Bytes) + ' | ' + DetailText;
     if ElapsedMs > 0 then
-      DetailText := DetailText + ' | ' +
-        FormatTelemetryRate(Bytes / (ElapsedMs / 1000.0)) +
-        ' effective';
+      DetailText := DetailText + ' | ' + Format(STR_SHELL_TEL_EFFECTIVE,
+        [FormatTelemetryRate(Bytes / (ElapsedMs / 1000.0))]);
   end;
 
-  FLastOperationText := UpperCase(OpKindName(LastOp.Kind)) + ' ' +
+  FLastOperationText := ShellOpKindName(LastOp.Kind) + ' ' +
                         StateText + LineEnding + DetailText;
   FLastOperationHint := FLastOperationText;
-  if LastOp.Failed and (LastOp.ErrorText <> '') then
-    FLastOperationHint := FLastOperationHint + LineEnding + LastOp.ErrorText;
   if LastOp.FailAddress >= 0 then
-    FLastOperationHint := FLastOperationHint + LineEnding + 'Failure address 0x' +
-      IntToHex(QWord(LastOp.FailAddress), 8);
+    FLastOperationHint := FLastOperationHint + LineEnding +
+      Format(STR_SHELL_TEL_FAILURE_ADDRESS,
+        [IntToHex(QWord(LastOp.FailAddress), 8)]);
 
   FOperationStartedAt := 0;
   UpdateTelemetry;
@@ -2652,6 +3706,9 @@ begin
   if s = '' then s := STR_NO_CHIP_SELECTED;
 
   MainForm.LabelChipInfo.Caption := s;
+  //The catalogue note can add several wrapped lines. Reflow the controls below
+  //it immediately so Scripts never appears to cover the chip identity block.
+  LayoutLeftPanel;
 
   ChipDetected := (CurrentICParam.Size > 0) or (UISize > 0);
   MainForm.ChipView.Invalidate;
@@ -2665,17 +3722,50 @@ end;
 //แผงด้านซ้ายในไฟล์ฟอร์มถูกวางไว้แบบพิกัดตายตัวและแคบเกินไป
 //จัดตำแหน่งใหม่ตอนรัน ให้กว้างขึ้นและทุกอย่างอยู่กึ่งกลาง
 procedure LayoutLeftPanel;
-const
-  PanelW = 200;
-  ComboW = 116;
 var
-  cx: integer;
+  OuterW, PanelW, ComboW, cx, Margin, InfoTop, InfoBottom,
+  PreferredW, PreferredH, ScriptsTop, ScriptsComboTop, StartLabelTop,
+  StartEditTop, SettingsTop, GroupH, MaxScroll, OldSettingsPos,
+  OldActionsPos, MaxActionScroll: integer;
 begin
-  MainForm.GroupChipSettings.Width := PanelW;
+  if (MainForm = nil) or (MainForm.FBenchSettingsScroll = nil) or
+     (MainForm.FBenchActions = nil) then Exit;
+
+  //Scroll positions are implemented by moving the children. Return to the
+  //logical origin while measuring, then restore only a position that still
+  //fits the resized viewport.
+  OldSettingsPos := MainForm.FBenchSettingsScroll.VertScrollBar.Position;
+  OldActionsPos := MainForm.FBenchActions.VertScrollBar.Position;
+  if OldSettingsPos <> 0 then
+    MainForm.FBenchSettingsScroll.VertScrollBar.Position := 0;
+  if OldActionsPos <> 0 then
+    MainForm.FBenchActions.VertScrollBar.Position := 0;
+
+  //Use more of a wide Bench window, while keeping the compact laptop layout.
+  OuterW := MainForm.ClientWidth div 5;
+  if OuterW < MainForm.Scale96ToForm(216) then
+    OuterW := MainForm.Scale96ToForm(216);
+  if OuterW > MainForm.Scale96ToForm(280) then
+    OuterW := MainForm.Scale96ToForm(280);
+  MainForm.FBenchSettingsScroll.Width := OuterW;
+
+  //Reserve the native vertical-scrollbar gutter even when it is currently
+  //hidden. This prevents a horizontal scrollbar from appearing later.
+  PanelW := MainForm.FBenchSettingsScroll.VertScrollBar.ClientSizeWithBar;
+  if PanelW <= 0 then PanelW := OuterW - MainForm.Scale96ToForm(16);
+  ComboW := PanelW - MainForm.Scale96ToForm(48);
+  if ComboW < MainForm.Scale96ToForm(116) then
+    ComboW := MainForm.Scale96ToForm(116);
+  if ComboW > MainForm.Scale96ToForm(168) then
+    ComboW := MainForm.Scale96ToForm(168);
+  Margin := MainForm.Scale96ToForm(6);
+
+  MainForm.GroupChipSettings.SetBounds(0, 0, PanelW,
+    MainForm.Scale96ToForm(720));
   cx := (PanelW - ComboW) div 2;
 
-  MainForm.LabelChipName.Left := 8;
-  MainForm.LabelChipName.Width := PanelW - 16;
+  MainForm.LabelChipName.Left := MainForm.Scale96ToForm(8);
+  MainForm.LabelChipName.Width := PanelW - MainForm.Scale96ToForm(16);
 
   MainForm.Label2.Left := cx;         MainForm.Label2.Width := ComboW;
   MainForm.ComboChipSize.Left := cx;  MainForm.ComboChipSize.Width := ComboW;
@@ -2692,55 +3782,123 @@ begin
   MainForm.Label5.Left := cx;         MainForm.Label5.Width := ComboW;
   MainForm.ComboMWBitLen.Left := cx;  MainForm.ComboMWBitLen.Width := ComboW;
 
-  MainForm.Panel_I2C_DevAddr.Left := (PanelW - MainForm.Panel_I2C_DevAddr.Width) div 2;
+  InfoTop := MainForm.Scale96ToForm(168);
+  MainForm.Panel_I2C_DevAddr.Left :=
+    (PanelW - MainForm.Panel_I2C_DevAddr.Width) div 2;
+  MainForm.Panel_I2C_DevAddr.Top := InfoTop;
 
   //บล็อกข้อมูลชิปกินความกว้างเต็มแผง ข้อความจะได้ไม่ห่อบรรทัดถี่เกินไป
-  MainForm.LabelChipInfo.Left := 12;
-  MainForm.LabelChipInfo.Width := PanelW - 24;
+  MainForm.LabelChipInfo.Anchors := [akLeft, akTop, akRight];
+  MainForm.LabelChipInfo.SetBounds(MainForm.Scale96ToForm(12), InfoTop,
+    PanelW - MainForm.Scale96ToForm(24), MainForm.Scale96ToForm(60));
+  MainForm.LabelChipInfo.InvalidatePreferredSize;
+  PreferredW := 0;
+  PreferredH := 0;
+  MainForm.LabelChipInfo.GetPreferredSize(PreferredW, PreferredH, True, False);
+  if PreferredH < MainForm.Scale96ToForm(60) then
+    PreferredH := MainForm.Scale96ToForm(60);
+  MainForm.LabelChipInfo.Height := PreferredH;
+
+  if MainForm.LabelChipInfo.Visible then
+    InfoBottom := MainForm.LabelChipInfo.Top + MainForm.LabelChipInfo.Height
+  else if MainForm.Panel_I2C_DevAddr.Visible then
+    InfoBottom := MainForm.Panel_I2C_DevAddr.Top +
+      MainForm.Panel_I2C_DevAddr.Height
+  else
+    InfoBottom := InfoTop + MainForm.Scale96ToForm(60);
+
+  ScriptsTop := InfoBottom + MainForm.Scale96ToForm(5);
+  ScriptsComboTop := ScriptsTop + MainForm.Label_chip_scripts.Height;
 
   MainForm.Label_chip_scripts.Left := cx;
+  MainForm.Label_chip_scripts.Top := ScriptsTop;
+  MainForm.Label_chip_scripts.Width := ComboW;
   MainForm.ComboBox_chip_scriptrun.Left := cx;
-  MainForm.ComboBox_chip_scriptrun.Width := ComboW - 28;
-  MainForm.SpeedButton1.Left := cx + ComboW - 23;
+  MainForm.ComboBox_chip_scriptrun.Top := ScriptsComboTop;
+  MainForm.ComboBox_chip_scriptrun.Width := ComboW - MainForm.Scale96ToForm(28);
+  MainForm.SpeedButton1.Left := cx + ComboW - MainForm.Scale96ToForm(23);
+  MainForm.SpeedButton1.Top := ScriptsComboTop;
 
+  StartLabelTop := ScriptsComboTop +
+    MainForm.ComboBox_chip_scriptrun.Height + MainForm.Scale96ToForm(4);
+  StartEditTop := StartLabelTop + MainForm.Label_StartAddress.Height +
+    MainForm.Scale96ToForm(6);
   MainForm.Label_StartAddress.Left := cx;
+  MainForm.Label_StartAddress.Top := StartLabelTop;
+  MainForm.Label_StartAddress.Width := ComboW;
   MainForm.Label6.Left := cx;
-  MainForm.StartAddressEdit.Left := cx + 20;
+  MainForm.Label6.Top := StartEditTop + MainForm.Scale96ToForm(8);
+  MainForm.StartAddressEdit.Left := cx + MainForm.Scale96ToForm(20);
+  MainForm.StartAddressEdit.Top := StartEditTop;
 
   //กล่องเลือกแรงดันของ CH347 อยู่ใต้แถวแอดเดรส โผล่เฉพาะตอนเลือก CH347
-  MainForm.GroupCH347Vcc.Left := 6;
-  MainForm.GroupCH347Vcc.Width := PanelW - 12;
-  MainForm.GroupCH347Vcc.Top := 330;
+  SettingsTop := StartEditTop + MainForm.StartAddressEdit.Height +
+    MainForm.Scale96ToForm(11);
+  MainForm.GroupCH347Vcc.Left := Margin;
+  MainForm.GroupCH347Vcc.Width := PanelW - (Margin * 2);
+  MainForm.GroupCH347Vcc.Top := SettingsTop;
+  MainForm.LabelCH347ChipVcc.Width := MainForm.GroupCH347Vcc.Width -
+    MainForm.Scale96ToForm(16);
+  MainForm.ButtonTryOtherRail.Width := MainForm.GroupCH347Vcc.Width -
+    MainForm.Scale96ToForm(16);
 
   //กล่องคล็อกต่อท้ายกล่องแรงดัน สองอย่างที่ต้องตั้งให้ถูกก่อนชิปจะตอบ
   //อยู่ติดกันและเห็นพร้อมกัน
-  MainForm.GroupBusClock.Left := 6;
-  MainForm.GroupBusClock.Width := PanelW - 12;
+  MainForm.GroupBusClock.Left := Margin;
+  MainForm.GroupBusClock.Width := PanelW - (Margin * 2);
+  MainForm.GroupBusClock.Height := MainForm.Scale96ToForm(88);
   if MainForm.GroupCH347Vcc.Visible then
     MainForm.GroupBusClock.Top := MainForm.GroupCH347Vcc.Top +
-                                  MainForm.GroupCH347Vcc.Height + 6
+      MainForm.GroupCH347Vcc.Height + MainForm.Scale96ToForm(6)
   else
-    MainForm.GroupBusClock.Top := 330;
-  MainForm.ComboBusClock.Width := MainForm.GroupBusClock.Width - 84;
-  MainForm.ButtonTuneClock.Left := MainForm.GroupBusClock.Width - 70;
-  MainForm.LabelBusClockHint.Width := MainForm.GroupBusClock.Width - 16;
+    MainForm.GroupBusClock.Top := SettingsTop;
+  MainForm.ComboBusClock.Width := MainForm.GroupBusClock.Width -
+    MainForm.Scale96ToForm(84);
+  MainForm.ButtonTuneClock.Left := MainForm.GroupBusClock.Width -
+    MainForm.Scale96ToForm(70);
+  MainForm.LabelBusClockHint.Width := MainForm.GroupBusClock.Width -
+    MainForm.Scale96ToForm(16);
+  MainForm.LabelBusClockHint.Height := MainForm.Scale96ToForm(32);
+  MainForm.LabelBusClockHint.WordWrap := True;
 
   //ภาพชิปกินพื้นที่ที่เหลือทั้งหมดด้านล่าง และยืดตามความสูงหน้าต่าง
   //กล่องไหนโผล่ ภาพชิปก็ขยับลงไปต่อท้ายตัวล่างสุด ถ้าหุบก็ทวงพื้นที่คืน
-  MainForm.ChipView.Left := 6;
-  MainForm.ChipView.Width := PanelW - 12;
+  MainForm.ChipView.Left := Margin;
+  MainForm.ChipView.Width := PanelW - (Margin * 2);
   if MainForm.GroupBusClock.Visible then
     MainForm.ChipView.Top := MainForm.GroupBusClock.Top +
-                             MainForm.GroupBusClock.Height + 6
+      MainForm.GroupBusClock.Height + MainForm.Scale96ToForm(6)
   else if MainForm.GroupCH347Vcc.Visible then
     MainForm.ChipView.Top := MainForm.GroupCH347Vcc.Top +
-                             MainForm.GroupCH347Vcc.Height + 6
+      MainForm.GroupCH347Vcc.Height + MainForm.Scale96ToForm(6)
   else
-    MainForm.ChipView.Top := 330;
+    MainForm.ChipView.Top := SettingsTop;
+
+  GroupH := MainForm.ChipView.Top + MainForm.Scale96ToForm(186);
+  if GroupH < MainForm.Scale96ToForm(720) then
+    GroupH := MainForm.Scale96ToForm(720);
+  MainForm.GroupChipSettings.Height := GroupH;
   MainForm.ChipView.Anchors := [akLeft, akTop, akRight, akBottom];
   MainForm.ChipView.Height := MainForm.GroupChipSettings.ClientHeight -
-                              MainForm.ChipView.Top - 6;
-  if MainForm.ChipView.Height < 160 then MainForm.ChipView.Height := 160;
+    MainForm.ChipView.Top - Margin;
+  if MainForm.ChipView.Height < MainForm.Scale96ToForm(160) then
+    MainForm.ChipView.Height := MainForm.Scale96ToForm(160);
+
+  MainForm.FBenchSettingsScroll.AutoScroll := True;
+  MainForm.FBenchSettingsScroll.UpdateScrollbars;
+  MaxScroll := MainForm.GroupChipSettings.Height -
+    MainForm.FBenchSettingsScroll.ClientHeight;
+  if MaxScroll < 0 then MaxScroll := 0;
+  if OldSettingsPos > MaxScroll then OldSettingsPos := MaxScroll;
+  MainForm.FBenchSettingsScroll.VertScrollBar.Position := OldSettingsPos;
+
+  MainForm.FBenchActions.AutoScroll := True;
+  MainForm.FBenchActions.UpdateScrollbars;
+  MaxActionScroll := MainForm.FBenchActions.VertScrollBar.Range -
+    MainForm.FBenchActions.VertScrollBar.Page;
+  if MaxActionScroll < 0 then MaxActionScroll := 0;
+  if OldActionsPos > MaxActionScroll then OldActionsPos := MaxActionScroll;
+  MainForm.FBenchActions.VertScrollBar.Position := OldActionsPos;
 end;
 
 //เวลารอสูงสุดของแต่ละคำสั่ง หน่วยเป็นมิลลิวินาที
@@ -4053,6 +5211,7 @@ begin
   ApplyCH347Vcc;
   RefreshCH347VccPanel;
   RefreshBusClockPanel;
+  UpdateWorkflowState;
 end;
 
 procedure TMainForm.RadioCH347VccChange(Sender: TObject);
@@ -4580,6 +5739,7 @@ begin
   LogPrint('SPI clock set to ' + ClockText(CurrentBusHz));
   //ความเร็วที่เปลี่ยนแล้วต้องมีผลกับงานถัดไป ไม่ใช่รอบถัดจากนั้น
   RefreshBusClockPanel;
+  UpdateWorkflowState;
 end;
 
 function AutoTuneSPIClock: boolean;
@@ -10105,6 +11265,7 @@ begin
              'no menu, script or command line can reach them')
   else
     LogPrint('read-only safe mode is OFF: this chip can be changed again');
+  UpdateWorkflowState;
 end;
 
 
@@ -13726,11 +14887,13 @@ begin
     Log.Lines[0] := 'NVRAMancer ' + PROX_VERSION;
 
   LoadModernIcons;
+  CreateWorkspaceShell;
   CreateWorkflowBar;
   CreateTelemetryPanel;
   LayoutLeftPanel;
   ApplyTheme(MenuDarkTheme.Checked);
   UpdateChipInfo;
+  SetWorkspaceMode(wmRepair);
 
   //ค้นหาเครื่องโปรแกรมที่เสียบอยู่ตั้งแต่เปิดโปรแกรม แล้วเฝ้าดูต่อเป็นระยะ
   SetHardwareMenuCheck(NVRAMancer.Current_HW);
@@ -13795,7 +14958,9 @@ begin
 
   //คำใบ้ปุ่มลัดอยู่ตรงนี้ ไม่ใช่บนแถบชื่อหน้าต่าง
   ButtonCancel.Hint := ButtonCancel.Hint + ' (Esc)';
-  StatusBar.Panels.Items[3].Text := STR_HINT_KEYS;
+  StatusBar.Panels.Items[3].Text := STR_HINT_KEYS + '   ' +
+    Format(STR_SHELL_SHORTCUTS, [STR_WORKSPACE_REPAIR,
+      STR_WORKSPACE_BENCH, STR_WORKSPACE_PRODUCTION]);
 
   //ตั้งแต่นี้ไปเปิดไดอะล็อกได้แล้ว
   //ถ้าเสียบเครื่องโปรแกรมมาตั้งแต่ก่อนเปิดโปรแกรม จังหวะเปลี่ยนสถานะผ่านไปแล้ว
@@ -13816,6 +14981,14 @@ begin
   //is still constructing controls.  It remains available from Options.
   if (not CLIMode) and (not ConnectionDoctorSeen) then
     MenuConnectionDoctorClick(nil);
+
+  //The form resource points at the hidden SPI radio button.  Establish a
+  //visible Repair focus target after startup detection and any first-run
+  //dialog have finished, without stealing focus from an open chip chooser.
+  if (not CLIMode) and (Screen.ActiveForm = Self) and
+     FTaskPrimary.Visible and FTaskPrimary.Enabled and
+     FTaskPrimary.CanFocus then
+    FTaskPrimary.SetFocus;
 end;
 
 //ลากไฟล์มาวางบนหน้าต่างแล้วโหลดเข้าเอดิเตอร์ได้เลย
@@ -13877,6 +15050,21 @@ begin
         ActiveNORCancellation.RequestCancellation;
       Key := 0;
     end;
+  end
+  else if (ssAlt in Shift) and (Key = Ord('1')) then
+  begin
+    SetWorkspaceMode(wmRepair);
+    Key := 0;
+  end
+  else if (ssAlt in Shift) and (Key = Ord('2')) then
+  begin
+    SetWorkspaceMode(wmBench);
+    Key := 0;
+  end
+  else if (ssAlt in Shift) and (Key = Ord('3')) then
+  begin
+    SetWorkspaceMode(wmProduction);
+    Key := 0;
   end
   else if Key = VK_F1 then
   begin
