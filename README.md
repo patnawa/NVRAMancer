@@ -4,7 +4,8 @@
 
 **A flash programmer that refuses to guess your chip's voltage.**
 
-SPI NOR · SPI NAND · I²C EEPROM · Microwire — across nine programmers.
+SPI NOR · SPI NAND · I²C EEPROM · Microwire — across nine validated
+programmers, plus a read-only T48 preview.
 
 [![Release](https://img.shields.io/github/v/release/patnawa/NVRAMancer?label=release)](https://github.com/patnawa/NVRAMancer/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/patnawa/NVRAMancer/build.yml?branch=main&label=CI)](https://github.com/patnawa/NVRAMancer/actions/workflows/build.yml)
@@ -47,7 +48,7 @@ Nothing here is inferred upward. A chip whose voltage cannot be established is a
 ## What it does
 
 <table>
-<tr><td width="34%"><b>🔌 Nine programmers</b></td><td>CH347 · CH341A · FT232H · EZP2023+ · AVRISP mkII · USBasp · Arduino · Bus Pirate · serprog</td></tr>
+<tr><td width="34%"><b>🔌 Nine validated programmers</b></td><td>CH347 · CH341A · FT232H · EZP2023+ · AVRISP mkII · USBasp · Arduino · Bus Pirate · serprog; T48 is a separate read-only preview</td></tr>
 <tr><td><b>💾 Five chip families</b></td><td>25-series SPI NOR · SPI NAND · 24-series I²C EEPROM · 93-series Microwire · 45/95-series</td></tr>
 <tr><td><b>⚡ Voltage safety</b></td><td>Four-tier voltage resolution, fail-low on every unknown, 1.8 V/3.3 V rail switching, and an electrical preflight that stops the bus <i>before</i> the first clock edge</td></tr>
 <tr><td><b>📊 Honest reporting</b></td><td>Requested vs measured voltage as separate fields; "not measurable" and "unknown" are answers, never blanks or zeros</td></tr>
@@ -89,8 +90,38 @@ That sounds obvious. It wasn't happening: the chip catalogue carries a voltage f
 | **Arduino** | ✓ | ✓ | ✓ | |
 | **Bus Pirate** | ✓ | ✓ | — | open-drain, external supply |
 | **serprog** | ✓ | — | — | flashrom serial protocol |
+| **XGecu T48** (preview) | read / verify | — | — | exact-device SPI NOR only; mutation locked pending physical HIL |
 
 **Chip families:** 25-series SPI NOR · SPI NAND · 24-series I²C EEPROM · 93-series Microwire · 45/95-series.
+
+### XGecu T48 preview
+
+T48 support is deliberately arriving in two stages. Before the ordered unit is
+available, NVRAMancer can expose a **read-only preview** through a separately
+installed, user-selected [`minipro`](https://gitlab.com/DavidGriffith/minipro/-/tree/cae74c0607077d6260b24995f5e4c0d0b66a6a2e)
+executable. NVRAMancer does not bundle that GPL program, copy its device data,
+or require it for a normal build or for the other programmers.
+
+The preview requires an exact `minipro` device and package name; it never
+guesses a socket mapping and does not use SPI auto-detection. It also asks the
+tool for the live programmer model and accepts only `T48`. A USB VID/PID is not
+enough because T48, T56 and TL866II+ devices can share it, as the upstream
+[T48 support investigation](https://gitlab.com/DavidGriffith/minipro/-/issues/270)
+documents.
+
+Only programmer information, live chip ID, an exact-size full-chip read, and
+independent verification are admitted in the preview. Erase, write, Smart
+Write, scripts, raw SPI, chip doctor, NAND/eMMC, firmware update and Production
+remain unreachable. Upstream still tracks limitations around T48 SPI
+auto-detection, which is another reason this integration requires an exact
+device/package name instead of making a plausible guess; see the upstream
+[T48 progress tracker](https://gitlab.com/DavidGriffith/minipro/-/issues/294).
+
+Those locks remain in place until a physical T48 passes the recorded
+[read-only and destructive graduation procedure](docs/hardware-in-loop.md#xgecu-t48-preview).
+Passing hardware-free tests proves the command and failure policy; it does not
+prove a voltage rail, socket route, driver, firmware or USB cleanup path on the
+unit that will actually touch a chip.
 
 ## CH347 target voltage
 

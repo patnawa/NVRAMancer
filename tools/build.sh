@@ -110,6 +110,31 @@ run_suite hardwarecapability_tests "$capability" \
   tests/hardwarecapability_tests.lpr \
   software/basehw.pas software/electricalpreflight.pas
 
+# Hardware presence is polled while the application is idle. An absent FTDI
+# device is a normal state and must not bypass the poller's state-change guard
+# by logging directly from the D2XX wrapper.
+ftdi_noise="$tmp/ftdi-noise"
+run_suite ftdinoise_tests "$ftdi_noise" \
+  tests/ftdinoise_tests.lpr tests/ftdinoise_main/main.pas \
+  software/D2XXUnit.pas
+
+# The optional T48 tool boundary is direct argv, never a shell. Transcript
+# fakes pin model/device identity, exact fresh files and the complete read-only
+# argv allowlist; real process tests cover bounded natural-exit capture.
+t48_bridge="$tmp/t48-bridge"
+run_suite t48bridge_tests "$t48_bridge" \
+  tests/t48bridge_tests.lpr software/processrunner.pas \
+  software/t48bridge.pas software/t48hw.pas software/basehw.pas \
+  software/electricalpreflight.pas
+
+# Bridge internals map onto the stable machine-facing exit contract without
+# importing either LCL or the CLI parser into the hardware seam.
+t48_outcome="$tmp/t48-outcome"
+run_suite t48outcome_tests "$t48_outcome" \
+  tests/t48outcome_tests.lpr software/t48outcome.pas \
+  software/t48bridge.pas software/processrunner.pas \
+  software/clicontract.pas software/operationmodel.pas
+
 # The admission ladder between a button press and the bus: which facts have
 # been established, and which of them a rail change or a fresh image revokes.
 session="$tmp/session-state"

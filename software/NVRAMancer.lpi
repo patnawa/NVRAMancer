@@ -25,11 +25,11 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="4"/>
-      <MinorVersionNr Value="41"/>
+      <MinorVersionNr Value="42"/>
       <RevisionNr Value="0"/>
       <BuildNr Value="0"/>
       <Language Value="0409"/>
-      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="NVRAMancer" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="NVRAMancer.exe" ProductName="NVRAMancer" ProductVersion="4.41.0.0"/>
+      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="NVRAMancer" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="NVRAMancer.exe" ProductName="NVRAMancer" ProductVersion="4.42.0.0"/>
     </VersionInfo>
     <MacroValues Count="2">
       <Macro1 Name="LCLWidgetType" Value="win32"/>
@@ -104,7 +104,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="22">
+    <Units Count="26">
       <Unit0>
         <Filename Value="NVRAMancer.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -206,6 +206,22 @@
         <Filename Value="workspacemodel.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit21>
+      <Unit22>
+        <Filename Value="processrunner.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="t48bridge.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="t48hw.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="t48outcome.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit25>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

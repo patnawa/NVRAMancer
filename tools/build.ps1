@@ -167,6 +167,32 @@ Run-Suite "hardwarecapability_tests" $capabilityDir @(
   "$root\tests\hardwarecapability_tests.lpr",
   "$root\software\basehw.pas", "$root\software\electricalpreflight.pas")
 
+# Hardware presence is polled while the application is idle.  An absent FTDI
+# device is a normal state and must not bypass the poller's state-change guard
+# by logging directly from the D2XX wrapper.
+$ftdiNoiseDir = Join-Path $env:TEMP "aspx-tests-ftdi-noise"
+Run-Suite "ftdinoise_tests" $ftdiNoiseDir @(
+  "$root\tests\ftdinoise_tests.lpr",
+  "$root\tests\ftdinoise_main\main.pas", "$root\software\D2XXUnit.pas")
+
+# The optional T48 tool boundary is direct argv, never a shell.  Transcript
+# fakes pin the supported minipro output and refuse wrong models, fuzzy device
+# names, stale/partial files and every argv shape outside the complete
+# read-only allowlist; real process tests cover bounded natural-exit capture.
+$t48BridgeDir = Join-Path $env:TEMP "aspx-tests-t48-bridge"
+Run-Suite "t48bridge_tests" $t48BridgeDir @(
+  "$root\tests\t48bridge_tests.lpr", "$root\software\processrunner.pas",
+  "$root\software\t48bridge.pas", "$root\software\t48hw.pas",
+  "$root\software\basehw.pas", "$root\software\electricalpreflight.pas")
+
+# Bridge internals map onto the stable machine-facing exit contract without
+# importing either LCL or the CLI parser into the hardware seam.
+$t48OutcomeDir = Join-Path $env:TEMP "aspx-tests-t48-outcome"
+Run-Suite "t48outcome_tests" $t48OutcomeDir @(
+  "$root\tests\t48outcome_tests.lpr", "$root\software\t48outcome.pas",
+  "$root\software\t48bridge.pas", "$root\software\processrunner.pas",
+  "$root\software\clicontract.pas", "$root\software\operationmodel.pas")
+
 # The admission ladder between a button press and the bus: which facts have
 # been established, and which of them a rail change or a fresh image revokes.
 $sessionDir = Join-Path $env:TEMP "aspx-tests-session-state"

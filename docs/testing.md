@@ -32,6 +32,9 @@ adds it to the builds.
 - `quadpolicy_tests`
 - `hwtests`
 - `hardwarecapability_tests`
+- `ftdinoise_tests`
+- `t48bridge_tests`
+- `t48outcome_tests`
 - `simhw_tests`
 - `sessionstate_tests`
 - `workspacemodel_tests`
@@ -65,6 +68,7 @@ adds it to the builds.
 |---|---|
 | File formats and SFDP | Intel HEX/S-record round trips, malformed input, JESD216 tables, address strategies, declared timings, and ambiguous sector-map rejection |
 | Hardware protocols | Exact SPI/I²C/legacy frames, transfer limits, typed backend capabilities, live-identity gates, cleanup, and four-byte address strategies |
+| T48 read-only bridge | Direct argv without a shell, a complete read-only argv allowlist, bounded output capture with a natural-exit T48 policy, typed process failure/timeout/cancel/busy results and stable CLI outcome mapping, reentrant configuration protection, canonical live chip identity, exact T48 and `NAME@PACKAGE` selection, tool-version and byte-capacity retention, fresh exact-size reads, and private temporary verification inputs |
 | NOR and EEPROM operations | Differential planning, preserved neighbor bytes, read-twice trust, cancellation boundaries, fail-at-every-call matrices, and randomized final-image invariants |
 | SPI NAND | Geometry, bad-block planning, ECC verdicts, protection, status failures, cancellation, and virtual-device execution |
 | Chip health | Capacity/counterfeit tests restore the original data; protocol packet layouts remain byte-exact |

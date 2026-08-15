@@ -23,9 +23,23 @@ uses
   writeadmission, voltagewarning, writejournal,
   workspacemodel,
   baseHW, UsbAspHW, ch341hw, ch347hw, avrisphw, arduinohw, buzzpirathw,
-  serproghw, ezphw, simhw;
+  serproghw, ezphw, t48bridge, t48outcome, t48hw, simhw;
 
 type
+
+  //Everything a managed T48 invocation is allowed to trust is captured before
+  //the wait loop starts pumping GUI messages.  The operation never rereads a
+  //profile, executable path or socket mapping that a reentrant event could
+  //have changed underneath the child process.
+  TT48OperationContext = record
+    ToolPath: string;
+    DeviceSpec: string;
+    ProfileName: string;
+    ExpectedID: string;
+    ExpectedSize: QWord;
+    ProfileHasScript: boolean;
+    ProfileEligible: boolean;
+  end;
 
   { TMainForm }
 
@@ -137,7 +151,10 @@ type
     MenuSerprogCOMPort: TMenuItem;
     MenuHWSERPROG: TMenuItem;
     MenuHWEZP: TMenuItem;
+    MenuHWT48: TMenuItem;
     MenuHWSIM: TMenuItem;
+    MenuT48Separator: TMenuItem;
+    MenuT48Configure: TMenuItem;
     MenuChipDoctor: TMenuItem;
     MenuCapacityTest: TMenuItem;
     MenuSurfaceScan: TMenuItem;
@@ -315,6 +332,8 @@ type
     procedure MenuHWSERPROGClick(Sender: TObject);
     procedure MenuHWSIMClick(Sender: TObject);
     procedure MenuHWEZPClick(Sender: TObject);
+    procedure MenuHWT48Click(Sender: TObject);
+    procedure MenuT48ConfigureClick(Sender: TObject);
     procedure MenuChipDoctorClick(Sender: TObject);
     procedure MenuCapacityTestClick(Sender: TObject);
     procedure MenuSurfaceScanClick(Sender: TObject);
@@ -433,6 +452,20 @@ type
     procedure UpdateTelemetry;
     procedure BeginOperationTelemetry;
     procedure FinishOperationTelemetry;
+    procedure PumpT48Process;
+    function T48CancellationRequested: boolean;
+    function T48RunOptions: TT48RunOptions;
+    procedure ApplyT48BridgeFailure(const BridgeResult: TT48BridgeResult);
+    procedure CaptureT48OperationContext(out Context: TT48OperationContext);
+    function OpenT48Preview(const Context: TT48OperationContext;
+      out Hardware: TT48Hardware;
+      out BridgeResult: TT48BridgeResult): boolean;
+    function T48IdentityMatches(const ExpectedID: string;
+      const BridgeResult: TT48BridgeResult): boolean;
+    procedure RunT48ReadID;
+    procedure RunT48Read;
+    procedure RunT48Verify;
+    procedure RefuseT48Operation(Kind: TOpKind);
   public
     { ส่วนประกาศแบบ public }
 
@@ -605,6 +638,11 @@ var
   //serprog วิ่งบน USB-CDC เป็นหลัก ค่า baud จึงเป็นพิธี แต่ UART จริงก็มี
   Serprog_COMPort: string;
   Serprog_BaudRate: integer = 115200;
+  //The GPL minipro tool and its device database stay outside this MIT
+  //executable.  These are explicit user choices; the backend never searches
+  //PATH and never guesses a socket package from the NVRAMancer chip name.
+  T48ToolPath: string = '';
+  T48DeviceSpec: string = '';
 
   //สถานะที่วาดเป็นไฟบอกสถานะในแผงด้านซ้าย
   ProgrammerPresent: boolean = False;
@@ -2368,6 +2406,13 @@ begin
     RepairContext.StateDetail := RepairContext.StateDetail +
       STR_SHELL_PROGRAMMER_CHECK;
   end;
+  if (NVRAMancer <> nil) and (NVRAMancer.Current_HW = CHW_T48) then
+  begin
+    if RepairContext.StateDetail <> '' then
+      RepairContext.StateDetail := RepairContext.StateDetail + LineEnding;
+    RepairContext.StateDetail := RepairContext.StateDetail +
+      STR_T48_PREVIEW_NOTICE;
+  end;
   if LastOp.Started and LastOp.Failed and (not OperationRunning) and
      (LastOp.ErrorText <> '') then
   begin
@@ -2388,9 +2433,12 @@ begin
     ProductionContext.HasBuffer := MPHexEditorEx.DataSize > 0;
     ProductionContext.BatchEnabled := ProdSettings.BatchEnabled;
     ProductionContext.JobLoaded := CurrentJob.Loaded;
-    ProductionContext.JobRejected := CurrentJobLoadError <> '';
+    ProductionContext.JobRejected := (CurrentJobLoadError <> '') or
+      (NVRAMancer.Current_HW = CHW_T48);
 
-    if CurrentJobLoadError <> '' then
+    if NVRAMancer.Current_HW = CHW_T48 then
+      JobLine := STR_T48_MUTATION_LOCKED
+    else if CurrentJobLoadError <> '' then
       JobLine := Format(STR_SHELL_JOB_REFUSED, [CurrentJobLoadError])
     else if CurrentJob.Loaded then
     begin
@@ -2779,6 +2827,8 @@ procedure TMainForm.UpdateWorkflowText;
 begin
   if FWorkflowPanel = nil then Exit;
 
+  MenuHWT48.Caption := STR_T48_MENU;
+  MenuT48Configure.Caption := STR_T48_CONFIGURE;
   FWorkflowTitle.Caption := STR_WORKFLOW_TITLE;
   FWorkflowDetect.Caption := STR_WORKFLOW_DETECT;
   FWorkflowOpen.Caption := STR_WORKFLOW_OPEN;
@@ -2813,6 +2863,7 @@ end;
 procedure TMainForm.UpdateWorkflowState;
 var
   HasBuffer, SmartCapable, SizeKnown, AddrOK, FitsChip, MWAligned: boolean;
+  T48Preview: boolean;
   PageOK: boolean;
   BufSize, ChipSize, StartAddr: QWord;
   Parsed: QWord;
@@ -2823,6 +2874,8 @@ var
   Admission: TWriteAdmission;
 begin
   if FWorkflowPanel = nil then Exit;
+  T48Preview := (NVRAMancer <> nil) and
+                (NVRAMancer.Current_HW = CHW_T48);
 
   //กติกา "ภาพนี้ลงชิปนี้ที่แอดเดรสนี้ได้ไหม" ย้ายไปอยู่ใน writeadmission แล้ว
   //เพราะเดิมมันอยู่ในตัววาดแถบขั้นตอน แปลว่าบรรทัดคำสั่งมีคำตอบของตัวเองต่างหาก
@@ -2866,6 +2919,7 @@ begin
   Target.SmartWriteSupported := (RadioSPI.Checked and
                                  (ComboSPICMD.ItemIndex = SPI_CMD_25)) or
                                 IsEEPROMSmartWriteTarget;
+  if T48Preview then Target.SmartWriteSupported := False;
 
   Admission := EvaluateWriteAdmission(Target);
   //ชื่อเดิมยังใช้ต่อสำหรับข้อความบนแถบสถานะข้างล่าง แต่ค่าทุกตัวมาจากแกน
@@ -2881,12 +2935,25 @@ begin
 
   FWorkflowOpen.Enabled := not OperationRunning;
   FWorkflowDetect.Enabled := (not OperationRunning) and
-    ProgrammerPresent and RadioSPI.Checked;
+    ProgrammerPresent and RadioSPI.Checked and
+    ((not T48Preview) or ChipDetected);
   FWorkflowRead.Enabled := (not OperationRunning) and
     ProgrammerPresent and ChipDetected and SizeKnown;
   FWorkflowVerify.Enabled := FWorkflowRead.Enabled and HasBuffer;
+  if T48Preview then
+    FWorkflowVerify.Enabled := FWorkflowVerify.Enabled and AddrOK and
+      (StartAddr = 0) and (BufSize = ChipSize);
   FWorkflowSmart.Enabled := (not OperationRunning) and
                             Admission.MaySmartWrite;
+  if T48Preview then FWorkflowSmart.Enabled := False;
+
+  //The external preview deliberately publishes no mutation/raw-command verb.
+  //Keep the legacy toolbar honest as well as the new workspace controls; all
+  //handlers still fail closed at their operation boundary below.
+  ButtonWrite.Enabled := (not OperationRunning) and (not T48Preview);
+  ButtonErase.Enabled := (not OperationRunning) and (not T48Preview);
+  ButtonBlock.Enabled := (not OperationRunning) and (not T48Preview) and
+    RadioSPI.Checked and (ComboSPICMD.ItemIndex <> SPI_CMD_KB);
 
   //tooltip ของ Smart write บอกเหตุผลที่กดไม่ได้ ไม่ใช่คำอธิบายทั่วไปที่
   //ไม่เกี่ยวกับสถานะตรงหน้า และเหตุผลนั้นมาจากแกนตัวเดียวกับที่บรรทัดคำสั่ง
@@ -2913,7 +2980,9 @@ begin
   begin
     //Read ID ใช้ได้เฉพาะ SPI การบอกให้ "detect" บนชิป I2C/MicroWire คือการ
     //ชี้ไปที่ปุ่มที่กดไม่ได้
-    if RadioSPI.Checked then
+    if T48Preview then
+      StateText := STR_T48_SELECT_PROFILE
+    else if RadioSPI.Checked then
     begin
       StateText := STR_WORKFLOW_PICK_CHIP;
       NextStep := FWorkflowDetect;
@@ -2965,6 +3034,13 @@ begin
   begin
     StateText := STR_WORKFLOW_BAD_PAGE;
     StateColor := TColor($D16E0A);
+  end
+  else if T48Preview then
+  begin
+    StateText := STR_T48_WORKFLOW_READY;
+    StateColor := TColor($5B9E2E);
+    if FWorkflowVerify.Enabled then NextStep := FWorkflowVerify
+    else if FWorkflowRead.Enabled then NextStep := FWorkflowRead;
   end
   else if SmartCapable then
   begin
@@ -3192,6 +3268,14 @@ begin
         InterfaceText := Format(STR_SHELL_TEL_EZP_INTERFACE, [ClockText]);
         FTelemetryValues[1].Hint := STR_SHELL_TEL_EZP_HINT;
       end;
+    CHW_T48:
+      begin
+        TransportText := STR_T48_TEL_TRANSPORT;
+        InterfaceText := STR_T48_TEL_INTERFACE;
+        if T48DeviceSpec <> '' then
+          InterfaceText := InterfaceText + LineEnding + T48DeviceSpec;
+        FTelemetryValues[1].Hint := STR_T48_PREVIEW_NOTICE;
+      end;
     CHW_SERPROG:
       begin
         TransportText := STR_SHELL_TEL_SERPROG_TRANSPORT;
@@ -3229,7 +3313,9 @@ begin
     end;
   end;
 
-  if ProgrammerPresent and (NVRAMancer.Current_HW in
+  if ProgrammerPresent and (NVRAMancer.Current_HW = CHW_T48) then
+    ConnectionText := Format(STR_T48_TEL_CONFIGURED, [T48DeviceSpec])
+  else if ProgrammerPresent and (NVRAMancer.Current_HW in
      [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG]) then
     ConnectionText := Format(STR_SHELL_TEL_CONNECTION_SELECTED,
       [NVRAMancer.Programmer.HardwareName])
@@ -3240,7 +3326,7 @@ begin
     ConnectionText := Format(STR_SHELL_TEL_CONNECTION_DISCONNECTED,
       [NVRAMancer.Programmer.HardwareName]);
   if not (ProgrammerPresent and (NVRAMancer.Current_HW in
-     [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG])) then
+     [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG, CHW_T48])) then
     ConnectionText := ConnectionText + LineEnding + TransportText;
   FTelemetryValues[0].Caption := ConnectionText;
   FTelemetryValues[0].Hint := ConnectionText;
@@ -10727,6 +10813,21 @@ end;
 
 procedure SelectHW(programmer: THardwareList);
 begin
+  //External-tool waits pump the GUI.  A hardware menu event during that wait
+  //must not reconfigure TT48Hardware and free its bridge while Execute is
+  //still on the stack.  This is the authoritative mutation boundary; disabled
+  //menus below are only the visible UX layer.
+  if OperationRunning then Exit;
+  if (NVRAMancer <> nil) and (NVRAMancer.Current_HW <> programmer) then
+  begin
+    //A different programmer means a different socket/clip observation.  Never
+    //carry a live ID or chip-content owner across that physical boundary,
+    //even when both backends are merely "available" and Poll sees no boolean
+    //presence transition.
+    ForgetChipKnowledge;
+    LastChipUID := '';
+  end;
+
   //เมนู Buzzpirat กับรายการพอร์ต COM ใช้เฉพาะกับเครื่องที่คุยผ่านพอร์ตอนุกรม
   //ถ้าใช้ CH341/CH347/FT232H อยู่ก็ไม่ต้องมีให้เกะกะ
   MainForm.MenuBuzzpirat.Visible := programmer = CHW_BUZZPIRAT;
@@ -10801,6 +10902,22 @@ begin
     NVRAMancer.Current_HW := CHW_EZP;
   end;
 
+  if programmer = CHW_T48 then
+  begin
+    //T48 is a managed whole-chip process backend.  Its exact device profile
+    //owns the clock and socket routing; none of the raw-bus menus apply.
+    MainForm.MenuSPIClock.Visible:= false;
+    MainForm.MenuCH347SPIClock.Visible:= false;
+    MainForm.MenuAVRISPSPIClock.Visible:= false;
+    MainForm.MenuArduinoSPIClock.Visible:= false;
+    MainForm.MenuFT232SPIClock.Visible:= false;
+    MainForm.MenuMicrowire.Enabled:= false;
+    NVRAMancer.Current_HW := CHW_T48;
+    if NVRAMancer.Programmer is TT48Hardware then
+      TT48Hardware(NVRAMancer.Programmer).Configure(T48ToolPath,
+        T48DeviceSpec);
+  end;
+
   if programmer = CHW_SERPROG then
   begin
     //ความถี่อยู่ในมือเฟิร์มแวร์ของบอร์ด ไม่มีเมนูให้เลือกฝั่งนี้
@@ -10837,6 +10954,39 @@ begin
   //กล่องเลือกแรงดันบนหน้าหลักผูกกับ CH347 เท่านั้น โผล่และหุบตามเครื่องที่เลือก
   RefreshCH347VccPanel;
   RefreshBusClockPanel;
+
+  //The T48 phase-one bridge has only typed ID/read/verify commands.  Disable
+  //every surface whose implementation assumes raw bus access or mutation;
+  //switching to any other backend restores the legacy availability and its
+  //own operation-time safety checks remain authoritative.
+  MainForm.ComboItem1.Enabled := programmer <> CHW_T48;
+  MainForm.MenuSmartWrite.Enabled := programmer <> CHW_T48;
+  MainForm.MenuSmartWritePreview.Enabled := programmer <> CHW_T48;
+  MainForm.MenuEraseRangeAuto.Enabled := programmer <> CHW_T48;
+  MainForm.MenuEraseRange4K.Enabled := programmer <> CHW_T48;
+  MainForm.MenuEraseRange32K.Enabled := programmer <> CHW_T48;
+  MainForm.MenuEraseRange64K.Enabled := programmer <> CHW_T48;
+  MainForm.MenuEraseChip.Enabled := programmer <> CHW_T48;
+  MainForm.BlankCheckMenuItem.Enabled := programmer <> CHW_T48;
+  MainForm.MenuChipDoctor.Enabled := programmer <> CHW_T48;
+  MainForm.MenuCapacityTest.Enabled := programmer <> CHW_T48;
+  MainForm.MenuSurfaceScan.Enabled := programmer <> CHW_T48;
+  MainForm.MenuSFDPDetect.Enabled := programmer <> CHW_T48;
+  MainForm.MenuSPIConsole.Enabled := programmer <> CHW_T48;
+  MainForm.MenuSecReg.Enabled := programmer <> CHW_T48;
+  MainForm.MenuSecRegWrite.Enabled := programmer <> CHW_T48;
+  //MenuProtInfo is retained as an optional legacy hook but is not present in
+  //every form resource.  Hardware selection also runs during FormCreate, so
+  //never dereference the hook unless this build actually instantiated it.
+  if Assigned(MainForm.MenuProtInfo) then
+    MainForm.MenuProtInfo.Enabled := programmer <> CHW_T48;
+  //The doctor can still run the managed tool/model/database preflight.  It
+  //already understands native whole-chip backends and skips raw SPI probes.
+  MainForm.MenuConnectionDoctor.Enabled := True;
+  MainForm.MenuCompareChip.Enabled := programmer <> CHW_T48;
+  MainForm.ScriptsMenuItem.Enabled := programmer <> CHW_T48;
+  MainForm.MenuRunBatch.Enabled := programmer <> CHW_T48;
+  MainForm.MenuAutoDetectChip.Enabled := programmer <> CHW_T48;
 end;
 
 //ไล่เปิดอุปกรณ์ทีละตัว เพื่อดูว่ามีเครื่องโปรแกรมตัวไหนเสียบอยู่จริง
@@ -10879,6 +11029,7 @@ end;
 //ติ๊กเมนู Hardware ให้ตรงกับอุปกรณ์ที่ใช้งานอยู่จริง
 procedure SetHardwareMenuCheck(HW: THardwareList);
 begin
+  if OperationRunning then Exit;
   //เครื่องคนละตัวคือบันไดคล็อกคนละบันได ผลการไล่ครั้งก่อนใช้ไม่ได้
   TunedAfterSilence := False;
   MainForm.MenuHWUSBASP.Checked    := HW = CHW_USBASP;
@@ -10890,6 +11041,7 @@ begin
   MainForm.MenuHWFT232H.Checked    := HW = CHW_FT232H;
   MainForm.MenuHWSERPROG.Checked   := HW = CHW_SERPROG;
   MainForm.MenuHWEZP.Checked       := HW = CHW_EZP;
+  MainForm.MenuHWT48.Checked       := HW = CHW_T48;
   MainForm.MenuHWSIM.Checked       := HW = CHW_SIM;
 end;
 
@@ -10918,6 +11070,15 @@ begin
   else if NVRAMancer.Current_HW in
           [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG] then
     Present := True
+  //Do not launch an exclusive external USB tool every three seconds.  For the
+  //preview the idle state means "configured"; DevOpen performs the live T48
+  //model check at the operation boundary and reports absence separately.
+  else if NVRAMancer.Current_HW = CHW_T48 then
+  begin
+    TT48Hardware(NVRAMancer.Programmer).Configure(T48ToolPath,
+      T48DeviceSpec);
+    Present := TT48Hardware(NVRAMancer.Programmer).Configured;
+  end
   //EZP ตรวจ presence จากรายการ USB เท่านั้น ไม่เปิดหรือ claim ตัวเครื่อง
   else if NVRAMancer.Current_HW = CHW_EZP then
     Present := EZPDevicePresent
@@ -10953,7 +11114,17 @@ begin
   //พูดเฉพาะตอนสถานะเปลี่ยน ไม่งั้น log จะเต็มไปด้วยข้อความซ้ำทุกสามวินาที
   if Announce or (Was <> ProgrammerPresent) then
   begin
-    if ProgrammerPresent then
+    //An idle T48 is deliberately not opened or claimed, so "connected" would
+    //be a fabricated hardware observation.  Report the exact configured state
+    //and defer the live model query to the operation boundary.
+    if NVRAMancer.Current_HW = CHW_T48 then
+    begin
+      if ProgrammerPresent then
+        LogPrint(Format(STR_T48_TEL_CONFIGURED, [T48DeviceSpec]))
+      else
+        LogPrint(STR_T48_CONFIG_REQUIRED);
+    end
+    else if ProgrammerPresent then
       LogPrint(STR_HW_CONNECTED + NVRAMancer.Programmer.HardwareName)
     else
       LogPrint(STR_HW_DISCONNECTED);
@@ -10966,7 +11137,8 @@ begin
   //ทำเฉพาะจังหวะที่สถานะเปลี่ยนจากไม่มีเป็นมี ไม่งั้นจะยิงคำสั่งใส่ชิปทุกสามวินาที
   //และทำเฉพาะโหมด SPI เพราะคำสั่งอ่านรหัสเป็นของ SPI
   if AppReady and ProgrammerPresent and (not Was) and
-     MainForm.MenuAutoDetectChip.Checked and MainForm.RadioSPI.Checked then
+     MainForm.MenuAutoDetectChip.Checked and MainForm.RadioSPI.Checked and
+     (NVRAMancer.Current_HW <> CHW_T48) then
   begin
     AutomaticChipDetection := True;
     try
@@ -10995,6 +11167,8 @@ begin
   MainForm.ButtonOpenHex.Enabled := False;
   MainForm.ButtonSaveHex.Enabled := False;
 
+  MainForm.MenuItemHardware.Enabled := False;
+  MainForm.MenuChip.Enabled := False;
   MainForm.GroupChipSettings.Enabled := false;
   MainForm.MPHexEditorEx.Enabled := false;
   MainForm.BeginOperationTelemetry;
@@ -11008,6 +11182,8 @@ begin
 
   MainForm.MPHexEditorEx.Enabled := true;
   MainForm.GroupChipSettings.Enabled := true;
+  MainForm.MenuItemHardware.Enabled := True;
+  MainForm.MenuChip.Enabled := True;
   MainForm.ButtonRead.Enabled := True;
   MainForm.ButtonWrite.Enabled := True;
   MainForm.ButtonVerify.Enabled := True;
@@ -11056,6 +11232,10 @@ end;
 
 procedure TMainForm.ChipClick(Sender: TObject);
 begin
+  //SelectChipAny is also the trusted internal path that applies a profile
+  //after a successful live ID read, which legitimately occurs while locked.
+  //Block only this user-driven entry point during a pumped operation.
+  if OperationRunning then Exit;
   if Sender is TMenuItem then
     SelectChipAny(TMenuItem(Sender).Caption);
 end;
@@ -11154,6 +11334,7 @@ end;
 
 procedure TMainForm.MenuFindChipClick(Sender: TObject);
 begin
+  if OperationRunning then Exit;
   ChipSearchForm.EditSearch.Text:= '';
 
   //เปิดมาแล้วเห็นชิปทั้งหมดเลย ไม่ใช่หน้าต่างว่างที่ต้องเดาว่าต้องพิมพ์อะไรก่อน
@@ -11227,6 +11408,478 @@ end;
 procedure TMainForm.MenuHWEZPClick(Sender: TObject);
 begin
   SelectHW(CHW_EZP);
+end;
+
+procedure TMainForm.MenuT48ConfigureClick(Sender: TObject);
+var
+  Dlg: TOpenDialog;
+  NewTool, NewDevice: string;
+  Verifier: TT48Hardware;
+  Options: TT48RunOptions;
+  BridgeResult: TT48BridgeResult;
+begin
+  if OperationRunning then Exit;
+
+  Dlg := TOpenDialog.Create(Self);
+  try
+    Dlg.Title := STR_T48_TOOL_DIALOG;
+    Dlg.Filter := 'minipro executable|minipro.exe|Executable files|*.exe|All files|*.*';
+    Dlg.Options := Dlg.Options + [ofFileMustExist, ofPathMustExist];
+    if T48ToolPath <> '' then
+      Dlg.FileName := T48ToolPath
+    else
+      Dlg.FileName := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+                      'minipro.exe';
+    if not Dlg.Execute then Exit;
+    NewTool := ExpandFileNameUTF8(Dlg.FileName);
+  finally
+    Dlg.Free;
+  end;
+
+  NewDevice := T48DeviceSpec;
+  if not InputQuery(STR_T48_CONFIGURE, STR_T48_DEVICE_PROMPT,
+                    NewDevice) then Exit;
+  NewDevice := Trim(NewDevice);
+  //The bridge performs the authoritative offline database check.  Reject the
+  //obvious non-exact form here so a typo never survives into settings.xml.
+  if (Pos('@', NewDevice) <= 1) or
+     (Pos('@', NewDevice) = Length(NewDevice)) then
+  begin
+    MessageDlg('NVRAMancer', STR_T48_CONFIG_REQUIRED, mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  //Validate the separately installed tool and the exact offline database
+  //entry before replacing a working station configuration.  A physical T48
+  //is intentionally not required here; the live model is checked when an
+  //operation begins, so this can be prepared before the order arrives.
+  Verifier := TT48Hardware.Create;
+  try
+    Verifier.Configure(NewTool, NewDevice);
+    InitT48RunOptions(Options);
+    //Until physical T48 validation proves a safe abort sequence, never force-
+    //terminate minipro on a deadline while it may own the programmer.
+    Options.TimeoutMS := 0;
+    if not Verifier.CheckConfiguration(Options, BridgeResult) then
+    begin
+      MessageDlg('NVRAMancer', BridgeResult.ErrorText, mtError, [mbOK], 0);
+      Exit;
+    end;
+  finally
+    Verifier.Free;
+  end;
+
+  T48ToolPath := NewTool;
+  T48DeviceSpec := NewDevice;
+  LogPrint(Format(STR_T48_CONFIG_SAVED,
+    [T48DeviceSpec, T48ToolPath]));
+  if NVRAMancer.Current_HW = CHW_T48 then
+    SelectHW(CHW_T48);
+  PollProgrammer(False);
+  UpdateWorkflowState;
+end;
+
+procedure TMainForm.MenuHWT48Click(Sender: TObject);
+begin
+  if OperationRunning then Exit;
+  SelectHW(CHW_T48);
+  SetHardwareMenuCheck(CHW_T48);
+  LogPrint(STR_T48_PREVIEW_NOTICE);
+  if (T48ToolPath = '') or (T48DeviceSpec = '') then
+  begin
+    LogPrint(STR_T48_CONFIG_REQUIRED);
+    if not CLIMode then MenuT48ConfigureClick(Sender);
+  end;
+  PollProgrammer(False);
+  UpdateWorkflowState;
+end;
+
+procedure TMainForm.PumpT48Process;
+begin
+  //The child process is waited on by the GUI thread.  Keep paint and status
+  //messages flowing, but cancellation is deliberately not passed to the
+  //process runner until kill/power-down behaviour is proven on real T48
+  //hardware.  A request is honored between complete minipro invocations.
+  OpProcessMessages;
+end;
+
+function TMainForm.T48CancellationRequested: boolean;
+begin
+  Result := OperationCancellationRequested;
+end;
+
+function TMainForm.T48RunOptions: TT48RunOptions;
+begin
+  InitT48RunOptions(Result);
+  //A forced child-process termination may leave the socket powered or an
+  //algorithm half-finished.  No deadline is safer until the real programmer
+  //has proved a graceful abort/unplug sequence in HIL.
+  Result.TimeoutMS := 0;
+  Result.CancelCheck := nil;
+  //Unlike process-level cancellation, this callback is sampled only after a
+  //complete minipro invocation has returned and before another one begins.
+  Result.BetweenStepCancelCheck := @T48CancellationRequested;
+  Result.WaitPump := @PumpT48Process;
+end;
+
+procedure TMainForm.ApplyT48BridgeFailure(
+  const BridgeResult: TT48BridgeResult);
+begin
+  if CLIMode and (BridgeResult.Error <> tbeNone) then
+    NoteCLIOutcome(OutcomeFromT48BridgeError(BridgeResult.Error));
+  if BridgeResult.Error = tbeCancelled then
+    OpCancel
+  else
+    OpFail(BridgeResult.ErrorText);
+end;
+
+procedure TMainForm.CaptureT48OperationContext(
+  out Context: TT48OperationContext);
+begin
+  Context := Default(TT48OperationContext);
+  Context.ToolPath := T48ToolPath;
+  Context.DeviceSpec := T48DeviceSpec;
+  Context.ProfileName := CurrentICParam.Name;
+  Context.ExpectedID := CurrentICParam.ID;
+  Context.ExpectedSize := CurrentICParam.Size;
+  Context.ProfileHasScript := Trim(CurrentICParam.Script) <> '';
+  Context.ProfileEligible := RadioSPI.Checked and
+    (ComboSPICMD.ItemIndex = SPI_CMD_25) and ChipDetected and
+    (Context.ProfileName <> '') and (Context.ExpectedSize > 0) and
+    (not Context.ProfileHasScript);
+end;
+
+function TMainForm.OpenT48Preview(const Context: TT48OperationContext;
+  out Hardware: TT48Hardware;
+  out BridgeResult: TT48BridgeResult): boolean;
+var
+  Options: TT48RunOptions;
+  CanonicalExpectedID: string;
+begin
+  Result := False;
+  Hardware := nil;
+  InitT48BridgeResult(BridgeResult);
+  if (NVRAMancer = nil) or
+     not (NVRAMancer.Programmer is TT48Hardware) then
+  begin
+    BridgeResult.Error := tbeRunnerFailure;
+    BridgeResult.ErrorText := 'the selected programmer is not the T48 backend';
+    Exit;
+  end;
+  if Context.ProfileHasScript then
+  begin
+    BridgeResult.Error := tbeInvalidDeviceName;
+    BridgeResult.ErrorText := STR_T48_SCRIPT_PROFILE;
+    Exit;
+  end;
+  if not Context.ProfileEligible then
+  begin
+    BridgeResult.Error := tbeInvalidSize;
+    BridgeResult.ErrorText := STR_T48_SELECT_PROFILE;
+    Exit;
+  end;
+  if (not NormalizeT48ChipID(Context.ExpectedID, CanonicalExpectedID)) or
+     (CanonicalExpectedID = '0') then
+  begin
+    BridgeResult.Error := tbeInvalidDeviceName;
+    BridgeResult.ErrorText := STR_T48_SELECT_PROFILE;
+    Exit;
+  end;
+
+  Hardware := TT48Hardware(NVRAMancer.Programmer);
+  Hardware.Configure(Context.ToolPath, Context.DeviceSpec);
+  Options := T48RunOptions;
+  if not Hardware.OpenWithOptions(Options, BridgeResult) then Exit;
+  if Hardware.DeviceInfo.CapacityBytes <> Context.ExpectedSize then
+  begin
+    if CLIMode then NoteCLIOutcome(coFileSizeMismatch);
+    BridgeResult.Error := tbeDeviceMismatch;
+    BridgeResult.ErrorText := Format(STR_T48_PROFILE_MISMATCH,
+      [Hardware.DeviceInfo.CapacityBytes, Context.ExpectedSize]);
+    Hardware.DevClose;
+    Exit;
+  end;
+
+  LogPrint(STR_CURR_HW + Hardware.HardwareName);
+  if Hardware.DeviceInfo.ToolVersion <> '' then
+    LogPrint(Format(STR_T48_TOOL_VERSION,
+      [Hardware.DeviceInfo.ToolVersion]));
+  LogPrint(Format(STR_T48_CONFIG_SAVED,
+    [Context.DeviceSpec, Context.ToolPath]));
+  LogRailReport;
+  Result := True;
+end;
+
+function TMainForm.T48IdentityMatches(
+  const ExpectedID: string;
+  const BridgeResult: TT48BridgeResult): boolean;
+var
+  CanonicalExpectedID, LiveID: string;
+begin
+  Result := T48ChipIDsEqual(ExpectedID, BridgeResult.ChipID,
+    CanonicalExpectedID, LiveID) and (CanonicalExpectedID <> '0');
+  if not Result then
+  begin
+    if CLIMode then NoteCLIOutcome(coChipMismatch);
+    OpFail(Format(STR_T48_ID_MISMATCH,
+      [IfThen(LiveID = '', '--', LiveID),
+       IfThen(CanonicalExpectedID = '', '--', CanonicalExpectedID)]));
+    Exit;
+  end;
+  LastID9F := LiveID;
+  ChipIdentityConfirmed := True;
+  LogPrint('ID(9F): ' + LiveID);
+  LogPrint(STR_ID_OK + CanonicalExpectedID);
+end;
+
+procedure TMainForm.RunT48ReadID;
+var
+  Hardware: TT48Hardware;
+  BridgeResult: TT48BridgeResult;
+  Options: TT48RunOptions;
+  Context: TT48OperationContext;
+  Completed: boolean;
+begin
+  Hardware := nil;
+  Completed := False;
+  CaptureT48OperationContext(Context);
+  //Every live socket query starts with no inherited identity.  A failed or
+  //cancelled query must not leave a prior chip's ID as current evidence.
+  ForgetChipKnowledge;
+  LockControl;
+  try
+    Options := T48RunOptions;
+    if not OpenT48Preview(Context, Hardware, BridgeResult) then
+    begin
+      ApplyT48BridgeFailure(BridgeResult);
+      Exit;
+    end;
+    if OperationCancellationRequested then
+    begin
+      if CLIMode then NoteCLIOutcome(coCancelled);
+      OpCancel;
+      Exit;
+    end;
+    if not Hardware.ReadChipID(Options, BridgeResult) then
+    begin
+      ApplyT48BridgeFailure(BridgeResult);
+      Exit;
+    end;
+    if OperationCancellationRequested then
+    begin
+      if CLIMode then NoteCLIOutcome(coCancelled);
+      OpCancel;
+      Exit;
+    end;
+    if not T48IdentityMatches(Context.ExpectedID, BridgeResult) then Exit;
+    OpProgress(1, 1);
+    Completed := True;
+  finally
+    if Hardware <> nil then Hardware.DevClose;
+    if (not Completed) and OpOK then OpFail(STR_T48_INCOMPLETE);
+    if not Completed then ForgetChipKnowledge;
+    try
+      LogPrint(STR_OP_RESULT + OpSummary);
+    finally
+      UnlockControl;
+    end;
+  end;
+end;
+
+procedure TMainForm.RunT48Read;
+var
+  Hardware: TT48Hardware;
+  FirstRead, SecondRead: TT48BridgeResult;
+  Options: TT48RunOptions;
+  I: SizeInt;
+  CRC32: cardinal;
+  Context: TT48OperationContext;
+  Completed: boolean;
+begin
+  Hardware := nil;
+  Completed := False;
+  CaptureT48OperationContext(Context);
+  ForgetChipKnowledge;
+  LockControl;
+  try
+    Options := T48RunOptions;
+    if not OpenT48Preview(Context, Hardware, FirstRead) then
+    begin
+      ApplyT48BridgeFailure(FirstRead);
+      Exit;
+    end;
+    if OperationCancellationRequested then
+    begin
+      if CLIMode then NoteCLIOutcome(coCancelled);
+      OpCancel;
+      Exit;
+    end;
+
+    TimeCounter := Time;
+    if not Hardware.ReadWholeChip(Context.ExpectedSize, Options,
+      FirstRead) then
+    begin
+      ApplyT48BridgeFailure(FirstRead);
+      Exit;
+    end;
+    if not T48IdentityMatches(Context.ExpectedID, FirstRead) then Exit;
+    if OperationCancellationRequested then
+    begin
+      if CLIMode then NoteCLIOutcome(coCancelled);
+      OpCancel;
+      Exit;
+    end;
+
+    LogPrint(STR_T48_READ_SECOND);
+    if not Hardware.ReadWholeChip(Context.ExpectedSize, Options,
+      SecondRead) then
+    begin
+      ApplyT48BridgeFailure(SecondRead);
+      Exit;
+    end;
+    if not T48IdentityMatches(Context.ExpectedID, SecondRead) then Exit;
+    if OperationCancellationRequested then
+    begin
+      if CLIMode then NoteCLIOutcome(coCancelled);
+      OpCancel;
+      Exit;
+    end;
+
+    if Length(FirstRead.Data) <> Length(SecondRead.Data) then
+    begin
+      if CLIMode then NoteCLIOutcome(coUnstable);
+      OpFail('the two independent T48 reads returned different sizes');
+      Exit;
+    end;
+    for I := 0 to High(FirstRead.Data) do
+      if FirstRead.Data[I] <> SecondRead.Data[I] then
+      begin
+        if CLIMode then NoteCLIOutcome(coUnstable);
+        OpFail(Format(STR_T48_READ_DISAGREE, [IntToHex(I, 8)]), I);
+        Exit;
+      end;
+
+    //Only now are bytes published to the editor.  A short, stale, mismatched
+    //or unstable read leaves the previous buffer untouched.
+    RomF.Clear;
+    if Length(FirstRead.Data) > 0 then
+      RomF.WriteBuffer(FirstRead.Data[0], Length(FirstRead.Data));
+    RomF.Position := 0;
+    ScanDumpAndReport(RomF);
+    RomF.Position := 0;
+    MPHexEditorEx.LoadFromStream(RomF);
+    StatusBar.Panels.Items[2].Text := LabelChipName.Caption;
+    RememberChipContent(RomF);
+    BufferSource := bsChip;
+    BufferSourceName := Context.ProfileName;
+    OpProgress(Cardinal(Context.ExpectedSize), Cardinal(Context.ExpectedSize));
+    CRC32 := UpdateCRC32($FFFFFFFF, RomF.Memory, RomF.Size);
+    LogPrint('CRC32 = 0x' + IntToHex(CRC32, 8));
+    LogPrint(STR_TIME + TimeToStr(Time - TimeCounter));
+    UpdateWorkflowState;
+    Completed := True;
+  finally
+    if Hardware <> nil then Hardware.DevClose;
+    if (not Completed) and OpOK then OpFail(STR_T48_INCOMPLETE);
+    if not Completed then ForgetChipKnowledge;
+    try
+      LogPrint(STR_OP_RESULT + OpSummary);
+    finally
+      UnlockControl;
+    end;
+  end;
+end;
+
+procedure TMainForm.RunT48Verify;
+var
+  Hardware: TT48Hardware;
+  BridgeResult: TT48BridgeResult;
+  Options: TT48RunOptions;
+  VerifyData: TBytes;
+  StartAddress: QWord;
+  Context: TT48OperationContext;
+  Completed: boolean;
+begin
+  Hardware := nil;
+  VerifyData := nil;
+  Completed := False;
+  CaptureT48OperationContext(Context);
+  ForgetChipKnowledge;
+  LockControl;
+  try
+    if (not TryStrToQWord('$' + Trim(StartAddressEdit.Text),
+                          StartAddress)) or
+       (StartAddress <> 0) or
+       (QWord(MPHexEditorEx.DataSize) <> Context.ExpectedSize) or
+       (Context.ExpectedSize = 0) then
+    begin
+      if CLIMode then NoteCLIOutcome(coFileSizeMismatch);
+      OpFail(Format(STR_T48_FULL_IMAGE_ONLY, [Context.ExpectedSize]));
+      Exit;
+    end;
+
+    RomF.Clear;
+    MPHexEditorEx.SaveToStream(RomF);
+    if QWord(RomF.Size) <> Context.ExpectedSize then
+    begin
+      if CLIMode then NoteCLIOutcome(coFileSizeMismatch);
+      OpFail(Format(STR_T48_FULL_IMAGE_ONLY, [Context.ExpectedSize]));
+      Exit;
+    end;
+    SetLength(VerifyData, RomF.Size);
+    if Length(VerifyData) > 0 then
+      Move(RomF.Memory^, VerifyData[0], Length(VerifyData));
+
+    Options := T48RunOptions;
+    if not OpenT48Preview(Context, Hardware, BridgeResult) then
+    begin
+      ApplyT48BridgeFailure(BridgeResult);
+      Exit;
+    end;
+    if OperationCancellationRequested then
+    begin
+      if CLIMode then NoteCLIOutcome(coCancelled);
+      OpCancel;
+      Exit;
+    end;
+    TimeCounter := Time;
+    if not Hardware.VerifyWholeChipData(VerifyData, Context.ExpectedSize,
+      Options, BridgeResult) then
+    begin
+      ApplyT48BridgeFailure(BridgeResult);
+      Exit;
+    end;
+    if OperationCancellationRequested then
+    begin
+      if CLIMode then NoteCLIOutcome(coCancelled);
+      OpCancel;
+      Exit;
+    end;
+    if not T48IdentityMatches(Context.ExpectedID, BridgeResult) then Exit;
+    OpProgress(Cardinal(Context.ExpectedSize), Cardinal(Context.ExpectedSize));
+    LogPrint(STR_DONE);
+    LogPrint(STR_TIME + TimeToStr(Time - TimeCounter));
+    Completed := True;
+  finally
+    if Hardware <> nil then Hardware.DevClose;
+    VerifyData := nil;
+    if (not Completed) and OpOK then OpFail(STR_T48_INCOMPLETE);
+    if not Completed then ForgetChipKnowledge;
+    try
+      LogPrint(STR_OP_RESULT + OpSummary);
+    finally
+      UnlockControl;
+    end;
+  end;
+end;
+
+procedure TMainForm.RefuseT48Operation(Kind: TOpKind);
+begin
+  OpBegin(Kind);
+  OpFail(STR_T48_MUTATION_LOCKED);
+  LogPrint(STR_T48_MUTATION_LOCKED);
+  LogPrint(STR_OP_RESULT + OpSummary);
+  UpdateWorkflowState;
 end;
 
 //เครื่องโปรแกรมที่ไม่มีอยู่จริง
@@ -11936,6 +12589,11 @@ var
   I2C_ChunkSize: Word;
   ParsedPage: integer;
 begin
+  if NVRAMancer.Current_HW = CHW_T48 then
+  begin
+    RefuseT48Operation(opkWrite);
+    Exit;
+  end;
   //All normal SPI NOR writes share the transactional planner/executor.  This
   //removes the legacy raw page-program path from GUI, batch, and CLI entry
   //points while leaving protocol-specific EEPROM/DataFlash writers intact.
@@ -12309,6 +12967,14 @@ begin
   if OperationRunning then Exit;
   I2C_ChunkSize := 65535;
   if BlankCheck then OpBegin(opkBlankCheck) else OpBegin(opkVerify);
+  if NVRAMancer.Current_HW = CHW_T48 then
+  begin
+    if BlankCheck then
+      RefuseT48Operation(opkBlankCheck)
+    else
+      RunT48Verify;
+    Exit;
+  end;
 try
   ButtonCancel.Tag := 0;
   if not OpenDevice() then
@@ -12566,6 +13232,11 @@ var
   s: string;
   SLreg: array[0..31] of byte;
 begin
+  if NVRAMancer.Current_HW = CHW_T48 then
+  begin
+    RefuseT48Operation(opkWrite);
+    Exit;
+  end;
 try
   OpBegin(opkNone);
   ButtonCancel.Tag := 0;
@@ -12800,6 +13471,11 @@ begin
   //เริ่มตรวจใหม่ = ลืมของเก่าไว้ก่อน ถ้าตรวจไม่สำเร็จก็ต้องไม่เหลือสถานะ
   //"ยืนยันตัวตนแล้ว" ค้างมาจากชิปตัวก่อนหน้า
   ForgetChipKnowledge;
+  if NVRAMancer.Current_HW = CHW_T48 then
+  begin
+    RunT48ReadID;
+    Exit;
+  end;
   try
     if not OpenDevice() then
     begin
@@ -13891,11 +14567,22 @@ begin
   ledY := 4;
   C.Font.Size := 8;
 
-  if ProgrammerPresent then
-    s := NVRAMancer.Programmer.HardwareName
+  //For T48 the idle poll validates only the saved tool/device configuration.
+  //The live model query deliberately runs at operation start, so a configured
+  //but unplugged unit must never get the same green LED as present hardware.
+  if ProgrammerPresent and (NVRAMancer.Current_HW = CHW_T48) then
+  begin
+    s := STR_T48_LED_CONFIGURED;
+    Led(ledY, STR_LED_PROGRAMMER, s, False);
+  end
   else
-    s := '';
-  Led(ledY, STR_LED_PROGRAMMER, s, ProgrammerPresent);
+  begin
+    if ProgrammerPresent then
+      s := NVRAMancer.Programmer.HardwareName
+    else
+      s := '';
+    Led(ledY, STR_LED_PROGRAMMER, s, ProgrammerPresent);
+  end;
 
   if ChipDetected then s := CurrentICParam.ID else s := '';
   Led(ledY + 21, STR_LED_CHIP, s, ChipDetected);
@@ -14859,6 +15546,7 @@ begin
   NVRAMancer.AddHW(TCH347Hardware.Create);
   NVRAMancer.AddHW(TSerprogHardware.Create);
   NVRAMancer.AddHW(TEZPHardware.Create);
+  NVRAMancer.AddHW(TT48Hardware.Create);
   //ต่อท้ายสุด และ ProbeProgrammer ไม่แตะมันเลย เครื่องจำลองที่ถูกเลือก
   //อัตโนมัติได้จะกลายเป็นตัวที่ตอบแทนฮาร์ดแวร์ที่ไม่ได้เสียบอยู่
   NVRAMancer.AddHW(TSimulatedHardware.Create);
@@ -14896,9 +15584,17 @@ begin
   SetWorkspaceMode(wmRepair);
 
   //ค้นหาเครื่องโปรแกรมที่เสียบอยู่ตั้งแต่เปิดโปรแกรม แล้วเฝ้าดูต่อเป็นระยะ
+  //CLI admission runs after FormCreate, so it must not inherit an earlier
+  //startup probe.  In particular a rejected T48 mutation must launch zero
+  //hardware helpers before RunCLI has a chance to refuse it.
   SetHardwareMenuCheck(NVRAMancer.Current_HW);
-  PollProgrammer(True, True);
-  HwTimer.Enabled := True;
+  if CLIMode then
+    HwTimer.Enabled := False
+  else
+  begin
+    PollProgrammer(True, True);
+    HwTimer.Enabled := True;
+  end;
 end;
 
 //ตอน FormCreate ยังไม่รู้ความสูงจริงของแผง ต้องจัดวางซ้ำหลังหน้าต่างขึ้นแล้ว
@@ -14966,7 +15662,8 @@ begin
   //ถ้าเสียบเครื่องโปรแกรมมาตั้งแต่ก่อนเปิดโปรแกรม จังหวะเปลี่ยนสถานะผ่านไปแล้ว
   //จึงต้องตรวจชิปให้หนึ่งครั้งตรงนี้เอง
   AppReady := True;
-  if ProgrammerPresent and MenuAutoDetectChip.Checked and RadioSPI.Checked then
+  if ProgrammerPresent and MenuAutoDetectChip.Checked and RadioSPI.Checked and
+     (NVRAMancer.Current_HW <> CHW_T48) then
   begin
     AutomaticChipDetection := True;
     try
@@ -15110,6 +15807,12 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
+  //A command-line invocation is an operation, not an interactive settings
+  //session.  Its temporary backend/profile overrides must never rewrite the
+  //operator's saved bench configuration when Halt frees the hidden form.  Let
+  //the operating system reclaim process-lifetime globals on this path: the
+  //interactive cleanup order below assumes a fully running LCL session.
+  if CLIMode then Exit;
   NVRAMancer.Free;
   MainForm.MPHexEditorEx.Free;
   RomF.Free;
@@ -15131,6 +15834,11 @@ var
 begin
   I2C_ChunkSize := 65535;
   OpBegin(opkRead);
+  if NVRAMancer.Current_HW = CHW_T48 then
+  begin
+    RunT48Read;
+    Exit;
+  end;
 try
   ButtonCancel.Tag := 0;
   if not OpenDevice() then
@@ -15337,6 +16045,11 @@ procedure TMainForm.ButtonEraseClick(Sender: TObject);
 var
   I2C_DevAddr: byte;
 begin
+  if NVRAMancer.Current_HW = CHW_T48 then
+  begin
+    RefuseT48Operation(opkErase);
+    Exit;
+  end;
   //EZP2023+ มีคำสั่ง native erase ของเฟิร์มแวร์เอง แล้วอ่านกลับตรวจ FF
   //ทุกไบต์ การเขียนภาพ FF ใช้แทนไม่ได้เพราะเฟิร์มแวร์ข้ามเพจ FF
   if RadioSPI.Checked and (ComboSPICMD.ItemIndex = SPI_CMD_25) and
@@ -15606,6 +16319,11 @@ var
   Opcode: byte;
 begin
   if OperationRunning then Exit;
+  if NVRAMancer.Current_HW = CHW_T48 then
+  begin
+    RefuseT48Operation(opkErase);
+    Exit;
+  end;
 try
   OpBegin(opkErase);
   //ชิปกำลังจะถูกเปลี่ยนเนื้อใน ความรู้เดิมว่า "เปล่า" หรือ "มีข้อมูล"
@@ -16018,6 +16736,12 @@ var
 
 begin
   if OperationRunning then Exit;
+
+  if NVRAMancer.Current_HW = CHW_T48 then
+  begin
+    RefuseT48Operation(opkWrite);
+    Exit;
+  end;
 
   //EZP2023+ ไม่มีคำสั่ง SPI ดิบให้ตัววางแผนอ่าน sector ข้างเคียง ลบเป็น
   //ช่วง หรือโปรแกรมเฉพาะเพจที่เปลี่ยน มันรับได้แต่ภาพทั้งชิปผ่านคำสั่งของ
@@ -17331,6 +18055,11 @@ begin
       TDOMElement(ParentNode).SetAttribute('hw', 'serprog');
     if MainForm.MenuHWEZP.Checked then
       TDOMElement(ParentNode).SetAttribute('hw', 'ezp');
+    if MainForm.MenuHWT48.Checked then
+      TDOMElement(ParentNode).SetAttribute('hw', 't48');
+
+    TDOMElement(ParentNode).SetAttribute('t48_tool', T48ToolPath);
+    TDOMElement(ParentNode).SetAttribute('t48_device', T48DeviceSpec);
 
     //เลขรันนิ่งและการผลิตเป็นชุด
     TDOMElement(ParentNode).SetAttribute('sn_enabled', BoolToStr(ProdSettings.SNEnabled, '1', '0'));
@@ -17565,6 +18294,13 @@ begin
         if OptVal = '8Khz' then MainForm.MenuMW8Khz.Checked := true;
       end;
 
+      if Node.Attributes.GetNamedItem('t48_tool') <> nil then
+        T48ToolPath := UTF16ToUTF8(
+          Node.Attributes.GetNamedItem('t48_tool').NodeValue);
+      if Node.Attributes.GetNamedItem('t48_device') <> nil then
+        T48DeviceSpec := UTF16ToUTF8(
+          Node.Attributes.GetNamedItem('t48_device').NodeValue);
+
       if  Node.Attributes.GetNamedItem('hw') <> nil then
       begin
         OptVal := UTF16ToUTF8(Node.Attributes.GetNamedItem('hw').NodeValue);
@@ -17621,6 +18357,12 @@ begin
         begin
           MainForm.MenuHWEZP.Checked := true;
           SelectHW(CHW_EZP);
+        end;
+
+        if OptVal = 't48' then
+        begin
+          MainForm.MenuHWT48.Checked := true;
+          SelectHW(CHW_T48);
         end;
 
 

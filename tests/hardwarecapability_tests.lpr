@@ -127,6 +127,20 @@ begin
     HW.Free;
   end;
 
+  HW := TDummyHardware.Create(CHW_T48);
+  try
+    Check('T48 capabilities known', HW.GetMemoryCapabilities(Caps));
+    Check('T48 pre-arrival support is SPI-family only',
+      Caps.Protocols = [mpSPI]);
+    Check('T48 managed socket backend does not claim arbitrary SPI',
+      not Caps.RawSPICommands);
+    Check('T48 exposes read-only whole-chip support before HIL',
+      Caps.NativeWholeChipRead and (not Caps.NativeWholeChipWrite) and
+      (not Caps.NativeWholeChipErase));
+  finally
+    HW.Free;
+  end;
+
   HW := TDummyHardware.Create(CHW_SERPROG);
   try
     Check('serprog supports SPI', HW.SupportsProtocol(mpSPI));

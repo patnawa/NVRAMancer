@@ -36,6 +36,7 @@ uses
   safemode,
   chipprofile, chipsave,
   nandmodel, nandplanner, nandengine, spi25nandadapter, nandcatalog,
+  DOM, LazUTF8, t48bridge,
   validationgate;
 
 const
@@ -44,12 +45,12 @@ const
   EXIT_USAGE = 2;
 
   //สวิตช์ที่ตามด้วยค่า
-  ValueSwitches: array[0..24] of string = (
+  ValueSwitches: array[0..26] of string = (
     'chip', 'hw', 'read', 'write', 'verify', 'job', 'operator', 'log', 'save-chip',
     'read-passes', 'sfdp-dump', 'sfdp-decode', 'compare', 'scan',
     'prod-job', 'prod-auth', 'prod-key-id', 'prod-key-env', 'evidence-dir',
     'export-chip', 'region', 'nand-read', 'nand-write', 'nand-bad-policy',
-    'nand-backup'
+    'nand-backup', 't48-tool', 't48-device'
   );
 
   //สวิตช์ที่เป็นธงเปล่า ๆ
@@ -172,7 +173,14 @@ var
 begin
   Result := False;
   for i := 1 to ParamCount do
-    if Copy(ParamStr(i), 1, 2) = '--' then Exit(True);
+    if Copy(ParamStr(i), 1, 2) = '--' then
+    begin
+      //NVRAMancer.lpr asks this before it constructs the main form.  Publish
+      //the mode at that first boundary so FormCreate cannot auto-probe a
+      //programmer before RunCLI validates and admits the requested backend.
+      CLIMode := True;
+      Exit(True);
+    end;
 end;
 
 //สวิตช์ที่สะกดผิดต้องหยุดตั้งแต่ยังไม่แตะชิป ไม่ใช่ปล่อยผ่านแล้วไปทำอย่างอื่น
@@ -217,6 +225,9 @@ begin
   Say('  NVRAMancer.exe --verify in.bin --chip W25Q64BV');
   Say('  NVRAMancer.exe --erase --chip W25Q64BV');
   Say('  NVRAMancer.exe --detect');
+  Say('  NVRAMancer.exe --read out.bin --chip W25Q64BV --hw t48');
+  Say('                  --t48-tool C:\Tools\minipro.exe');
+  Say('                  --t48-device W25Q64JV@SOIC8');
   Say('');
   Say('  --chip NAME     pick a chip from the chip list');
   Say('  --sfdp          take the chip parameters from SFDP instead of the list');
@@ -227,6 +238,17 @@ begin
   Say('                  erase with automatic byte-for-byte read-back.');
   Say('                  Smart write, SFDP and chip tests need raw SPI and');
   Say('                  therefore cannot work through this firmware)');
+  Say('                  t48 (guarded read-only preview through a separately');
+  Say('                  installed minipro executable)');
+  Say('  --t48-tool F    absolute path to the separately installed minipro');
+  Say('                  executable; required with --hw t48 unless saved in GUI');
+  Say('                  (C:\Tools\minipro.exe or /usr/bin/minipro)');
+  Say('  --t48-device D  exact minipro DEVICE@PACKAGE; required with --hw t48');
+  Say('                  unless saved in GUI. No package guessing is performed');
+  Say('                  T48 preview permits only whole-chip --read, --detect');
+  Say('                  and --verify FILE with an explicit --chip profile;');
+  Say('                  write, erase, Smart Write, scripts, production and');
+  Say('                  every NAND operation are refused before hardware opens');
   Say('  --erase         erase before writing');
   Say('  --smart         SPI NOR transactional differential write: two-pass');
   Say('                  backup, neighbour preservation and full-block verify');
@@ -349,11 +371,97 @@ begin
   else if SameText(S, 'buzzpirat') then HW := CHW_BUZZPIRAT
   else if SameText(S, 'serprog') then HW := CHW_SERPROG
   else if SameText(S, 'ezp') then HW := CHW_EZP
+  else if SameText(S, 't48') then HW := CHW_T48
   else
   begin
     HW := CHW_NONE;
     Result := False;
   end;
+end;
+
+//The T48 bridge launches one explicitly selected executable.  A relative path
+//would silently change meaning with the caller's working directory, so it is
+//not an acceptable trust boundary for a bench or production command.
+function IsAbsoluteFileName(const S: string): boolean;
+begin
+  Result := False;
+  if (S = '') or (S <> Trim(S)) then Exit;
+  {$IFDEF WINDOWS}
+  if Length(S) < 3 then Exit;
+  Result := ((S[2] = ':') and ((S[3] = '\') or (S[3] = '/'))) or
+    (((S[1] = '\') and (S[2] = '\')) or
+     ((S[1] = '/') and (S[2] = '/')));
+  {$ELSE}
+  //minipro officially targets Unix-like hosts.  POSIX has one absolute form:
+  //a leading slash.  A leading ~ is shell syntax and is intentionally not
+  //expanded because the bridge passes argv directly without a shell.
+  Result := S[1] = '/';
+  {$ENDIF}
+end;
+
+//Inspect the catalog without applying the profile to the GUI.  SelectChipAny
+//updates controls and can trigger hardware-specific guidance, so using it for
+//the safety gate would put the gate after selection side effects.  This small
+//read-only lookup mirrors the catalog's category/vendor/chip shape and lets the
+//T48 script/protocol refusal happen before SelectHW and PollProgrammer.
+function T48ProfileInCatalog(XMLFile: TXMLDocument; const ChipName: string;
+  out IsSPI25, HasScript: boolean): boolean;
+var
+  Category, Vendor, ChipNode, Attr: TDOMNode;
+  SPICommand: string;
+begin
+  Result := False;
+  IsSPI25 := False;
+  HasScript := False;
+  if (XMLFile = nil) or (XMLFile.DocumentElement = nil) then Exit;
+
+  Category := XMLFile.DocumentElement.FirstChild;
+  while Category <> nil do
+  begin
+    if Category.NodeType = ELEMENT_NODE then
+    begin
+      Vendor := Category.FirstChild;
+      while Vendor <> nil do
+      begin
+        if Vendor.NodeType = ELEMENT_NODE then
+        begin
+          ChipNode := Vendor.FirstChild;
+          while ChipNode <> nil do
+          begin
+            if (ChipNode.NodeType = ELEMENT_NODE) and
+               SameText(UTF16ToUTF8(ChipNode.NodeName), ChipName) and
+               ChipNode.HasAttributes then
+            begin
+              IsSPI25 := SameText(UTF16ToUTF8(Category.NodeName), 'SPI');
+              Attr := ChipNode.Attributes.GetNamedItem('spicmd');
+              if Attr <> nil then
+              begin
+                SPICommand := UTF16ToUTF8(Attr.NodeValue);
+                IsSPI25 := IsSPI25 and SameText(SPICommand, '25');
+              end;
+              Attr := ChipNode.Attributes.GetNamedItem('script');
+              HasScript := (Attr <> nil) and
+                (Trim(UTF16ToUTF8(Attr.NodeValue)) <> '');
+              Exit(True);
+            end;
+            ChipNode := ChipNode.NextSibling;
+          end;
+        end;
+        Vendor := Vendor.NextSibling;
+      end;
+    end;
+    Category := Category.NextSibling;
+  end;
+end;
+
+function FindT48Profile(const ChipName: string; out IsSPI25,
+  HasScript: boolean): boolean;
+begin
+  Result := T48ProfileInCatalog(ChipListFile, ChipName, IsSPI25, HasScript) or
+    T48ProfileInCatalog(ChipListFile2, ChipName, IsSPI25, HasScript) or
+    T48ProfileInCatalog(ChipListFile3, ChipName, IsSPI25, HasScript) or
+    T48ProfileInCatalog(ChipListFile4, ChipName, IsSPI25, HasScript) or
+    T48ProfileInCatalog(ChipListFile5, ChipName, IsSPI25, HasScript);
 end;
 
 var
@@ -612,6 +720,55 @@ begin
   Result := HasSwitch('prod-job') or HasSwitch('prod-auth') or
             HasSwitch('prod-key-id') or HasSwitch('prod-key-env') or
             HasSwitch('evidence-dir');
+end;
+
+//The first T48 release is a managed, whole-chip, read-only bridge.  Keep this
+//deny-list at the CLI boundary as well as in the backend: an unsupported
+//request must be rejected before PollProgrammer or a GUI handler can launch a
+//tool, even if a future UI regression accidentally enables the action.
+function T48UnsupportedOperation(out Reason: string): boolean;
+begin
+  Result := True;
+  Reason := '';
+
+  if ProductionModeRequested or HasSwitch('job') or HasSwitch('operator') or
+     HasSwitch('log') then
+  begin
+    Reason := 'T48 preview does not permit production or legacy job/log operations';
+    Exit;
+  end;
+
+  if HasSwitch('nand-info') or HasSwitch('nand-read') or
+     HasSwitch('nand-write') or HasSwitch('nand-erase') or
+     HasSwitch('nand-raw') or HasSwitch('nand-bad-policy') or
+     HasSwitch('nand-backup') then
+  begin
+    Reason := 'T48 preview does not expose any SPI NAND operation';
+    Exit;
+  end;
+
+  if HasSwitch('write') or HasSwitch('erase') or HasSwitch('smart') or
+     HasSwitch('plan-only') or HasSwitch('capacity-test') or
+     HasSwitch('surface-scan') or HasSwitch('force') then
+  begin
+    Reason := 'T48 preview is read-only: write, erase and destructive tests ' +
+              'are locked until hardware-in-loop validation is complete';
+    Exit;
+  end;
+
+  if HasSwitch('sfdp') or HasSwitch('sfdp-dump') or
+     HasSwitch('export-chip') or HasSwitch('save-chip') or
+     HasSwitch('chip-test') or HasSwitch('preflight') or
+     HasSwitch('no-fast-read') or HasSwitch('read-passes') or
+     HasSwitch('region') or HasSwitch('compare') then
+  begin
+    Reason := 'T48 preview permits only whole-chip --read, --detect, or ' +
+              '--verify FILE; raw SPI, scripts, partial ranges and chip tests ' +
+              'are not available';
+    Exit;
+  end;
+
+  Result := False;
 end;
 
 function RunAuthenticatedProduction(const RequestedChip: string;
@@ -1432,15 +1589,18 @@ end;
 function RunCLI: integer;
 var
   ChipName, FileName, HWName, Bad, SaveName: string;
+  T48ToolArg, T48DeviceArg, T48RejectReason: string;
+  T48DevicePart, T48PackagePart, T48DeviceValidationError: string;
   HW: THardwareList;
   Stream, Slice: TMemoryStream;
   ErrMsg: string;
-  Json: boolean;
+  Json, T48Requested, T48ProfileIsSPI25, T48ProfileHasScript: boolean;
   Action: string;
   ProdMode: boolean;
   RegionName: string;
   Region: TIFDRegion;
   DidSaveChip: boolean;
+  T48PrimaryActions: integer;
   GateReason: string;
   GateLines: TGateLines;
   Capability: TGatedCapability;
@@ -1449,6 +1609,9 @@ begin
   Result := EXIT_USAGE;
   Action := 'none';
   DidSaveChip := False;
+  HW := CHW_NONE;
+  HWName := '';
+  T48Requested := False;
 
   //ไม่มีใครนั่งอยู่หน้าจอ ทุกด่านที่ปกติจะถามต้องตัดสินใจเอง
   CLIMode := True;
@@ -1493,6 +1656,152 @@ begin
     Say('unknown option: ' + Bad);
     Say('run with --help to see the options');
     Exit(EXIT_USAGE);
+  end;
+
+  //Resolve the effective backend before any offline shortcut or hardware poll.
+  //An explicit --hw wins; otherwise LoadOptions has already selected the saved
+  //backend on NVRAMancer.  Treating only --hw t48 as T48 would let a saved T48
+  //bypass this outer deny-list until the deeper GUI/backend guard caught it.
+  HWName := SwitchValue('hw');
+  if HasSwitch('hw') and (HWName = '') then
+  begin
+    Say('--hw needs a programmer name');
+    Exit(EXIT_USAGE);
+  end;
+  if HWName <> '' then
+  begin
+    if not ParseHW(HWName, HW) then
+    begin
+      Say('unknown programmer: ' + HWName);
+      Exit(EXIT_USAGE);
+    end;
+  end
+  else if NVRAMancer <> nil then
+    HW := NVRAMancer.Current_HW;
+  T48Requested := HW = CHW_T48;
+
+  T48ToolArg := SwitchValue('t48-tool');
+  T48DeviceArg := SwitchValue('t48-device');
+  if HasSwitch('t48-tool') and (T48ToolArg = '') then
+  begin
+    Say('--t48-tool needs an absolute executable path');
+    Exit(EXIT_USAGE);
+  end;
+  if HasSwitch('t48-device') and (T48DeviceArg = '') then
+  begin
+    Say('--t48-device needs an exact DEVICE@PACKAGE value');
+    Exit(EXIT_USAGE);
+  end;
+  if (HasSwitch('t48-tool') or HasSwitch('t48-device')) and
+     (not T48Requested) then
+  begin
+    Say('--t48-tool and --t48-device require T48 to be selected, either by ' +
+        '--hw t48 or the saved GUI setting');
+    Exit(EXIT_USAGE);
+  end;
+
+  if T48Requested then
+  begin
+    if T48UnsupportedOperation(T48RejectReason) then
+    begin
+      Say(T48RejectReason);
+      Exit(EXIT_USAGE);
+    end;
+
+    //A T48 invocation is deliberately one managed whole-chip operation.  Count
+    //the actual switches rather than three booleans so duplicate --read or
+    //--verify arguments are ambiguous usage too, not silently first-one-wins.
+    T48PrimaryActions := 0;
+    for i := 1 to ParamCount do
+      if SameText(ParamStr(i), '--detect') or
+         SameText(ParamStr(i), '--read') or
+         SameText(ParamStr(i), '--verify') then
+        Inc(T48PrimaryActions);
+    if T48PrimaryActions = 0 then
+    begin
+      Say('T48 preview requires exactly one primary operation: --detect, ' +
+          '--read FILE, or --verify FILE');
+      Exit(EXIT_USAGE);
+    end;
+    if T48PrimaryActions > 1 then
+    begin
+      Say('T48 preview accepts only one primary operation per invocation; ' +
+          'choose --detect, --read FILE, or --verify FILE');
+      Exit(EXIT_USAGE);
+    end;
+    if HasSwitch('read') and (SwitchValue('read') = '') then
+    begin
+      Say('--read needs an output file');
+      Exit(EXIT_USAGE);
+    end;
+    //For T48, --verify is never the legacy post-write flag because writes are
+    //locked.  Its sole valid form is the primary action --verify INPUT_FILE.
+    if HasSwitch('verify') and (SwitchValue('verify') = '') then
+    begin
+      Say('T48 --verify needs a full-chip input file');
+      Exit(EXIT_USAGE);
+    end;
+
+    //Explicit command-line values override settings.xml.  The remaining value
+    //may still come from the GUI, which lets a bench configure the station once
+    //without weakening either validation rule below.
+    if T48ToolArg <> '' then T48ToolPath := T48ToolArg;
+    if T48DeviceArg <> '' then T48DeviceSpec := T48DeviceArg;
+
+    if T48ToolPath = '' then
+    begin
+      Say('T48 CLI requires --t48-tool ABSOLUTE_PATH (or a saved GUI value)');
+      Exit(EXIT_USAGE);
+    end;
+    if not IsAbsoluteFileName(T48ToolPath) then
+    begin
+      Say('T48 tool path must be absolute: ' + T48ToolPath);
+      Exit(EXIT_USAGE);
+    end;
+    if not FileExists(T48ToolPath) then
+    begin
+      Say('T48 tool does not exist: ' + T48ToolPath);
+      Exit(EXIT_USAGE);
+    end;
+    if T48DeviceSpec = '' then
+    begin
+      Say('T48 CLI requires --t48-device DEVICE@PACKAGE (or a saved GUI value)');
+      Exit(EXIT_USAGE);
+    end;
+    if not ValidateT48DeviceName(T48DeviceSpec, T48DevicePart,
+       T48PackagePart, T48DeviceValidationError) then
+    begin
+      Say('invalid T48 device/package: ' + T48DeviceValidationError);
+      Exit(EXIT_USAGE);
+    end;
+
+    ChipName := SwitchValue('chip');
+    if (HasSwitch('read') or HasSwitch('detect') or HasSwitch('verify')) and
+       (ChipName = '') then
+    begin
+      Say('T48 preview requires an explicit --chip profile; it never guesses ' +
+          'a device or socket package');
+      Exit(EXIT_USAGE);
+    end;
+    if ChipName <> '' then
+    begin
+      if not FindT48Profile(ChipName, T48ProfileIsSPI25,
+         T48ProfileHasScript) then
+      begin
+        Say('chip not found in the chip list: ' + ChipName);
+        Exit(EXIT_USAGE);
+      end;
+      if not T48ProfileIsSPI25 then
+      begin
+        Say('T48 preview accepts only a standard SPI 25-series NOR profile');
+        Exit(EXIT_USAGE);
+      end;
+      if T48ProfileHasScript then
+      begin
+        Say('T48 preview refuses chip profiles that dispatch scripts');
+        Exit(EXIT_USAGE);
+      end;
+    end;
   end;
 
   //Defense at the outermost boundary: a disabled NAND mutation request is
@@ -1611,15 +1920,11 @@ begin
     Say('job file loaded: ' + SwitchValue('job'));
   end;
 
-  //เลือกเครื่องโปรแกรมก่อน ถ้าไม่ระบุก็ใช้ตัวที่ตรวจเจอ
-  HWName := SwitchValue('hw');
-  if HWName <> '' then
+  //เลือกเครื่องที่ระบุไว้ หรือใช้ตัวที่โหลดจาก settings.xml ตามเดิม สำหรับ
+  //T48 ให้เลือกซ้ำหลัง admission เสมอ เพื่อส่งค่า --t48-tool/--t48-device
+  //ที่อาจทับค่าที่บันทึกไว้เข้า backend ก่อน PollProgrammer/operation dispatch.
+  if (HWName <> '') or T48Requested then
   begin
-    if not ParseHW(HWName, HW) then
-    begin
-      Say('unknown programmer: ' + HWName);
-      Exit(EXIT_USAGE);
-    end;
     SelectHW(HW);
     SetHardwareMenuCheck(HW);
   end;
@@ -1634,7 +1939,11 @@ begin
     if Json then SayJson('connect');
     Exit(CLIExitCode(coNoProgrammer));
   end;
-  Say('programmer: ' + NVRAMancer.Programmer.HardwareName);
+  if T48Requested then
+    Say('programmer configured: ' + NVRAMancer.Programmer.HardwareName +
+        ' (live T48 check pending)')
+  else
+    Say('programmer: ' + NVRAMancer.Programmer.HardwareName);
 
   if ProdMode then
     Exit(RunAuthenticatedProduction(SwitchValue('chip'), Json));
@@ -1958,7 +2267,10 @@ begin
     if not OpOK then
     begin
       if Json then SayJson(Action);
-      Exit(EXIT_FAIL);
+      //T48 bridge failures have already recorded a stable operator-facing
+      //outcome in main.  ResultCode preserves that reason; for older paths
+      //with no specific note it remains the same generic exit code 1.
+      Exit(ResultCode);
     end;
 
     Stream := TMemoryStream.Create;
@@ -1988,8 +2300,9 @@ begin
       begin
         Say('could not save: ' + ErrMsg);
         OpFail('could not save ' + FileName + ': ' + ErrMsg);
+        NoteCLIOutcome(coFileError);
         if Json then SayJson(Action);
-        Exit(EXIT_FAIL);
+        Exit(ResultCode);
       end;
     finally
       Stream.Free;
@@ -2028,15 +2341,39 @@ begin
   if not FileExists(FileName) then
   begin
     Say('no such file: ' + FileName);
+    if T48Requested then
+    begin
+      NoteCLIOutcome(coFileError);
+      Exit(CLIExitCode(CurrentCLIOutcome));
+    end;
     Exit(EXIT_USAGE);
   end;
 
   Stream := TMemoryStream.Create;
   try
-    if not LoadFirmware(FileName, Stream, CurrentICParam.Size, $FF, ErrMsg) then
-    begin
-      Say('could not load: ' + ErrMsg);
-      Exit(EXIT_USAGE);
+    try
+      if not LoadFirmware(FileName, Stream, CurrentICParam.Size, $FF,
+         ErrMsg) then
+      begin
+        Say('could not load: ' + ErrMsg);
+        if T48Requested then
+        begin
+          NoteCLIOutcome(coFileError);
+          Exit(CLIExitCode(CurrentCLIOutcome));
+        end;
+        Exit(EXIT_USAGE);
+      end;
+    except
+      on E: Exception do
+      begin
+        Say('could not load: ' + E.Message);
+        if T48Requested then
+        begin
+          NoteCLIOutcome(coFileError);
+          Exit(CLIExitCode(CurrentCLIOutcome));
+        end;
+        Exit(EXIT_USAGE);
+      end;
     end;
 
     if RegionName <> '' then

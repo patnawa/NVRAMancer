@@ -594,7 +594,12 @@ Var
 Begin
 DevIndex := 0;
 Result := FT_Open(DevIndex,@FT_Handle);
-If Result <> FT_OK then FT_Error_Report('FT_Open',Result);
+//Presence polling deliberately opens index zero while no programmer is
+//attached.  Absence is returned to TFT232HHardware, whose callers either
+//announce the state transition or show its actionable error at operation
+//time; logging here would bypass that guard every time the idle timer fires.
+If (Result <> FT_OK) and (Result <> FT_DEVICE_NOT_FOUND) then
+  FT_Error_Report('FT_Open',Result);
 End;
 
 

@@ -2033,3 +2033,91 @@ msgstr "DETECT"
 #: msgstr.str_shell_shortcuts
 msgid "Alt+1 %s   Alt+2 %s   Alt+3 %s"
 msgstr "Alt+1 %s   Alt+2 %s   Alt+3 %s"
+
+#: msgstr.str_t48_menu
+msgid "XGecu T48 (read-only preview)"
+msgstr "XGecu T48 (read-only preview)"
+
+#: msgstr.str_t48_configure
+msgid "Configure T48 preview..."
+msgstr "Configure T48 preview..."
+
+#: msgstr.str_t48_tool_dialog
+msgid "Select the separately installed minipro executable"
+msgstr "Select the separately installed minipro executable"
+
+#: msgstr.str_t48_device_prompt
+msgid "Enter the exact minipro device and package name (for example W25Q64FV@SOIC8). NVRAMancer will not guess a socket mapping."
+msgstr "Enter the exact minipro device and package name (for example W25Q64FV@SOIC8). NVRAMancer will not guess a socket mapping."
+
+#: msgstr.str_t48_config_required
+msgid "Configure both the minipro executable and an exact DEVICE@PACKAGE before using the T48 preview."
+msgstr "Configure both the minipro executable and an exact DEVICE@PACKAGE before using the T48 preview."
+
+#: msgstr.str_t48_config_saved
+msgid "T48 preview configured for %s through %s"
+msgstr "T48 preview configured for %s through %s"
+
+#: msgstr.str_t48_tool_version
+msgid "minipro version: %s"
+msgstr "minipro version: %s"
+
+#: msgstr.str_t48_preview_notice
+msgid "T48 preview is read-only: chip ID, full-chip read and independent verify are available. Erase, write, Smart Write, scripts, raw SPI and Production stay locked until physical hardware validation passes."
+msgstr "T48 preview is read-only: chip ID, full-chip read and independent verify are available. Erase, write, Smart Write, scripts, raw SPI and Production stay locked until physical hardware validation passes."
+
+#: msgstr.str_t48_select_profile
+msgid "T48 requires a selected NVRAMancer chip profile plus the exact minipro DEVICE@PACKAGE. Automatic SPI detection is unavailable in this preview."
+msgstr "T48 requires a selected NVRAMancer chip profile plus the exact minipro DEVICE@PACKAGE. Automatic SPI detection is unavailable in this preview."
+
+#: msgstr.str_t48_script_profile
+msgid "T48 preview does not accept chip profiles that dispatch scripts. Select an exact standard SPI 25-series NOR profile."
+msgstr "T48 preview does not accept chip profiles that dispatch scripts. Select an exact standard SPI 25-series NOR profile."
+
+#: msgstr.str_t48_profile_mismatch
+msgid "The configured minipro device describes %d bytes, but the selected NVRAMancer profile describes %d. Select matching profiles before touching the socket."
+msgstr "The configured minipro device describes %d bytes, but the selected NVRAMancer profile describes %d. Select matching profiles before touching the socket."
+
+#: msgstr.str_t48_id_mismatch
+msgid "The live T48 chip ID is %s, but the selected NVRAMancer profile expects %s."
+msgstr "The live T48 chip ID is %s, but the selected NVRAMancer profile expects %s."
+
+#: msgstr.str_t48_read_second
+msgid "Reading a second independent T48 pass before publishing any bytes"
+msgstr "Reading a second independent T48 pass before publishing any bytes"
+
+#: msgstr.str_t48_read_disagree
+msgid "The two independent T48 reads disagree at 0x%s. Reseat the chip or adapter; no bytes were published."
+msgstr "The two independent T48 reads disagree at 0x%s. Reseat the chip or adapter; no bytes were published."
+
+#: msgstr.str_t48_full_image_only
+msgid "T48 preview verification requires a full-chip image starting at address 0 with exactly %d bytes."
+msgstr "T48 preview verification requires a full-chip image starting at address 0 with exactly %d bytes."
+
+#: msgstr.str_t48_mutation_locked
+msgid "T48 erase and write are locked until the physical programmer passes the documented hardware-in-loop graduation checklist."
+msgstr "T48 erase and write are locked until the physical programmer passes the documented hardware-in-loop graduation checklist."
+
+#: msgstr.str_t48_incomplete
+msgid "The T48 operation did not reach its validated completion point."
+msgstr "The T48 operation did not reach its validated completion point."
+
+#: msgstr.str_t48_tel_transport
+msgid "Managed minipro process | exact T48 model check"
+msgstr "Managed minipro process | exact T48 model check"
+
+#: msgstr.str_t48_tel_interface
+msgid "SPI memory | exact DEVICE@PACKAGE\r\nRead-only preview | full-chip read and verify"
+msgstr "SPI memory | exact DEVICE@PACKAGE\r\nRead-only preview | full-chip read and verify"
+
+#: msgstr.str_t48_tel_configured
+msgid "CONFIGURED | %s\r\nLive T48 connection is checked when an operation starts"
+msgstr "CONFIGURED | %s\r\nLive T48 connection is checked when an operation starts"
+
+#: msgstr.str_t48_led_configured
+msgid "configured; live check pending"
+msgstr "configured; live check pending"
+
+#: msgstr.str_t48_workflow_ready
+msgid "T48 read-only preview ready - read the chip or verify this full image"
+msgstr "T48 read-only preview ready - read the chip or verify this full image"

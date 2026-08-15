@@ -3,6 +3,31 @@
 All notable changes to NVRAMancer are recorded here. The version in the
 first entry must match `software/appver.pas`; CI enforces that invariant.
 
+## 4.42.0.0 — a guarded, read-only T48 preview
+
+- XGecu T48 support begins as an explicitly read-only preview through a
+  separately installed `minipro` executable. The operator must choose its
+  absolute path and an exact `DEVICE@PACKAGE`; NVRAMancer accepts only a live
+  `T48` model response and never guesses from a shared USB identifier.
+- Device information, chip identity, exact-size whole-chip reads and
+  independent verification are available in the GUI and CLI. Erase, write,
+  Smart Write, raw SPI, scripts, NAND/eMMC, firmware update and Production
+  remain unreachable until a physical unit passes the recorded HIL graduation
+  procedure.
+- The external-tool boundary passes argv directly without a command shell,
+  captures bounded output, rejects stale or partial files, distinguishes
+  timeout/cancellation/busy/process failures, and protects an active operation
+  from reentrant configuration changes.
+- The T48 configuration, telemetry, workflow state, command-line contract and
+  hardware-in-loop documentation now state what is configured, what was
+  observed live, and what remains unvalidated hardware behavior.
+- An unattached FT232H no longer floods the log with `FT_Open - Device not
+  found` during idle presence polling. Unexpected D2XX failures and explicit
+  operation errors are still reported.
+- The hardware-free release pipeline now contains 37 synchronized Windows and
+  POSIX suites, including the T48 process/outcome boundary and the FTDI idle
+  no-device regression.
+
 ## 4.41.0.0 — task-first workspaces keep the next safe action visible
 
 - The default Repair workspace now guides occasional users through connecting,

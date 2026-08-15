@@ -1325,11 +1325,24 @@ object MainForm: TMainForm
         RadioItem = True
         OnClick = MenuHWEZPClick
       end
+      object MenuHWT48: TMenuItem
+        AutoCheck = True
+        Caption = 'XGecu T48 (read-only preview)'
+        RadioItem = True
+        OnClick = MenuHWT48Click
+      end
       object MenuHWSIM: TMenuItem
         AutoCheck = True
         Caption = 'Simulated (no hardware) - W25Q64 in memory'
         RadioItem = True
         OnClick = MenuHWSIMClick
+      end
+      object MenuT48Separator: TMenuItem
+        Caption = '-'
+      end
+      object MenuT48Configure: TMenuItem
+        Caption = 'Configure T48 preview...'
+        OnClick = MenuT48ConfigureClick
       end
     end
     object ScriptsMenuItem: TMenuItem
