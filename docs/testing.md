@@ -15,8 +15,10 @@ powershell -ExecutionPolicy Bypass -File tools\build.ps1
 ./tools/build.sh
 ```
 
-The Windows build requires 32-bit Lazarus/FPC 3.2.2. The POSIX build requires
-`fpc`; its production crypto tests also need the system OpenSSL `libcrypto`.
+The Windows build requires 32-bit Lazarus/FPC 3.2.2. On Debian/Ubuntu the
+POSIX build requires `fp-compiler` and `fp-units-fcl` (for the external-tool
+process boundary); its production crypto tests also need the system OpenSSL
+`libcrypto`. The Homebrew `fpc` package includes those units.
 
 ## Suite catalog
 

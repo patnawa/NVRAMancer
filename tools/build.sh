@@ -10,7 +10,7 @@
 # formats, the image checks, and the SPI and I2C protocol layers driven through
 # the in-memory programmer. Those are the suites this runs.
 #
-# Needs Free Pascal:  apt install fp-compiler   /   brew install fpc
+# Needs Free Pascal:  apt install fp-compiler fp-units-fcl   /   brew install fpc
 
 set -euo pipefail
 

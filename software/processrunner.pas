@@ -300,7 +300,10 @@ begin
         else
         begin
           Result.Status := prsCompleted;
-          Result.ExitCode := P.ExitStatus;
+          //ExitStatus is the raw waitpid status on POSIX (23 becomes 5888).
+          //ExitCode decodes a normal exit there and is the native code on
+          //Windows, so callers receive the same process contract everywhere.
+          Result.ExitCode := P.ExitCode;
           Result.ErrorText := '';
         end;
       end;
