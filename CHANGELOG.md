@@ -3,6 +3,21 @@
 All notable changes to NVRAMancer are recorded here. The version in the
 first entry must match `software/appver.pas`; CI enforces that invariant.
 
+## 4.43.0.0 — the T48 preview is withdrawn
+
+- XGecu T48 support has been removed. The read-only `minipro` bridge, the
+  `--hw t48`, `--t48-tool` and `--t48-device` switches, the GUI configuration
+  entry, the saved `t48_tool`/`t48_device` settings, the T48 entry in the
+  hardware capability model and the hardware-in-loop graduation procedure are
+  gone; NVRAMancer launches no external tool. A saved `hw="t48"` setting is
+  ignored and the default programmer applies.
+- The guards that arrived with the preview stay: the hardware menu and the chip
+  chooser are refused while an operation is running, and a command-line
+  invocation neither runs the interactive startup probe nor rewrites the saved
+  bench configuration on exit.
+- The hardware-free release pipeline drops the `t48bridge_tests` and
+  `t48outcome_tests` suites, leaving 35 synchronized Windows and POSIX suites.
+
 ## 4.42.0.0 — a guarded, read-only T48 preview
 
 - XGecu T48 support begins as an explicitly read-only preview through a

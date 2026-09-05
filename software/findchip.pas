@@ -393,9 +393,9 @@ procedure TChipSearchForm.ListBoxChipsDblClick(Sender: TObject);
 var
   chipname: string;
 begin
-  //The T48 process wait pumps window messages.  Do not let the modeless chip
-  //chooser replace the immutable operation profile while a read is active;
-  //internal live-ID selection still uses SelectChipAny directly.
+  //Do not let the modeless chip chooser replace the operation profile while
+  //an operation is active; internal live-ID selection still uses SelectChipAny
+  //directly.
   if Main.OperationRunning then Exit;
   if ListBoxChips.ItemIndex >= 0 then
   begin

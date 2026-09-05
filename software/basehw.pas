@@ -16,8 +16,7 @@ type
 // the list on purpose -- auto-detection walks real devices, and a simulator
 // that could be auto-selected would silently answer for absent hardware.
 THardwareList = (CHW_NONE, CHW_CH341, CHW_CH347, CHW_AVRISP, CHW_USBASP,
-  CHW_ARDUINO, CHW_FT232H, CHW_BUZZPIRAT, CHW_SERPROG, CHW_EZP,
-  CHW_T48, CHW_SIM);
+  CHW_ARDUINO, CHW_FT232H, CHW_BUZZPIRAT, CHW_SERPROG, CHW_EZP, CHW_SIM);
 
 // Capability-oriented seam used by admission, setup, and headless callers.
 // A caller asks only whether the selected programmer can serve its protocol;
@@ -260,17 +259,6 @@ begin
         Result.NativeWholeChipRead := True;
         Result.NativeWholeChipWrite := True;
         Result.NativeWholeChipErase := True;
-      end;
-    CHW_T48:
-      begin
-        //The pre-arrival T48 adapter is deliberately read-only.  It delegates
-        //an exact socket-device profile to a separately installed minipro
-        //process, so it cannot honestly expose arbitrary SPI commands.  Write
-        //and erase stay absent until a physical unit passes the recorded HIL
-        //graduation gate.
-        Result.Protocols := [mpSPI];
-        Result.RawSPICommands := False;
-        Result.NativeWholeChipRead := True;
       end;
   end;
   //SupportsQuadSPI is left False for every model, deliberately.  See the
