@@ -277,6 +277,31 @@ end;
 
 // ---------------------------------------------------- what it will not do
 
+procedure TestStreamingReadBoundaries;
+var
+  Header: array[0..3] of byte;
+  Data: array[0..3] of byte;
+begin
+  Sim.PokeByte(SIM_CAPACITY - 2, $12);
+  Sim.PokeByte(SIM_CAPACITY - 1, $34);
+  Header[0] := $03;
+  Header[1] := $7F;
+  Header[2] := $FF;
+  Header[3] := $FE;
+  Check('streaming read header is accepted', Sim.SPIWrite(0, 4, Header) = 4);
+  Check('held-CS first byte reads at the requested address',
+    (Sim.SPIRead(0, 1, Data) = 1) and (Data[0] = $12));
+  Check('next chunk continues and saturates at the die boundary',
+    (Sim.SPIRead(0, 4, Data) = 4) and (Data[0] = $34) and
+    (Data[1] = $FF) and (Data[3] = $FF));
+  Check('released read continues to return FF beyond the die',
+    (Sim.SPIRead(1, 4, Data) = 4) and (Data[0] = $FF));
+  Header[0] := $9F;
+  Sim.SPIWrite(0, 1, Header);
+  Sim.SPIRead(1, 3, Data);
+  Check('new command replaces the streaming reply', Data[0] = $EF);
+end;
+
 procedure TestItNeverPretendsToMeasureAnything;
 var
   Caps: TProgrammerElectricalCapabilities;
@@ -337,6 +362,7 @@ begin
     TestEraseAlignsDownLikeTheChipDoes;
     TestEraseSizesAreDistinct;
     TestStatusRegisters;
+    TestStreamingReadBoundaries;
     TestItNeverPretendsToMeasureAnything;
   finally
     //TNVRAMancer owns what it is given.

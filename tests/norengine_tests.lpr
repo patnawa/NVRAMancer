@@ -31,6 +31,14 @@ type
       Opcode: byte): TNORIOResult; override;
   end;
 
+  TReopenFaultDevice = class(TVirtualSPI25)
+  public
+    Opens: integer;
+    FailReopen: boolean;
+    CorruptOnReopen: boolean;
+    function Open: TNORIOResult; override;
+  end;
+
   TThrowingEvidenceSink = class
   public
     function Commit(const Request: TOperationRequest;
@@ -90,6 +98,15 @@ begin
   Result := inherited Erase(Address, Len, Opcode);
   if Result.Success then
     raise Exception.Create('injected exception after erase delivery');
+end;
+
+function TReopenFaultDevice.Open: TNORIOResult;
+begin
+  Inc(Opens);
+  if (Opens = 2) and FailReopen then
+    Exit(NORIOFailure(nioDisconnected, 'injected verification reopen failure'));
+  Result := inherited Open;
+  if (Opens = 2) and CorruptOnReopen then FlipReadAddress := 0;
 end;
 
 function TThrowingEvidenceSink.Commit(const Request: TOperationRequest;
@@ -245,9 +262,10 @@ begin
     Check('operation succeeds', Outcome.Status = osSucceeded);
     Check('final memory exactly matches the ideal overlay',
           Device.MemoryEquals(Expected));
-    Check('device was deinitialized exactly once',
-          Device.DeinitializeCalls = 1);
-    Check('device was closed exactly once', Device.CloseCalls = 1);
+    Check('both verification sessions were deinitialized',
+          Device.DeinitializeCalls = 2);
+    Check('both verification sessions were closed', Device.CloseCalls = 2);
+    Check('fresh-session verification completed', Outcome.FreshSessionVerifyCompleted);
     Check('chip is idle after success', not Device.IsBusy);
     Check('WEL is clear after success', not Device.WriteEnabled);
     Check('events include command starts',
@@ -635,7 +653,8 @@ var
   Token: TCancellationToken;
   Outcome: TOperationOutcome;
   Err: string;
-  BaselineCalls, N: cardinal;
+  BaselineCalls, N, OpenCount, InitCount: cardinal;
+  Trace: TVirtualCall;
   i: integer;
   AllFailed, CleanupOnce, StoppedAfterFailure, InjectionReached: boolean;
 begin
@@ -689,7 +708,16 @@ begin
         WriteLn('    injection ', N, ' was not reached');
         Break;
       end;
-      if (Device.CloseCalls > 1) or (Device.DeinitializeCalls > 1) then
+      OpenCount := 0;
+      InitCount := 0;
+      for Trace in Device.Calls do
+        if Trace.Succeeded then
+        begin
+          if Trace.Kind = vckOpen then Inc(OpenCount);
+          if Trace.Kind = vckInitialize then Inc(InitCount);
+        end;
+      if (Device.CloseCalls > OpenCount) or
+         (Device.DeinitializeCalls > InitCount) then
       begin
         CleanupOnce := False;
         WriteLn('    cleanup repeated after call ', N);
@@ -711,9 +739,53 @@ begin
   Check(Format('all %d injected call failures prevent PASS', [BaselineCalls]),
         AllFailed);
   Check('every numbered injection point is reachable', InjectionReached);
-  Check('cleanup is attempted at most once on every path', CleanupOnce);
+  Check('cleanup is attempted at most once per acquired session', CleanupOnce);
   Check('no destructive command starts after a failed call',
         StoppedAfterFailure);
+end;
+
+procedure TestFreshSessionVerification;
+var
+  Geometry: TNORGeometry;
+  Initial, Patch: TBytes;
+  Plan: TNORPlan;
+  Request: TOperationRequest;
+  Device: TReopenFaultDevice;
+  Executor: TNORPlanExecutor;
+  Outcome: TOperationOutcome;
+  Err: string;
+  Mode: integer;
+begin
+  WriteLn('Fresh verification: corruption and reopen failure cannot report PASS');
+  Check('fresh verification geometry', MakeGeometry(128, 16, 64, Geometry));
+  SetLength(Initial, 128);
+  FillChar(Initial[0], Length(Initial), $FF);
+  SetLength(Patch, 1);
+  Patch[0] := $A5;
+  Check('fresh verification plan',
+    BuildNORDifferentialPlan(Initial, Patch, 0, Geometry, Plan, Err));
+  Request := MakeRequest(0, 1, 128);
+  for Mode := 0 to 1 do
+  begin
+    Device := TReopenFaultDevice.Create(Geometry, Initial);
+    Device.CorruptOnReopen := Mode = 0;
+    Device.FailReopen := Mode = 1;
+    Executor := TNORPlanExecutor.Create(Device);
+    try
+      Outcome := Executor.Execute(Request, Plan, Geometry, nil);
+      Check('the first verification passed', Outcome.PhysicalVerifyCompleted);
+      Check('the second session was attempted', Device.Opens = 2);
+      Check('the fresh verification failed the write', Outcome.Status = osFailed);
+      Check('fresh verification is not marked completed',
+        not Outcome.FreshSessionVerifyCompleted);
+      if Mode = 0 then
+        Check('reopened corruption is a verify mismatch',
+          Outcome.ErrorCode = oeVerifyMismatch);
+    finally
+      Executor.Free;
+      Device.Free;
+    end;
+  end;
 end;
 
 procedure TestRandomPreservationProperties;
@@ -834,6 +906,7 @@ begin
   TestEvidenceExceptionIsTyped;
   TestExhaustiveFailAtN;
   TestRandomPreservationProperties;
+  TestFreshSessionVerification;
 
   WriteLn;
   WriteLn(Assertions, ' assertions, ', Failures, ' failures');

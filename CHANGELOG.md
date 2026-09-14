@@ -3,6 +3,37 @@
 All notable changes to NVRAMancer are recorded here. The version in the
 first entry must match `software/appver.pas`; CI enforces that invariant.
 
+## 4.44.0.0 — straight into the workspace, with English built in
+
+- English menus are embedded in the executable. A missing preference or
+  translation file falls back to English; an explicitly chosen available
+  language still works. Startup opens the remembered workspace directly,
+  without the automatic Connection Doctor window.
+- Ordinary NOR and EEPROM work uses inline preparation, chip-profile choices,
+  errors, progress and results. Loading an image prepares the write when the
+  setup is ready, while **Write** remains the explicit commitment. Changed
+  image bytes, physical snapshots or setup require a newly reviewed plan.
+- Reads and write preparation save backups automatically. The shared NOR and
+  EEPROM engines close, reopen and independently verify the programmed bytes
+  before reporting PASS. EEPROM adapters now own real programmer sessions,
+  restore the prepared rail, and reject changed full-chip preimages.
+- Interrupted desktop NOR writes can resume from a version 2 journal, the
+  original full-chip backup and the saved accepted image. Recovery validates
+  hashes, chip identity and erase geometry, restores erased neighbours, and
+  requires both verification passes. Older journals remain readable and point
+  to their original backup for manual restoration.
+- Prepared NOR jobs and recovery reconstruction move into shared units used
+  by the desktop and operation runner. Chip-name collisions use distinct
+  variants and exact name/ID selection; supported Winbond entries gain
+  manufacturer-sourced voltage metadata.
+- The simulated-programmer menu now selects the simulator correctly. Its
+  reads serve requested bytes without rebuilding an entire chip-sized reply
+  for every transfer, making full-chip backup and recovery practical.
+- Validation covers 37 hardware-free suites and the real desktop form with an
+  8 MiB simulated NOR chip, including English fallback, automatic preparation,
+  explicit Write and interrupted-write recovery. Physical hardware and visual
+  layout were not validated for these changes.
+
 ## 4.43.0.0 — the T48 preview is withdrawn
 
 - XGecu T48 support has been removed. The read-only `minipro` bridge, the

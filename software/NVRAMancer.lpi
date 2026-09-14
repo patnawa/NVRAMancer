@@ -25,11 +25,11 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="4"/>
-      <MinorVersionNr Value="43"/>
+      <MinorVersionNr Value="44"/>
       <RevisionNr Value="0"/>
       <BuildNr Value="0"/>
       <Language Value="0409"/>
-      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="NVRAMancer" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="NVRAMancer.exe" ProductName="NVRAMancer" ProductVersion="4.43.0.0"/>
+      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="NVRAMancer" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="NVRAMancer.exe" ProductName="NVRAMancer" ProductVersion="4.44.0.0"/>
     </VersionInfo>
     <MacroValues Count="2">
       <Macro1 Name="LCLWidgetType" Value="win32"/>

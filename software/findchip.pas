@@ -42,7 +42,7 @@ var
 
 implementation
 
-uses main, scriptsfunc;
+uses main, scriptsfunc, chipcatalog;
 
 {$R *.lfm}
 
@@ -108,7 +108,7 @@ begin
               begin
                 cs := UTF16ToUTF8(ChipNode.Attributes.GetNamedItem('id').NodeValue);
                 if UpCase(cs) = UpCase(chipid) then
-                  Dest.Add(UTF16ToUTF8(ChipNode.NodeName) + ' (' +
+                  Dest.Add(ChipSelectionKey(ChipNode) + ' (' +
                            UTF16ToUTF8(Item[j].NodeName) + ')');
               end;
           end
@@ -116,7 +116,7 @@ begin
           begin
             cs := UTF16ToUTF8(ChipNode.NodeName);
             if ChipNameMatches(cs, chipname) then
-              Dest.Add(cs + ' (' + UTF16ToUTF8(Item[j].NodeName) + ')');
+              Dest.Add(ChipSelectionKey(ChipNode) + ' (' + UTF16ToUTF8(Item[j].NodeName) + ')');
           end;
         end;
     finally
@@ -128,62 +128,8 @@ end;
 
 //ค้นหาชิปจากชื่อ ถ้า id ไม่ว่างจะค้นจาก id อย่างเดียว
 procedure FindChip(XMLfile: TXMLDocument; chipname: string; chipid: string = '');
-var
-  Node, ChipNode: TDOMNode;
-  j, i: integer;
-  cs: string;
 begin
-  if XMLfile <> nil then
-  begin
-    Node := XMLfile.DocumentElement.FirstChild;
-
-    while Assigned(Node) do
-    begin
-     //Node.NodeName; //หมวด (SPI, I2C...)
-
-     // ใช้พรอเพอร์ตี ChildNodes
-     with Node.ChildNodes do
-     try
-       for j := 0 to (Count - 1) do
-       begin
-         //Item[j].NodeName; //หมวดผู้ผลิต
-
-         for i := 0 to (Item[j].ChildNodes.Count - 1) do
-         begin
-
-           ChipNode := Item[j].ChildNodes.Item[i];
-           if ChipNode.NodeType <> ELEMENT_NODE then Continue;
-           if chipid <> '' then
-           begin
-             if (ChipNode.HasAttributes) then
-               if  ChipNode.Attributes.GetNamedItem('id') <> nil then
-               begin
-                 cs := UTF16ToUTF8(ChipNode.Attributes.GetNamedItem('id').NodeValue); //id
-                 if Upcase(cs) = Upcase(chipid) then
-                 begin
-                   ChipSearchForm.ListBoxChips.Items.Append(UTF16ToUTF8(ChipNode.NodeName)+' ('+ UTF16ToUTF8(Item[j].NodeName) +')');
-                   LogPrint(UTF16ToUTF8(ChipNode.NodeName)+' ('+ UTF16ToUTF8(Item[j].NodeName) +')');
-                 end;
-               end;
-           end
-           else
-           begin
-             cs := UTF16ToUTF8(ChipNode.NodeName); //ชิป
-             if ChipNameMatches(cs, chipname) then
-             begin
-               ChipSearchForm.ListBoxChips.Items.Append(cs+' ('+ UTF16ToUTF8(Item[j].NodeName) +')');
-               LogPrint(cs+' ('+ UTF16ToUTF8(Item[j].NodeName) +')');
-             end;
-           end;
-
-         end;
-       end;
-     finally
-       Free;
-     end;
-     Node := Node.NextSibling;
-    end;
-  end;
+  FindChipInto(XMLfile, chipname, chipid, ChipSearchForm.ListBoxChips.Items);
 end;
 
 function SelectChip(XMLfile: TXMLDocument; chipname: string): boolean;
@@ -215,7 +161,8 @@ begin
            if Item[j].ChildNodes.Item[i].NodeType <> ELEMENT_NODE then
              Continue;
            cs := UTF16ToUTF8(Item[j].ChildNodes.Item[i].NodeName); //ชิป
-           if Upcase(chipname) = Upcase(cs) then
+           if SameText(chipname, ChipSelectionKey(Item[j].ChildNodes.Item[i])) or
+              SameText(chipname, cs) then
            begin
              ChipNode := Item[j].ChildNodes.Item[i];
              if (ChipNode.HasAttributes) then
@@ -356,6 +303,7 @@ begin
                   MainForm.ComboChipSize.Text := 'Chip size';
 
                 Result := True;
+                Exit;
               end;
            end;
          end;

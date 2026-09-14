@@ -20,6 +20,23 @@ POSIX build requires `fp-compiler` and `fp-units-fcl`; its production crypto
 tests also need the system OpenSSL `libcrypto`. The Homebrew `fpc` package
 includes those units.
 
+## Windows desktop smoke
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\test_desktop.ps1
+```
+
+This additional Windows check builds the real LCL form and runs an 8 MiB
+simulated NOR device. It covers direct startup, English menus with no external
+English catalog, optional language selection, inline file errors and ambiguous
+chip profiles, automatic preparation without mutation, explicit Write, reopened
+verification, and recovery from a saved original with erased neighbouring bytes.
+It verifies that routine operations create no modal form. A simulator check
+precedes every device operation; it never selects or probes real hardware.
+Settings, images, backups and logs live in a new temporary fixture directory,
+whose path is printed. No visual layout assertion or physical hardware claim
+is made by this test.
+
 ## Suite catalog
 
 The names inside this marked block are checked against both build scripts by
@@ -53,6 +70,8 @@ adds it to the builds.
 - `norengine_tests`
 - `eepromengine_tests`
 - `operationrunner_tests`
+- `writeworkflow_tests`
+- `chipcatalog_tests`
 - `nandplanner_tests`
 - `nandengine_tests`
 - `nandadapter_tests`
@@ -83,6 +102,8 @@ adds it to the builds.
 | Provisional chip profiles | Every incoherent SFDP geometry falls back to read-only rather than to a guess, an impossible density/addressing combination yields no profile at all, and a synthesised name can never match the patterns the voltage inference keys on |
 | Quad reads | A clear quad-enable bit means a single-bit read with no flag that changes it, continuous-read mode clocks are refused, the QE bit is located from SFDP rather than the vendor byte, and no backend claims a capability its driver does not have |
 | Session report | An unrun check is never rendered as a passed one, an empty section states what its emptiness means, a refusal is an outcome rather than an absence, and a file never appears without the hash that identifies it |
+| Prepared jobs and recovery | Accepted images and snapshots are owned copies; editing or replacing a plan requires a new commitment; repeated interrupted recovery reconstructs original neighbours; changed backup, image, UID or geometry is refused; real EEPROM session ownership restores voltage, catches changed preimages and propagates cleanup/reopen failures |
+| Chip selection | Name collisions are refused with exact name/ID choices; legacy aliases resolve only when unambiguous; catalog precedence remains stable |
 | Write journal | A line without its terminating newline is work that did not happen, nothing after an unreadable line is trusted, and a resume is refused whenever the chip, capacity, image or backup has moved |
 | Simulated programmer | Driven through the real protocol layer: no write-enable does nothing silently, programming only clears bits, a page program wraps within its own page, an erase aligns down to its sector, and nothing electrical is ever claimed to be measured |
 | Voltage warning | Across every combination of production mode, external power, rail selectability and Auto resolution, a high rail is never approved for a 1.8 V part and a board that cannot switch is never offered a switch |
@@ -131,3 +152,11 @@ That one asks GitHub, so it needs network and an authenticated `gh`. It exits
 `0` when review is required and deployment is restricted to `v*` tags, `1`
 when it is not, and `2` when the question could not be asked — which is
 reported as unverified rather than as a pass.
+
+The English fallback is generated from `software/lang/en.po` and checked for
+translation-content agreement by metadata validation (line endings normalized). After editing that catalog,
+regenerate it from the repository root:
+
+```powershell
+C:\lazarus32\tools\lazres.exe software\englishcatalog.lrs software\lang\en.po
+```

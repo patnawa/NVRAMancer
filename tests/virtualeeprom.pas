@@ -181,7 +181,8 @@ end;
 class function TVirtualEEPROM.CallsForPlan(const Plan: TEEPROMPlan): cardinal;
 begin
   // open + initialize + one call per plan step + deinitialize + close
-  Result := 2 + cardinal(Length(Plan.Steps)) + 2;
+  Result := 8 + cardinal(Length(Plan.Steps)) +
+    EEPROMPlanCountKind(Plan, epsVerify);
 end;
 
 end.

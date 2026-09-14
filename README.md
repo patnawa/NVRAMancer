@@ -36,7 +36,7 @@ That is a CH341A in a repair jig — and it has a **red wire soldered across it*
 
 So NVRAMancer does not claim to know things it cannot measure. It reports the rail it *asked for* and the rail it *measured* as separate facts, and where the hardware has no sensor it says **"not measurable on this programmer"** instead of showing a number that reads like a confirmation.
 
-Nothing here is inferred upward. A chip whose voltage cannot be established is asked about, not guessed at.
+Unknown voltage is shown in the workspace, beside the controls needed to select its datasheet value.
 
 </td>
 </tr>
@@ -64,17 +64,36 @@ Nothing here is inferred upward. A chip whose voltage cannot be established is a
 <tr><td><b>🖥️ No hardware needed</b></td><td>A simulated programmer with a 25-series part in memory, so the program runs, demos and reproduces bug reports with nothing plugged in</td></tr>
 </table>
 
-Every rule above lives in a hardware-free core unit and is covered by the test suite — **33 suites, no hardware required**. See [`docs/testing.md`](docs/testing.md).
+Every rule above lives in a hardware-free core unit and is covered by the test suite — **37 suites, no hardware required**. See [`docs/testing.md`](docs/testing.md).
 
 ---
+
+## Start working
+
+The app opens directly into the last workspace. English menus are built into the
+executable, so a fresh installation needs no language setup. Other languages
+remain available from the Language menu.
+
+Open or drop an image, connect the programmer, and select a chip profile if its
+ID has several matches. Preparation runs automatically when the setup is ready.
+The plan stays in the main window; **Write** is the explicit commitment. NOR and
+EEPROM writes save a backup and verify again after closing and reopening the
+programmer. Preparation itself never programs the image.
+
+Backups normally go to `%LOCALAPPDATA%\NVRAMancer\backups`. Use **Open backups**
+to find them. An unfinished NOR write appears in the recovery row: select it,
+choose **Prepare interrupted write**, review the reconstructed plan, then
+**Write**. Connection Doctor remains an optional command in Options.
+
+See [workspace and recovery details](docs/workspace-workflow.md).
 
 ## Why this exists
 
 Sending **3.3 V to a 1.8 V flash chip destroys it permanently**. Sending too little only means the chip doesn't answer, and you try again.
 
-Those two outcomes are not equally bad — so NVRAMancer never treats them as if they were. Every path that cannot work out a chip's supply voltage **fails low**, and when it genuinely doesn't know, it stops and asks you to check the datasheet rather than quietly picking one.
+Those two outcomes are not equally bad — so NVRAMancer never treats them as if they were. Every path that cannot work out a chip's supply voltage **fails low**, and when it does not know, it displays the voltage requirement in the workspace for you to resolve from the datasheet.
 
-That sounds obvious. It wasn't happening: the chip catalogue carries a voltage field on only **5 of its 658 entries**, and every voltage decision in the program read that field directly. Auto-voltage never worked, and the guard meant to stop a pinned 3.3 V rail reaching a 1.8 V part *could never fire.* NVRAMancer fixes that.
+Earlier catalog versions carried voltage metadata for only a handful of chips. NVRAMancer combines explicit metadata with restricted identification rules, and blocks a selected rail that conflicts with the known chip requirement.
 
 ## Supported programmers
 
@@ -119,20 +138,10 @@ Tier 4 covers the dangerous group: parts like `W25Q64FW` and `MT25QU256` that ar
 
 **Tiers 3 and 4 may only ever conclude 1.8 V.** Nothing is ever inferred *up* to 3.3 V, because that is the direction that kills chips.
 
-If none of the three resolves, NVRAMancer asks:
-
-```
-The catalog does not state the supply voltage for W25Q64.
-
-Open the chip datasheet and pick its supply voltage. Nothing is
-guessed for you here on purpose: sending 3.3 V to a 1.8 V part
-destroys it permanently, while too low a rail only means the chip
-does not answer and you can try again.
-
-          [ 1.8 V ]    [ 3.3 V ]    [ Decide later ]
-```
-
-Your answer is pinned into the voltage menu, so the level in use stays visible instead of hiding in a variable.
+If none of these resolves the voltage, the main window names the missing
+requirement. Choose the datasheet voltage in **Target voltage**; no voltage
+question interrupts the work window. An incompatible known rail blocks the
+operation and shows the correction inline.
 
 ### Requested is not measured
 

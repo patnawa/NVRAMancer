@@ -49,10 +49,11 @@ if command -v python3 >/dev/null 2>&1; then
   extra=()
   [ -f chiplist-flashrom.xml ] && extra+=(chiplist-flashrom.xml)
   [ -f chiplist-ezp.xml ] && extra+=(chiplist-ezp.xml)
+  [ -f chiplist-imsprog.xml ] && extra+=(chiplist-imsprog.xml)
   python3 tools/validate_chiplist.py chiplist.xml "${extra[@]}" \
     || die "the chip tables have errors"
 else
-  echo "    python3 not found, skipped"
+  die "python3 is required to validate the chip tables and project metadata"
 fi
 
 # --- tests ---
@@ -260,7 +261,19 @@ runner="$tmp/operation-runner"
 run_suite operationrunner_tests "$runner" \
   tests/operationrunner_tests.lpr tests/virtualspi25.pas \
   software/operationmodel.pas software/norplanner.pas \
-  software/norengine.pas software/operationrunner.pas
+  software/norengine.pas software/writeworkflow.pas software/operationrunner.pas
+
+workflow="$tmp/write-workflow"
+run_suite writeworkflow_tests "$workflow" \
+  tests/writeworkflow_tests.lpr tests/virtualspi25.pas tests/virtualeeprom.pas \
+  software/operationmodel.pas software/norplanner.pas software/norengine.pas \
+  software/writeworkflow.pas software/recoveryworkflow.pas software/writejournal.pas \
+  software/prodcrypto.pas software/prodevidence.pas software/eepromengine.pas \
+  software/eepromsession.pas software/basehw.pas software/electricalpreflight.pas
+
+catalog="$tmp/chip-catalog"
+run_suite chipcatalog_tests "$catalog" \
+  tests/chipcatalog_tests.lpr software/chipcatalog.pas
 
 # SPI NAND geometry and bad-block-aware planning: the arithmetic that decides
 # whether a bad block is ever touched.

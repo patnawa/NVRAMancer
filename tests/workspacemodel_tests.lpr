@@ -133,7 +133,8 @@ begin
     Presentation.Detail);
   CheckCommand('connect primary', Presentation.Primary,
     waScanProgrammer, True, 'Scan for programmer');
-  CheckEmptyCommand('connect secondary', Presentation.Secondary);
+  CheckCommand('offline file work stays available', Presentation.Secondary,
+    waOpenImage, True, 'Open firmware image...');
   CheckCommand('connect bench escape hatch', Presentation.Tertiary,
     waOpenBench, True, 'Open technical workspace');
   CheckNoDuplicateActions('connect step', Presentation);

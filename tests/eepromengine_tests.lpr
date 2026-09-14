@@ -172,10 +172,12 @@ begin
           'page writes equal the number of differing pages');
     Check(Outcome.PhysicalVerifyCompleted,
           'physical verification is reported completed');
-    Check((Chip.OpenCount = 1) and (Chip.InitCount = 1) and
-          (Chip.DeinitCount = 1) and (Chip.CloseCount = 1),
-          'open/init/deinit/close each happen exactly once');
-    Check(Outcome.BytesCompleted = Plan.WriteBytes + Plan.VerifyBytes,
+    Check(Outcome.FreshSessionVerifyCompleted,
+          'a second session independently verifies every affected page');
+    Check((Chip.OpenCount = 2) and (Chip.InitCount = 2) and
+          (Chip.DeinitCount = 2) and (Chip.CloseCount = 2),
+          'both sessions are opened, initialized, and closed');
+    Check(Outcome.BytesCompleted = Plan.WriteBytes + 2 * Plan.VerifyBytes,
           'progress is byte-denominated and complete');
   finally
     Executor.Free;

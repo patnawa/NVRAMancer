@@ -146,6 +146,7 @@ type
     FinishedAtMs: QWord;
     DeviceDisposition: TDeviceDisposition;
     PhysicalVerifyCompleted: boolean;
+    FreshSessionVerifyCompleted: boolean;
   end;
 
   TOperationEvent = record
@@ -206,6 +207,7 @@ type
     procedure CommandStarted(const Msg: string; Address, Len: QWord);
     procedure CommandFinished(const Msg: string; Address, Len: QWord);
     procedure MarkPhysicalVerifyCompleted;
+    procedure MarkFreshSessionVerifyCompleted;
     procedure Warn(const Msg: string; Address: QWord = 0;
       HasAddress: boolean = False);
     procedure Fail(Code: TOperationErrorCode; const Msg: string;
@@ -441,6 +443,12 @@ procedure TOperationStateMachine.MarkPhysicalVerifyCompleted;
 begin
   if FOutcome.Status = osRunning then
     FOutcome.PhysicalVerifyCompleted := True;
+end;
+
+procedure TOperationStateMachine.MarkFreshSessionVerifyCompleted;
+begin
+  if FOutcome.Status = osRunning then
+    FOutcome.FreshSessionVerifyCompleted := True;
 end;
 
 procedure TOperationStateMachine.Warn(const Msg: string; Address: QWord;

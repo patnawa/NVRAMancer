@@ -282,9 +282,7 @@ def check_file(rep, path):
                 count += 1
                 # The fingerprint decides whether a repeated name is a dead
                 # line or merely an ambiguous one.
-                fingerprint = (chip.attrib.get("id", ""),
-                               chip.attrib.get("size", ""),
-                               chip.attrib.get("page", ""))
+                fingerprint = (protocol.tag, tuple(sorted(chip.attrib.items())))
                 names[chip.tag].append((f"{protocol.tag}/{vendor.tag}", fingerprint))
                 chip_id = check_chip(rep, path, protocol.tag, vendor.tag, chip)
                 if chip_id:
@@ -303,12 +301,9 @@ def check_file(rep, path):
             rep.error(path, f"chip {name!r} is listed {len(places)} times with "
                             f"identical parameters ({where})")
         else:
-            # Same name, different parameters. Auto detect can still reach
-            # them by id, but picking by name silently takes the first, and
-            # the chip picker shows two rows that look the same.
-            rep.warn(path, f"chip name {name!r} is used by {len(places)} "
-                           f"different entries ({where}); selecting it by name "
-                           f"always picks the first")
+            rep.error(path, f"chip name {name!r} is used by {len(places)} "
+                            f"different entries ({where}); give each variant "
+                            f"a distinct name and retain the old name as an alias")
 
     for chip_id, chips in ids.items():
         if len(chips) > 8:

@@ -47,7 +47,7 @@ uses
   SysUtils, Classes, StrUtils;
 
 const
-  JOURNAL_MAGIC = 'nvramancer-write-journal/1';
+  JOURNAL_MAGIC = 'nvramancer-write-journal/2';
   // Long enough for a whole-chip plan on the largest part this program
   // handles, and short enough that a corrupt length field cannot ask for a
   // gigabyte of records.
@@ -92,6 +92,9 @@ type
     // a write with no way back.
     BackupPath: string;
     BackupSha256: string;
+    ChipUID: string;
+    GeometryHash: string;
+    ImagePath: string;
   end;
 
   TWriteJournal = record
@@ -192,6 +195,9 @@ const
   KEY_LENGTH    = 'length=';
   KEY_BACKUP    = 'backup=';
   KEY_BACKUPSHA = 'backup_sha256=';
+  KEY_UID      = 'uid=';
+  KEY_GEOMETRY = 'geometry_sha256=';
+  KEY_IMAGEPATH = 'image_path=';
   MARKS_MARKER  = '--';
 
 function JournalUnitKindName(Kind: TJournalUnitKind): string;
@@ -241,6 +247,9 @@ begin
   Add(KEY_LENGTH + UIntText(Header.Length));
   Add(KEY_BACKUP + Header.BackupPath);
   Add(KEY_BACKUPSHA + Header.BackupSha256);
+  Add(KEY_UID + Header.ChipUID);
+  Add(KEY_GEOMETRY + Header.GeometryHash);
+  Add(KEY_IMAGEPATH + Header.ImagePath);
   Add(MARKS_MARKER);
 end;
 
@@ -385,7 +394,8 @@ begin
     ErrMsg := 'the journal is empty';
     Exit;
   end;
-  if Lines[0] <> JOURNAL_MAGIC then
+  if (Lines[0] <> JOURNAL_MAGIC) and
+     (Lines[0] <> 'nvramancer-write-journal/1') then
   begin
     //Either not a journal, or one written by a version whose format this
     //build does not know. Both mean the same thing here: do not act on it.
@@ -419,6 +429,18 @@ begin
   end;
   if not Need(KEY_BACKUP, Journal.Header.BackupPath) then Exit;
   if not Need(KEY_BACKUPSHA, Journal.Header.BackupSha256) then Exit;
+  if Lines[0] = JOURNAL_MAGIC then
+  begin
+    if not Need(KEY_UID, Journal.Header.ChipUID) then Exit;
+    if not Need(KEY_GEOMETRY, Journal.Header.GeometryHash) then Exit;
+    if not Need(KEY_IMAGEPATH, Journal.Header.ImagePath) then Exit;
+    if (Journal.Header.GeometryHash <> '') and
+       (not IsLowerHex64(Journal.Header.GeometryHash)) then
+    begin
+      ErrMsg := 'the recorded geometry hash is not a SHA-256';
+      Exit;
+    end;
+  end;
 
   if (Cursor > High(Lines)) or (Lines[Cursor] <> MARKS_MARKER) then
   begin
@@ -576,27 +598,30 @@ function BeginJournal(const FileName: string; const Header: TJournalHeader;
   out ErrMsg: string): boolean;
 var
   Lines: TJournalLines;
-  Text: TStringList;
-  i: integer;
+  Journal: TWriteJournal;
+  Raw: RawByteString;
+  Line: string;
+  Stream: TFileStream;
 begin
-  ErrMsg := '';
   Result := False;
+  ErrMsg := '';
   Lines := HeaderLines(Header);
-  Text := TStringList.Create;
+  Raw := '';
+  for Line in Lines do Raw := Raw + Line + #10;
+  // Parse the serialized bytes too: embedded newlines must never change identity.
+  if not ParseJournal(SplitCompleteLines(Raw), Journal, ErrMsg) then Exit;
   try
+    Stream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
     try
-      for i := 0 to High(Lines) do Text.Add(Lines[i]);
-      //LF endings, written the same way on every platform, so a journal
-      //written on one machine parses on another.
-      Text.LineBreak := #10;
-      Text.SaveToFile(FileName);
+      Stream.WriteBuffer(Raw[1], Length(Raw));
+      if not FileFlush(Stream.Handle) then
+        raise EWriteError.Create('could not flush the write journal header');
       Result := True;
-    except
-      on E: Exception do ErrMsg := 'could not start the write journal: ' +
-                                   E.Message;
+    finally
+      Stream.Free;
     end;
-  finally
-    Text.Free;
+  except
+    on E: Exception do ErrMsg := 'could not start the write journal: ' + E.Message;
   end;
 end;
 
@@ -625,7 +650,8 @@ begin
       //Flushed to the device, not merely to the operating system's cache.
       //A buffered journal describes a chip state several blocks behind the
       //real one, which is the whole thing this file exists to avoid.
-      FileFlush(Stream.Handle);
+      if not FileFlush(Stream.Handle) then
+        raise EWriteError.Create('could not flush the write journal');
       Result := True;
     finally
       Stream.Free;

@@ -1,0 +1,1260 @@
+LazarusResources.Add('en','PO',[
+  '# English'#13#10'msgid ""'#13#10'msgstr ""'#13#10'"Project-Id-Version: \n"'
+  +#13#10'"POT-Creation-Date: \n"'#13#10'"PO-Revision-Date: \n"'#13#10'"Last-Tr'
+  +'anslator: MELERIX\n"'#13#10'"Language-Team: \n"'#13#10'"Language: en\n"'#13
+  +#10'"MIME-Version: 1.0\n"'#13#10'"Content-Type: text/plain; charset=UTF-8\n"'
+  +#13#10'"Content-Transfer-Encoding: 8bit\n"'#13#10'"X-Generator: Poedit 3.3.2'
+  +'\n"'#13#10#13#10'#: msgstr.str_45page_powerof2'#13#10'msgid "'#208#163#209
+  +#129#209#130#208#176#208#189#208#190#208#178#208#187#208#181#208#189' '#209
+  +#128#208#176#208#183#208#188#208#181#209#128' '#209#129#209#130#209#128#208
+  +#176#208#189#208#184#209#134#209#139' '#208#186#209#128#208#176#209#130#208
+  +#189#209#139#208#185' '#208#180#208#178#209#131#208#188'!"'#13#10'msgstr "Pa'
+  +'ge size is power of 2"'#13#10#13#10'#: msgstr.str_45page_std'#13#10'msgid "'
+  +#208#163#209#129#209#130#208#176#208#189#208#190#208#178#208#187#208#181#208
+  +#189' '#209#129#209#130#208#176#208#189#208#180#208#176#209#128#209#130#208
+  +#189#209#139#208#185' '#209#128#208#176#208#183#208#188#208#181#209#128' '
+  +#209#129#209#130#209#128#208#176#208#189#208#184#209#134#209#139'"'#13#10'ms'
+  +'gstr "Default page size is set"'#13#10#13#10'#: msgstr.str_block_en'#13#10
+  +'msgid ""'#13#10'"'#208#146#208#190#208#183#208#188#208#190#208#182#208#189
+  +#208#190' '#208#178#208#186#208#187#209#142#209#135#208#181#208#189#208#176
+  +' '#208#183#208#176#209#137#208#184#209#130#208#176' '#208#189#208#176' '#208
+  +#183#208#176#208#191#208#184#209#129#209#140'. '#208#157#208#176#208#182#208
+  +#188#208#184#209#130#208#181' '#208#186#208#189#208#190#208#191#208#186#209
+  +#131' \"'#208#161#208#189#209#143#209#130#209#140' '#208#183#208#176#209#137
+  +#208#184#209#130#209#131'\" '#208#184' "'#13#10'"'#209#129#208#178#208#181
+  +#209#128#209#140#209#130#208#181#209#129#209#140' '#209#129' '#208#180#208
+  +#176#209#130#208#176#209#136#208#184#209#130#208#190#208#188'"'#13#10'msgstr'
+  +' ""'#13#10'"Possible protection is enabled. Press \"Unprotect\" and check d'
+  +'atasheet"'#13#10#13#10'#: msgstr.str_changed'#13#10'msgid "'#208#152#208#183
+  +#208#188#208#181#208#189#208#181#208#189'"'#13#10'msgstr "Modified"'#13#10#13
+  +#10'#: msgstr.str_check_settings'#13#10'msgid "'#208#159#209#128#208#190#208
+  +#178#208#181#209#128#209#140#209#130#208#181' '#208#189#208#176#209#129#209
+  +#130#209#128#208#190#208#185#208#186#208#184'"'#13#10'msgstr "Check settings'
+  +'"'#13#10#13#10'#: msgstr.str_combo_warn'#13#10'msgid "'#208#167#208#184#208
+  +#191' '#208#177#209#131#208#180#208#181#209#130' '#209#129#209#130#208#181
+  +#209#128#209#130' '#208#184' '#208#191#208#181#209#128#208#181#208#183#208
+  +#176#208#191#208#184#209#129#208#176#208#189'. '#208#159#209#128#208#190#208
+  +#180#208#190#208#187#208#182#208#184#209#130#209#140'?"'#13#10'msgstr "IC wi'
+  +'ll be erased and programmed. Continue?"'#13#10#13#10'#: msgstr.str_connecti'
+  +'on_error'#13#10'msgid "'#208#158#209#136#208#184#208#177#208#186#208#176' '
+  +#208#191#208#190#208#180#208#186#208#187#209#142#209#135#208#181#208#189#208
+  +#184#209#143' '#208#186' "'#13#10'msgstr "Error connecting "'#13#10#13#10'#:'
+  +' msgstr.str_done'#13#10'msgid "'#208#147#208#190#209#130#208#190#208#178#208
+  +#190'"'#13#10'msgstr "Done"'#13#10#13#10'#: msgstr.str_erasing_flash'#13#10
+  +'msgid "'#208#161#209#130#208#184#209#128#208#176#209#142' '#209#132#208#187
+  +#209#141#209#136#208#186#209#131'..."'#13#10'msgstr "Erasing memory..."'#13
+  +#10#13#10'#: msgstr.str_goto_addr tmainform.menugotooffset.caption'#13#10'ms'
+  +'gid "'#208#159#208#181#209#128#208#181#208#185#209#130#208#184' '#208#191
+  +#208#190' '#208#176#208#180#209#128#208#181#209#129#209#131'"'#13#10'msgstr '
+  +'"Goto address"'#13#10#13#10'#: msgstr.str_i2c_no_answer'#13#10'msgid "'#208
+  +#156#208#184#208#186#209#128#208#190#209#129#209#133#208#181#208#188#208#176
+  +' '#208#189#208#181' '#208#190#209#130#208#178#208#181#209#135#208#176#208
+  +#181#209#130'"'#13#10'msgstr "IC not responding"'#13#10#13#10'#: msgstr.str_'
+  +'id_unknown'#13#10'msgid "('#208#157#208#181#208#184#208#183#208#178#208#181
+  +#209#129#209#130#208#189#208#190')"'#13#10'msgstr "(Unknown)"'#13#10#13#10'#'
+  +': msgstr.str_mini_eeprom_support'#13#10'msgid "'#208#148#208#176#208#189#208
+  +#189#208#176#209#143' '#208#178#208#181#209#128#209#129#208#184#209#143' '
+  +#208#191#209#128#208#190#209#136#208#184#208#178#208#186#208#184' '#208#189
+  +#208#181' '#208#191#208#190#208#180#208#180#208#181#209#128#208#182#208#184
+  +#208#178#208#176#208#181#209#130' I2C '#208#184' MW!"'#13#10'msgstr "This fi'
+  +'rmware does not support I2C and MW!"'#13#10#13#10'#: msgstr.str_new_sreg'#13
+  +#10'msgid "'#208#161#209#130#208#176#208#187#208#190' Sreg: "'#13#10'msgstr '
+  +'"New SREG: "'#13#10#13#10'#: msgstr.str_curr_hw'#13#10'msgid "'#208#152#209
+  +#129#208#191#208#190#208#187#209#140#208#183#209#131#208#181#209#130#209#129
+  +#209#143' '#208#191#209#128#208#190#208#179#209#128#208#176#208#188#208#188
+  +#208#176#209#130#208#190#209#128': "'#13#10'msgstr "Current programmer: "'#13
+  ,#10#13#10'#: msgstr.str_not_found_hex'#13#10'msgid "'#208#151#208#189#208#176
+  +#209#135#208#181#208#189#208#184#208#181' '#208#189#208#181' '#208#189#208
+  +#176#208#185#208#180#208#181#208#189#208#190'"'#13#10'msgstr "Value not foun'
+  +'d"'#13#10#13#10'#: msgstr.str_no_eeprom_support'#13#10'msgid "'#208#148#208
+  +#176#208#189#208#189#208#176#209#143' '#208#178#208#181#209#128#209#129#208
+  +#184#209#143' '#208#191#209#128#208#190#209#136#208#184#208#178#208#186#208
+  +#184' '#208#189#208#181' '#208#191#208#190#208#180#208#180#208#181#209#128
+  +#208#182#208#184#208#178#208#176#208#181#209#130#209#129#209#143'!"'#13#10'm'
+  +'sgstr "This firmware does not support memory programming"'#13#10#13#10'#: m'
+  +'sgstr.str_old_sreg'#13#10'msgid "'#208#145#209#139#208#187#208#190' Sreg: "'
+  +#13#10'msgstr "Old SREG: "'#13#10#13#10'#: msgstr.str_reading_flash'#13#10'm'
+  +'sgid "'#208#167#208#184#209#130#208#176#209#142' '#209#132#208#187#209#141
+  +#209#136#208#186#209#131'..."'#13#10'msgstr "Reading memory..."'#13#10#13#10
+  +'#: msgstr.str_search_hex'#13#10'msgid "'#208#159#208#190#208#184#209#129#208
+  +#186' HEX '#208#183#208#189#208#176#209#135#208#181#208#189#208#184#209#143
+  +'"'#13#10'msgstr "Search HEX value"'#13#10#13#10'#: msgstr.str_set_speed_err'
+  +'or'#13#10'msgid "'#208#158#209#136#208#184#208#177#208#186#208#176' '#209
+  +#131#209#129#209#130#208#176#208#189#208#190#208#178#208#186#208#184' '#209
+  +#129#208#186#208#190#209#128#208#190#209#129#209#130#208#184' SPI"'#13#10'ms'
+  +'gstr "Error setting SPI speed"'#13#10#13#10'#: msgstr.str_size'#13#10'msgid'
+  +' "'#208#160#208#176#208#183#208#188#208#181#209#128': "'#13#10'msgstr "Size'
+  +': "'#13#10#13#10'#: msgstr.str_specify_hex'#13#10'msgid "'#208#163#208#186
+  +#208#176#208#182#208#184#209#130#208#181' '#209#136#208#181#209#129#209#130
+  +#208#189#208#176#208#180#209#134#208#176#209#130#208#181#209#128#208#184#209
+  +#135#208#189#209#139#208#181' '#209#135#208#184#209#129#208#187#208#176'"'#13
+  +#10'msgstr "Use HEX numbers"'#13#10#13#10'#: msgstr.str_start_erase'#13#10'm'
+  +'sgid "'#208#162#208#190#209#135#208#189#208#190' '#209#129#209#130#208#181
+  +#209#128#208#181#209#130#209#140' '#209#135#208#184#208#191'?"'#13#10'msgstr'
+  +' "Erase IC?"'#13#10#13#10'#: msgstr.str_start_write'#13#10'msgid "'#208#157
+  +#208#176#209#135#208#176#209#130#209#140' '#208#183#208#176#208#191#208#184
+  +#209#129#209#140'?"'#13#10'msgstr "Begin programming?"'#13#10#13#10'#: msgst'
+  +'r.str_time'#13#10'msgid "'#208#146#209#128#208#181#208#188#209#143' '#208
+  +#178#209#139#208#191#208#190#208#187#208#189#208#181#208#189#208#184#209#143
+  +': "'#13#10'msgstr "Execution time: "'#13#10#13#10'#: msgstr.str_usb_timeout'
+  +#13#10'msgid "USB_control_msg '#208#190#209#130#208#178#208#176#208#187#208
+  +#184#208#187#209#129#209#143' '#208#191#208#190' '#209#130#208#176#208#185
+  +#208#188#208#176#209#131#209#130#209#131'!"'#13#10'msgstr "USB_control_msg t'
+  +'imeout!"'#13#10#13#10'#: msgstr.str_user_cancel'#13#10'msgid "'#208#159#209
+  +#128#208#181#209#128#208#178#208#176#208#189#208#190' '#208#191#208#190#208
+  +#187#209#140#208#183#208#190#208#178#208#176#209#130#208#181#208#187#208#181
+  +#208#188'"'#13#10'msgstr "Cancelled by user"'#13#10#13#10'#: msgstr.str_veri'
+  +'fy'#13#10'msgid "'#208#159#209#128#208#190#208#178#208#181#209#128#209#143
+  +#209#142' '#209#132#208#187#209#141#209#136#208#186#209#131'..."'#13#10'msgs'
+  +'tr "Verifying memory..."'#13#10#13#10'#: msgstr.str_verify_error'#13#10'msg'
+  +'id "'#208#158#209#136#208#184#208#177#208#186#208#176' '#209#129#209#128#208
+  +#176#208#178#208#189#208#181#208#189#208#184#209#143' '#208#191#208#190' '
+  +#208#176#208#180#209#128#208#181#209#129#209#131': "'#13#10'msgstr "Verifica'
+  +'tion error on address: "'#13#10#13#10'#: msgstr.str_writing_flash'#13#10'ms'
+  +'gid "'#208#151#208#176#208#191#208#184#209#129#209#139#208#178#208#176#209
+  +#142' '#209#132#208#187#209#141#209#136#208#186#209#131'..."'#13#10'msgstr "'
+  +'Programming memory..."'#13#10#13#10'#: msgstr.str_writing_flash_wchk'#13#10
+  +'msgid "'#208#151#208#176#208#191#208#184#209#129#209#139#208#178#208#176#209
+  +#142' '#209#132#208#187#209#141#209#136#208#186#209#131' '#209#129' '#208#191
+  +#209#128#208#190#208#178#208#181#209#128#208#186#208#190#208#185'..."'#13#10
+  +'msgstr "Programming memory (with verification)..."'#13#10#13#10'#: msgstr.s'
+  +'tr_wrong_bytes_read'#13#10'msgid "'#208#154#208#190#208#187#208#184#209#135
+  +#208#181#209#129#209#130#208#178#208#190' '#208#191#209#128#208#190#209#135
+  +#208#184#209#130#208#176#208#189#208#189#209#139#209#133' '#208#177#208#176
+  +#208#185#209#130' '#208#189#208#181' '#209#128#208#176#208#178#208#189#208
+  +#190' '#209#128#208#176#208#183#208#188#208#181#209#128#209#131' '#209#132
+  +#208#187#209#141#209#136#208#186#208#184'"'#13#10'msgstr "Number of bytes re'
+  +'ad not equal to IC size"'#13#10#13#10'#: msgstr.str_wrong_bytes_write'#13#10
+  +'msgid "'#208#154#208#190#208#187#208#184#209#135#208#181#209#129#209#130#208
+  +#178#208#190' '#208#183#208#176#208#191#208#184#209#129#208#176#208#189#208
+  ,#189#209#139#209#133' '#208#177#208#176#208#185#209#130' '#208#189#208#181' '
+  +#209#128#208#176#208#178#208#189#208#190' '#209#128#208#176#208#183#208#188
+  +#208#181#209#128#209#131' '#209#132#208#187#209#141#209#136#208#186#208#184
+  +'"'#13#10'msgstr "Number of bytes written not equal to IC size"'#13#10#13#10
+  +'#: msgstr.str_wrong_file_size'#13#10'msgid "'#208#160#208#176#208#183#208
+  +#188#208#181#209#128' '#209#132#208#176#208#185#208#187#208#176' '#208#177
+  +#208#190#208#187#209#140#209#136#208#181' '#209#128#208#176#208#183#208#188
+  +#208#181#209#128#208#176' '#209#135#208#184#208#191#208#176'"'#13#10'msgstr '
+  +'"File size larger than IC size"'#13#10#13#10'#: msgstr.str_erase_notice'#13
+  +#10'msgid "'#208#159#209#128#208#190#209#134#208#181#209#129#209#129' '#208
+  +#188#208#190#208#182#208#181#209#130' '#208#180#208#187#208#184#209#130#209
+  +#140#209#129#209#143' '#208#177#208#190#208#187#209#140#209#136#208#181' '
+  +#208#188#208#184#208#189#209#131#209#130#209#139' '#208#189#208#176' '#208
+  +#177#208#190#208#187#209#140#209#136#208#184#209#133' '#209#132#208#187#208
+  +#181#209#136#208#186#208#176#209#133'!"'#13#10'msgstr "The process can take '
+  +'more than a minute on large flash!"'#13#10#13#10'#: tmainform.allowinsertit'
+  +'em.caption'#13#10'msgid "'#208#160#208#176#208#183#209#128#208#181#209#136
+  +#208#184#209#130#209#140' '#209#128#208#181#208#182#208#184#208#188' '#208
+  +#178#209#129#209#130#208#176#208#178#208#186#208#184'"'#13#10'msgstr "Insert'
+  +' mode"'#13#10#13#10'#: tmainform.menuitemhardware.caption'#13#10'msgid "'
+  +#208#159#209#128#208#190#208#179#209#128#208#176#208#188#208#188#208#176#209
+  +#130#208#190#209#128'"'#13#10'msgstr "Hardware"'#13#10#13#10'#: tmainform.bu'
+  +'ttonblock.hint'#13#10'msgid "'#208#161#208#189#209#143#209#130#209#140' '
+  +#208#183#208#176#209#137#208#184#209#130#209#131'"'#13#10'msgstr "Unprotect"'
+  +#13#10#13#10'#: tmainform.buttoncancel.hint'#13#10'msgid "'#208#159#209#128
+  +#208#181#209#128#208#178#208#176#209#130#209#140' '#209#130#208#181#208#186
+  +#209#131#209#137#208#181#209#142' '#208#190#208#191#208#181#209#128#208#176
+  +#209#134#208#184#209#142'"'#13#10'msgstr "Cancel"'#13#10#13#10'#: tmainform.'
+  +'buttonerase.hint'#13#10'msgid "'#208#161#209#130#208#181#209#128#208#181#209
+  +#130#209#140'"'#13#10'msgstr "Erase IC"'#13#10#13#10'#: tmainform.buttonopen'
+  +'hex.hint'#13#10'msgid "'#208#151#208#176#208#179#209#128#209#131#208#183#208
+  +#184#209#130#209#140' '#208#191#209#128#208#190#209#136#208#184#208#178#208
+  +#186#209#131' '#208#178' '#209#128#208#181#208#180#208#176#208#186#209#130
+  +#208#190#209#128'"'#13#10'msgstr "Open file"'#13#10#13#10'#: tmainform.butto'
+  +'nread.hint'#13#10'msgid "'#208#159#209#128#208#190#209#135#208#184#209#130
+  +#208#176#209#130#209#140'"'#13#10'msgstr "Read IC"'#13#10#13#10'#: tmainform'
+  +'.buttonreadid.hint'#13#10'msgid "'#208#159#209#128#208#190#209#135#208#184
+  +#209#130#208#176#209#130#209#140' '#208#184#208#189#208#180#208#184#209#132
+  +#208#184#208#186#208#176#209#130#208#190#209#128'"'#13#10'msgstr "Read ID"'
+  +#13#10#13#10'#: tmainform.buttonsavehex.hint'#13#10'msgid "'#208#161#208#190
+  +#209#133#209#128#208#176#208#189#208#184#209#130#209#140' '#208#191#209#128
+  +#208#190#209#136#208#184#208#178#208#186#209#131' '#208#184#208#183' '#209
+  +#128#208#181#208#180#208#176#208#186#209#130#208#190#209#128#208#176'"'#13#10
+  +'msgstr "Save file"'#13#10#13#10'#: tmainform.buttonverify.hint'#13#10'msgid'
+  +' "'#208#161#209#128#208#176#208#178#208#189#208#184#209#130#209#140' '#209
+  +#129#208#190#208#180#208#181#209#128#208#182#208#184#208#188#208#190#208#181
+  +'"'#13#10'msgstr "Verify IC"'#13#10#13#10'#: tmainform.buttonwrite.hint'#13
+  +#10'msgid "'#208#151#208#176#208#191#208#184#209#129#208#176#209#130#209#140
+  +'"'#13#10'msgstr "Program IC"'#13#10#13#10'#: tmainform.clearlogmenuitem.cap'
+  +'tion'#13#10'msgid "'#208#158#209#135#208#184#209#129#209#130#208#184#209#130
+  +#209#140'"'#13#10'msgstr "Clear"'#13#10#13#10'#: tmainform.comboaddrtype.hin'
+  +'t'#13#10'msgid "'#208#162#208#184#208#191' '#208#176#208#180#209#128#208#181
+  +#209#129#208#176#209#134#208#184#208#184' '#208#186' '#208#191#208#176#208
+  +#188#209#143#209#130#208#184'"'#13#10'msgstr "Type of addressing"'#13#10#13
+  +#10'#: tmainform.combochipsize.hint'#13#10'msgid "'#208#160#208#176#208#183
+  +#208#188#208#181#209#128' '#209#135#208#184#208#191#208#176' '#208#178' '#208
+  +#177#208#176#208#185#209#130#208#176#209#133'"'#13#10'msgstr "IC size in byt'
+  +'es"'#13#10#13#10'#: tmainform.comboitem1.caption'#13#10'msgid "'#208#161#208
+  +#189#209#143#209#130#209#140' '#208#183#208#176#209#137#208#184#209#130#209
+  +#131' -> '#209#129#209#130#208#181#209#128#208#181#209#130#209#140' -> '#208
+  +#183#208#176#208#191#208#184#209#129#208#176#209#130#209#140' -> '#208#191
+  +#209#128#208#190#208#178#208#181#209#128#208#184#209#130#209#140'"'#13#10'ms'
+  +'gstr "Unprotect -> erase -> program -> verify"'#13#10#13#10'#: tmainform.co'
+  +'mbomwbitlen.hint'#13#10'msgid "'#208#148#208#187#208#184#208#189#208#189#208
+  ,#176' '#208#176#208#180#209#128#208#181#209#129#208#176' '#208#178' '#208#177
+  +#208#184#209#130#208#176#209#133'"'#13#10'msgstr "Address Length in bits"'#13
+  +#10#13#10'#: tmainform.combopagesize.hint'#13#10'msgid "'#208#160#208#176#208
+  +#183#208#188#208#181#209#128' '#209#129#209#130#209#128#208#176#208#189#208
+  +#184#209#134#209#139'"'#13#10'msgstr "Page size"'#13#10#13#10'#: tmainform.c'
+  +'opylogmenuitem.caption'#13#10'msgctxt "TMAINFORM.COPYLOGMENUITEM.CAPTION"'
+  +#13#10'msgid "'#208#154#208#190#208#191#208#184#209#128#208#190#208#178#208
+  +#176#209#130#209#140'"'#13#10'msgstr "Copy"'#13#10#13#10'#: tmainform.label1'
+  +'.caption'#13#10'msgid "'#208#161#209#130#209#128#208#176#208#189#208#184#209
+  +#134#208#176'"'#13#10'msgstr "Page"'#13#10#13#10'#: tmainform.label2.caption'
+  +#13#10'msgid "'#208#160#208#176#208#183#208#188#208#181#209#128'"'#13#10'msg'
+  +'str "Size"'#13#10#13#10'#: tmainform.label4.caption'#13#10'msgid "'#208#162
+  +#208#184#208#191' '#208#176#208#180#209#128#208#181#209#129#208#176'"'#13#10
+  +'msgstr "Address type"'#13#10#13#10'#: tmainform.label5.caption'#13#10'msgid'
+  +' "'#208#148#208#187#208#184#208#189#208#176' '#208#176#208#180#209#128#208
+  +#181#209#129#208#176'"'#13#10'msgstr "Address length"'#13#10#13#10'#: tmainf'
+  +'orm.label3.caption'#13#10'msgctxt "tmainform.label3.caption"'#13#10'msgid "'
+  +#208#156#208#184#208#186#209#128#208#190#209#129#209#133#208#181#208#188#208
+  +#176':"'#13#10'msgstr "IC:"'#13#10#13#10'#: tmainform.labelspicmd.caption'#13
+  +#10'msgid "'#208#154#208#190#208#188#208#176#208#189#208#180#209#139' SPI"'
+  +#13#10'msgstr "SPI commands"'#13#10#13#10'#: tmainform.menuautocheck.caption'
+  +#13#10'msgid "'#208#159#209#128#208#190#208#178#208#181#209#128#208#186#208
+  +#176' '#208#183#208#176#208#191#208#184#209#129#208#184'"'#13#10'msgstr "Ver'
+  +'ify"'#13#10#13#10'#: tmainform.menuchip.caption'#13#10'msgctxt "TMAINFORM.M'
+  +'ENUCHIP.CAPTION"'#13#10'msgid "'#208#156#208#184#208#186#209#128#208#190#209
+  +#129#209#133#208#181#208#188#208#176'"'#13#10'msgstr "IC"'#13#10#13#10'#: tm'
+  +'ainform.menucopytoclip.caption'#13#10'msgctxt "tmainform.menucopytoclip.cap'
+  +'tion"'#13#10'msgid "'#208#154#208#190#208#191#208#184#209#128#208#190#208
+  +#178#208#176#209#130#209#140'"'#13#10'msgstr "Copy"'#13#10#13#10'#: tmainfor'
+  +'m.menufind.caption tsearchform.caption'#13#10'msgid "'#208#159#208#190#208
+  +#184#209#129#208#186'"'#13#10'msgstr "Search"'#13#10#13#10'#: tmainform.menu'
+  +'findchip.caption'#13#10'msgctxt "tmainform.menufindchip.caption"'#13#10'msg'
+  +'id "'#208#159#208#190#208#184#209#129#208#186'"'#13#10'msgstr "Search"'#13
+  +#10#13#10'#: tmainform.menuskipff.caption'#13#10'msgid "'#208#157#208#181' '
+  +#208#191#208#184#209#129#208#176#209#130#209#140' FF"'#13#10'msgstr "Do not '
+  +'write FF"'#13#10#13#10'#: tmainform.menusendab.caption'#13#10'msgid "'#208
+  +#146#209#139#208#178#208#190#208#180#208#184#209#130#209#140' '#209#135#208
+  +#184#208#191' '#208#184#208#183' '#209#129#208#189#208#176'"'#13#10'msgstr "'
+  +'Send \"wake-up\" to flash"'#13#10#13#10'#: tmainform.menuignorebusybit.capt'
+  +'ion'#13#10'msgid "'#208#157#208#181' '#208#191#209#128#208#190#208#178#208
+  +#181#209#128#209#143#209#130#209#140' Busy '#208#177#208#184#209#130'"'#13#10
+  +'msgstr "Do not chek Busy bit"'#13#10#13#10'#: tmainform.menuitemlockflash.c'
+  +'aption'#13#10'msgid "'#208#159#208#190#209#129#209#130#208#176#208#178#208
+  +#184#209#130#209#140' '#208#183#208#176#209#137#208#184#209#130#209#131'"'#13
+  +#10'msgstr "Set the protection bits"'#13#10#13#10'#: tmainform.menuitemreads'
+  +'reg.caption'#13#10'msgid "'#208#159#209#128#208#190#209#135#208#184#209#130
+  +#208#176#209#130#209#140' SREG"'#13#10'msgstr "Read SREG"'#13#10#13#10'#: tm'
+  +'ainform.menuitemeditsreg.caption'#13#10'msgid "'#208#152#208#183#208#188#208
+  +#181#208#189#208#184#209#130#209#140' SREG"'#13#10'msgstr "Edit SREG"'#13#10
+  +#13#10'#: tmainform.menumwclock.caption'#13#10'msgctxt "TMAINFORM.MENUMWCLOC'
+  +'K.CAPTION"'#13#10'msgid "'#208#167#208#176#209#129#209#130#208#190#209#130
+  +#208#176'"'#13#10'msgstr "Frequency"'#13#10#13#10'#: tmainform.menuoptions.c'
+  +'aption'#13#10'msgid "'#208#157#208#176#209#129#209#130#209#128#208#190#208
+  +#185#208#186#208#184'"'#13#10'msgstr "Options"'#13#10#13#10'#: tmainform.men'
+  +'uspiclock.caption'#13#10'msgctxt "tmainform.menuspiclock.caption"'#13#10'ms'
+  +'gid "'#208#167#208#176#209#129#209#130#208#190#209#130#208#176'"'#13#10'msg'
+  +'str "Frequency"'#13#10#13#10'#: tsearchform.casesensecheckbox.caption'#13#10
+  +'msgid "'#208#163#209#135#208#184#209#130#209#139#208#178#208#176#209#130#209
+  +#140' '#209#128#208#181#208#179#208#184#209#129#209#130#209#128'"'#13#10'msg'
+  +'str "Case sensitivity"'#13#10#13#10'#: tsearchform.findbutton.caption'#13#10
+  +'msgid "'#208#157#208#176#208#185#209#130#208#184'"'#13#10'msgstr "Find"'#13
+  +#10#13#10'#: tsearchform.frombeginingcheckbox.caption'#13#10'msgid "'#208#152
+  +#209#129#208#186#208#176#209#130#209#140' '#209#129#208#189#208#176#209#135
+  +#208#176#208#187#208#176'"'#13#10'msgstr "Search from the beginning"'#13#10
+  ,#13#10'#: tsearchform.hexcheckbox.caption'#13#10'msgid "'#208#152#209#129#208
+  +#186#208#176#209#130#209#140' HEX '#208#183#208#189#208#176#209#135#208#181
+  +#208#189#208#184#208#181'"'#13#10'msgstr "Search HEX value"'#13#10#13#10'#: '
+  +'tsearchform.replaceallcheckbox.caption'#13#10'msgid "'#208#151#208#176#208
+  +#188#208#181#208#189#208#184#209#130#209#140' '#208#178#209#129#208#181'"'#13
+  +#10'msgstr "Replace all"'#13#10#13#10'#: tsearchform.replacecheckbox.caption'
+  +#13#10'msgid "'#208#151#208#176#208#188#208#181#208#189#208#184#209#130#209
+  +#140'"'#13#10'msgstr "Replace"'#13#10#13#10'#: tsearchform.replacelabel.capt'
+  +'ion'#13#10'msgid "'#208#183#208#176#208#188#208#181#208#189#208#184#209#130
+  +#209#140' '#208#189#208#176':"'#13#10'msgstr "replace to:"'#13#10#13#10'#: t'
+  +'searchform.searchlabel.caption'#13#10'msgid "'#208#152#209#129#208#186#208
+  +#176#209#130#209#140'"'#13#10'msgstr "Find"'#13#10#13#10'#: tsregeditform.bu'
+  +'ttonreadsreg.caption'#13#10'msgctxt "TSREGEDITFORM.BUTTONREADSREG.CAPTION"'
+  +#13#10'msgid "'#208#159#209#128#208#190#209#135#208#184#209#130#208#176#209
+  +#130#209#140'"'#13#10'msgstr "Read"'#13#10#13#10'#: tsregeditform.buttonwrit'
+  +'esreg.caption'#13#10'msgctxt "TSREGEDITFORM.BUTTONWRITESREG.CAPTION"'#13#10
+  +'msgid "'#208#151#208#176#208#191#208#184#209#129#208#176#209#130#209#140'"'
+  +#13#10'msgstr "Write"'#13#10#13#10'#: tchipsearchform.caption'#13#10'msgid "'
+  +#208#159#208#190#208#184#209#129#208#186' '#208#188#208#184#208#186#209#128
+  +#208#190#209#129#209#133#208#181#208#188#209#139'"'#13#10'msgstr "Find IC"'
+  +#13#10#13#10'#: tchipsearchform.label1.caption'#13#10'msgid "'#208#156#208
+  +#176#209#128#208#186#208#184#209#128#208#190#208#178#208#186#208#176' '#209
+  +#129#208#190#208#180#208#181#209#128#208#182#208#184#209#130':"'#13#10'msgst'
+  +'r "IC '#208#188'arking contains:"'#13#10#13#10'#: tchipsearchform.ChipSearc'
+  +'hSelectButton.caption'#13#10'msgid "'#208#146#209#139#208#177#209#128#208
+  +#176#209#130#209#140' '#208#188#208#184#208#186#209#128#208#190#209#129#209
+  +#133#208#181#208#188#209#131'"'#13#10'msgstr "Select IC"'#13#10#13#10'#: tma'
+  +'inform.blankcheckmenuitem.caption'#13#10'msgid "'#208#159#209#128#208#190
+  +#208#178#208#181#209#128#208#186#208#176' '#208#189#208#176' '#209#135#208
+  +#184#209#129#209#130#208#190#209#130#209#131'"'#13#10'msgstr "Blank check"'
+  +#13#10#13#10'#: tmainform.Label_I2C_DevAddr.caption'#13#10'msgctxt "tmainfor'
+  +'m.Label_I2C_DevAddr.caption"'#13#10'msgid "'#208#144#208#180#209#128#208#181
+  +#209#129' '#209#131#209#129#209#130#209#128#208#190#208#185#209#129#209#130
+  +#208#178#208#176'"'#13#10'msgstr "Device address"'#13#10#13#10'#: tmainform.'
+  +'CheckBox_I2C_ByteRead.caption'#13#10'msgctxt "tmainform.CheckBox_I2C_ByteRe'
+  +'ad.caption"'#13#10'msgid "'#208#159#208#190#208#177#208#176#208#185#209#130
+  +#208#190#208#178#208#190#208#181' '#209#135#209#130#208#181#208#189#208#184
+  +#208#181'"'#13#10'msgstr "Byte-wise reading"'#13#10#13#10'#: tmainform.scrip'
+  +'tsmenuitem.caption tmainform.label_chip_scripts.caption'#13#10'msgid "'#208
+  +#161#208#186#209#128#208#184#208#191#209#130#209#139'"'#13#10'msgstr "Script'
+  +'s"'#13#10#13#10'#: msgstr.str_script_no_section'#13#10'msgid "'#208#157#208
+  +#181#209#130' '#209#129#208#181#208#186#209#134#208#184#208#184': "'#13#10'm'
+  +'sgstr "There is no section: "'#13#10#13#10'#: msgstr.str_script_run_section'
+  +#13#10'msgid "'#208#146#209#139#208#191#208#190#208#187#208#189#209#143#208
+  +#181#209#130#209#129#209#143' '#209#129#208#181#208#186#209#134#208#184#209
+  +#143': "'#13#10'msgstr "Runs section: "'#13#10#13#10'#: msgstr.str_script_se'
+  +'l_section'#13#10'msgid "'#208#146#209#139#208#177#208#181#209#128#208#184
+  +#209#130#208#181' '#209#129#208#181#208#186#209#134#208#184#209#142'"'#13#10
+  +'msgstr "Select section"'#13#10#13#10'#: msgstr.str_dlg_filechgd'#13#10'msgi'
+  +'d "'#209#132#208#176#208#185#208#187' '#208#184#208#183#208#188#208#181#208
+  +#189#209#145#208#189'"'#13#10'msgstr "File modified"'#13#10#13#10'#: msgstr.'
+  +'str_dlg_savefile'#13#10'msgid "'#208#161#208#190#209#133#209#128#208#176#208
+  +#189#208#184#209#130#209#140' '#208#184#208#183#208#188#208#181#208#189#208
+  +#181#208#189#208#184#209#143'?"'#13#10'msgstr "Save changes?"'#13#10#13#10'#'
+  +': msgstr.str_using_script'#13#10'msgid "'#208#152#209#129#208#191#208#190
+  +#208#187#209#140#208#183#209#131#208#181#209#130#209#129#209#143' '#209#129
+  +#208#186#209#128#208#184#208#191#209#130': "'#13#10'msgstr "Using script: "'
+  +#13#10#13#10'#: tscripteditform.menuitemfile.caption'#13#10'msgid "'#208#164
+  +#208#176#208#185#208#187'"'#13#10'msgstr "File"'#13#10#13#10'#: tscripteditf'
+  +'orm.menuitemopen.caption'#13#10'msgid "'#208#158#209#130#208#186#209#128#209
+  +#139#209#130#209#140'"'#13#10'msgstr "Open"'#13#10#13#10'#: tscripteditform.'
+  +'menuitemrun.caption'#13#10'msgid "'#208#146#209#139#208#191#208#190#208#187
+  +#208#189#208#184#209#130#209#140'"'#13#10'msgstr "Execute"'#13#10#13#10'#: t'
+  +'scripteditform.menuitemsave.caption'#13#10'msgid "'#208#161#208#190#209#133
+  ,#209#128#208#176#208#189#208#184#209#130#209#140'"'#13#10'msgstr "Save"'#13
+  +#10#13#10'#: tscripteditform.menuitemsaveas.caption'#13#10'msgid "'#208#161
+  +#208#190#209#133#209#128#208#176#208#189#208#184#209#130#209#140' '#208#186
+  +#208#176#208#186'..."'#13#10'msgstr "Save as..."'#13#10#13#10'#: tscriptedit'
+  +'form.menuitemsection.caption'#13#10'msgid "'#208#161#208#181#208#186#209#134
+  +#208#184#209#143' ="'#13#10'msgstr "Section ="'#13#10#13#10'#: tmainform.spe'
+  +'edbutton1.hint'#13#10'msgid "'#208#146#209#139#208#191#208#190#208#187#208
+  +#189#208#184#209#130#209#140' '#209#129#208#186#209#128#208#184#208#191#209
+  +#130'"'#13#10'msgstr "Run script"'#13#10#13#10'#: tmainform.label_startaddre'
+  +'ss.caption'#13#10'msgid "'#208#157#208#176#209#135#208#176#208#187#209#140
+  +#208#189#209#139#208#185' '#208#176#208#180#209#128#208#181#209#129'"'#13#10
+  +'msgstr "Start address"'#13#10#13#10'#: msgstr.str_sector_spi25_only'#13#10
+  +'msgid "Sector erase is available only for SPI 25 series chips"'#13#10'msgst'
+  +'r "Sector erase is available only for SPI 25 series chips"'#13#10#13#10'#: '
+  +'msgstr.str_erase_range_q'#13#10'msgid "Erase the selected address range?"'
+  +#13#10'msgstr "Erase the selected address range?"'#13#10#13#10'#: msgstr.str'
+  +'_erasing_range'#13#10'msgid "Erasing range: "'#13#10'msgstr "Erasing range:'
+  +' "'#13#10#13#10'#: msgstr.str_erase_range_empty'#13#10'msgid "Nothing to er'
+  +'ase: load a file or set a range first"'#13#10'msgstr "Nothing to erase: loa'
+  +'d a file or set a range first"'#13#10#13#10'#: msgstr.str_checksum'#13#10'm'
+  +'sgid "Checksum: "'#13#10'msgstr "Checksum: "'#13#10#13#10'#: msgstr.str_che'
+  +'cksum_empty'#13#10'msgid "Buffer is empty, nothing to checksum"'#13#10'msgs'
+  +'tr "Buffer is empty, nothing to checksum"'#13#10#13#10'#: msgstr.str_sfdp_r'
+  +'eading'#13#10'msgid "Reading SFDP..."'#13#10'msgstr "Reading SFDP..."'#13#10
+  +#13#10'#: msgstr.str_sfdp_not_found'#13#10'msgid "SFDP is not supported by t'
+  +'his chip (no valid signature)"'#13#10'msgstr "SFDP is not supported by this'
+  +' chip (no valid signature)"'#13#10#13#10'#: msgstr.str_sfdp_found'#13#10'ms'
+  +'gid "SFDP detected"'#13#10'msgstr "SFDP detected"'#13#10#13#10'#: msgstr.st'
+  +'r_sfdp_applied'#13#10'msgid "Chip settings filled from SFDP"'#13#10'msgstr '
+  +'"Chip settings filled from SFDP"'#13#10#13#10'#: msgstr.str_file_loaded'#13
+  +#10'msgid "File loaded: "'#13#10'msgstr "File loaded: "'#13#10#13#10'#: msgs'
+  +'tr.str_file_saved'#13#10'msgid "File saved: "'#13#10'msgstr "File saved: "'
+  +#13#10#13#10'#: msgstr.str_fill_buffer'#13#10'msgid "Fill buffer"'#13#10'msg'
+  +'str "Fill buffer"'#13#10#13#10'#: msgstr.str_fill_value_hex'#13#10'msgid "F'
+  +'ill value (hex byte)"'#13#10'msgstr "Fill value (hex byte)"'#13#10#13#10'#:'
+  +' msgstr.str_id_mismatch'#13#10'msgid "Chip ID does not match the selected c'
+  +'hip: expected "'#13#10'msgstr "Chip ID does not match the selected chip: ex'
+  +'pected "'#13#10#13#10'#: msgstr.str_id_mismatch_q'#13#10'msgid "The chip in'
+  +' the socket does not match the selected one.\r\nContinue anyway?"'#13#10'ms'
+  +'gstr "The chip in the socket does not match the selected one.\r\nContinue a'
+  +'nyway?"'#13#10#13#10'#: msgstr.str_id_no_answer'#13#10'msgid "No chip answe'
+  +'red the id commands. Nothing was read back, so there is no id to compare. T'
+  +'his is what a loose clip, an empty socket, a chip fitted the wrong way roun'
+  +'d or an unpowered chip all look like"'#13#10'msgstr "No chip answered the i'
+  +'d commands. Nothing was read back, so there is no id to compare. This is wh'
+  +'at a loose clip, an empty socket, a chip fitted the wrong way round or an u'
+  +'npowered chip all look like"'#13#10#13#10'#: msgstr.str_id_no_answer_q'#13
+  +#10'msgid "No chip is answering. Nothing was read back from the socket.\r\n\'
+  +'r\nCheck the clip or socket contact, the orientation and the supply, then p'
+  +'ress Read ID again.\r\n\r\nContinue anyway?"'#13#10'msgstr "No chip is answ'
+  +'ering. Nothing was read back from the socket.\r\n\r\nCheck the clip or sock'
+  +'et contact, the orientation and the supply, then press Read ID again.\r\n\r'
+  +'\nContinue anyway?"'#13#10#13#10'#: msgstr.str_id_ok'#13#10'msgid "Chip ID '
+  +'matches: "'#13#10'msgstr "Chip ID matches: "'#13#10#13#10'#: msgstr.str_bac'
+  +'kup_making'#13#10'msgid "Backing up the chip first..."'#13#10'msgstr "Backi'
+  +'ng up the chip first..."'#13#10#13#10'#: msgstr.str_backup_done'#13#10'msgi'
+  +'d "Backup saved: "'#13#10'msgstr "Backup saved: "'#13#10#13#10'#: msgstr.st'
+  +'r_backup_failed'#13#10'msgid "Backup failed, operation aborted"'#13#10'msgs'
+  +'tr "Backup failed, operation aborted"'#13#10#13#10'#: msgstr.str_backup_ski'
+  +'pped'#13#10'msgid "This chip family has no safe full-chip backup reader; op'
+  +'eration aborted"'#13#10'msgstr "This chip family has no safe full-chip back'
+  +'up reader; operation aborted"'#13#10#13#10'#: msgstr.str_smart_preview_titl'
+  +'e'#13#10'msgid "Smart Write preview"'#13#10'msgstr "Smart Write preview"'#13
+  +#10#13#10'#: msgstr.str_smart_preview_safe'#13#10'msgid "Nothing has been wr'
+  ,'itten. This plan came from the live chip snapshot."'#13#10'msgstr "Nothing '
+  +'has been written. This plan came from the live chip snapshot."'#13#10#13#10
+  +'#: msgstr.str_smart_preview_go'#13#10'msgid "Continue with these exact eras'
+  +'e, program and verify steps?"'#13#10'msgstr "Continue with these exact eras'
+  +'e, program and verify steps?"'#13#10#13#10'#: msgstr.str_smart_preview_stop'
+  +#13#10'msgid "Smart Write cancelled after preview; the chip was not changed"'
+  +#13#10'msgstr "Smart Write cancelled after preview; the chip was not changed'
+  +'"'#13#10#13#10'#: msgstr.str_doctor_title'#13#10'msgid "Connection Doctor -'
+  +' read-only checks"'#13#10'msgstr "Connection Doctor - read-only checks"'#13
+  +#10#13#10'#: msgstr.str_compare_reading'#13#10'msgid "Reading the chip to co'
+  +'mpare..."'#13#10'msgstr "Reading the chip to compare..."'#13#10#13#10'#: ms'
+  +'gstr.str_compare_equal'#13#10'msgid "Buffer and chip are identical"'#13#10
+  +'msgstr "Buffer and chip are identical"'#13#10#13#10'#: msgstr.str_compare_d'
+  +'iff'#13#10'msgid "Different bytes: "'#13#10'msgstr "Different bytes: "'#13
+  +#10#13#10'#: msgstr.str_compare_ranges'#13#10'msgid "Differing ranges (first'
+  +' 20):"'#13#10'msgstr "Differing ranges (first 20):"'#13#10#13#10'#: msgstr.'
+  +'str_swap_done'#13#10'msgid "Byte order swapped, 16-bit words: "'#13#10'msgs'
+  +'tr "Byte order swapped, 16-bit words: "'#13#10#13#10'#: msgstr.str_project_'
+  +'saved'#13#10'msgid "Project saved: "'#13#10'msgstr "Project saved: "'#13#10
+  +#13#10'#: msgstr.str_project_loaded'#13#10'msgid "Project loaded: "'#13#10'm'
+  +'sgstr "Project loaded: "'#13#10#13#10'#: msgstr.str_project_failed'#13#10'm'
+  +'sgid "Project file error"'#13#10'msgstr "Project file error"'#13#10#13#10'#'
+  +': msgstr.str_prod_saved'#13#10'msgid "Serial number and production settings'
+  +' updated"'#13#10'msgstr "Serial number and production settings updated"'#13
+  +#10#13#10'#: msgstr.str_batch_disabled'#13#10'msgid "Enable batch mode first'
+  +': Options -> Serial number and production"'#13#10'msgstr "Enable batch mode'
+  +' first: Options -> Serial number and production"'#13#10#13#10'#: msgstr.str'
+  +'_batch_start'#13#10'msgid "Production batch started, chips to program: "'#13
+  +#10'msgstr "Production batch started, chips to program: "'#13#10#13#10'#: ms'
+  +'gstr.str_batch_insert'#13#10'msgid "Insert chip %d of %d, then press OK"'#13
+  +#10'msgstr "Insert chip %d of %d, then press OK"'#13#10#13#10'#: msgstr.str_'
+  +'batch_unit_ok'#13#10'msgid "Chip %d: OK"'#13#10'msgstr "Chip %d: OK"'#13#10
+  +#13#10'#: msgstr.str_batch_unit_fail'#13#10'msgid "Chip %d: FAILED"'#13#10'm'
+  +'sgstr "Chip %d: FAILED"'#13#10#13#10'#: msgstr.str_batch_summary'#13#10'msg'
+  +'id "Batch finished. Done %d, passed %d, failed %d"'#13#10'msgstr "Batch fin'
+  +'ished. Done %d, passed %d, failed %d"'#13#10#13#10'#: msgstr.str_serial_wri'
+  +'tten'#13#10'msgid "Serial number written: "'#13#10'msgstr "Serial number wr'
+  +'itten: "'#13#10#13#10'#: msgstr.str_serial_nofit'#13#10'msgid "Serial numbe'
+  +'r does not fit in the buffer, skipped"'#13#10'msgstr "Serial number does no'
+  +'t fit in the buffer, skipped"'#13#10#13#10'#: msgstr.str_unique_id'#13#10'm'
+  +'sgid "Unique ID (4Bh): "'#13#10'msgstr "Unique ID (4Bh): "'#13#10#13#10'#: '
+  +'msgstr.str_secreg_header'#13#10'msgid "Security register %d at 0x%.6x:"'#13
+  +#10'msgstr "Security register %d at 0x%.6x:"'#13#10#13#10'#: msgstr.str_secr'
+  +'eg_blank'#13#10'msgid "Security register %d at 0x%.6x: blank (all FF)"'#13
+  +#10'msgstr "Security register %d at 0x%.6x: blank (all FF)"'#13#10#13#10'#: '
+  +'msgstr.str_erase_too_fast'#13#10'msgid "Erase finished suspiciously fast. T'
+  +'he chip may still be write protected - check the status register and the WP'
+  +' pin"'#13#10'msgstr "Erase finished suspiciously fast. The chip may still b'
+  +'e write protected - check the status register and the WP pin"'#13#10#13#10
+  +'#: msgstr.str_auth_not_supported'#13#10'msgid "Authentication flash (96h): '
+  +'no response, this is not a W74M part"'#13#10'msgstr "Authentication flash ('
+  +'96h): no response, this is not a W74M part"'#13#10#13#10'#: msgstr.str_auth'
+  +'_status'#13#10'msgid "Authentication flash status (96h): 0x"'#13#10'msgstr '
+  +'"Authentication flash status (96h): 0x"'#13#10#13#10'#: msgstr.str_auth_cou'
+  +'nter'#13#10'msgid "Last returned counter data: "'#13#10'msgstr "Last return'
+  +'ed counter data: "'#13#10#13#10'#: msgstr.str_auth_needs_key'#13#10'msgid "'
+  +'Counter and key commands (9Bh) are HMAC-SHA-256 signed and cannot be used w'
+  +'ithout the root key"'#13#10'msgstr "Counter and key commands (9Bh) are HMAC'
+  +'-SHA-256 signed and cannot be used without the root key"'#13#10#13#10'#: ms'
+  +'gstr.str_no_chip'#13#10'msgid "No chip answered. Check the socket, the orie'
+  +'ntation of pin 1, the cable and the supply voltage"'#13#10'msgstr "No chip '
+  +'answered. Check the socket, the orientation of pin 1, the cable and the sup'
+  +'ply voltage"'#13#10#13#10'#: msgstr.str_no_chip_clock'#13#10'msgid "The SPI'
+  +' clock is %s. That is often too fast for a clip lead or a long cable, and a'
+  ,' bus that cannot keep up reads back as all FF, exactly like an empty socket'
+  +'. Try Hardware -> SPI clock -> 15 MHz or slower, then read the ID again"'#13
+  +#10'msgstr "The SPI clock is %s. That is often too fast for a clip lead or a'
+  +' long cable, and a bus that cannot keep up reads back as all FF, exactly li'
+  +'ke an empty socket. Try Hardware -> SPI clock -> 15 MHz or slower, then rea'
+  +'d the ID again"'#13#10#13#10'#: msgstr.str_detect_one'#13#10'msgid "Chip de'
+  +'tected and selected: "'#13#10'msgstr "Chip detected and selected: "'#13#10
+  +#13#10'#: msgstr.str_detect_many'#13#10'msgid "This ID matches %d chips, pic'
+  +'k the right one from the list"'#13#10'msgstr "This ID matches %d chips, pic'
+  +'k the right one from the list"'#13#10#13#10'#: msgstr.str_detect_none'#13#10
+  +'msgid "This ID is not in chiplist.xml and the chip has no SFDP table. Set s'
+  +'ize and page size by hand, or add the chip to chiplist.xml"'#13#10'msgstr "'
+  +'This ID is not in chiplist.xml and the chip has no SFDP table. Set size and'
+  +' page size by hand, or add the chip to chiplist.xml"'#13#10#13#10'#: msgstr'
+  +'.str_detect_sfdp'#13#10'msgid "Not in chiplist.xml, falling back to SFDP"'
+  +#13#10'msgstr "Not in chiplist.xml, falling back to SFDP"'#13#10#13#10'#: ms'
+  +'gstr.str_vendor'#13#10'msgid "Manufacturer: "'#13#10'msgstr "Manufacturer: '
+  +'"'#13#10#13#10'#: msgstr.str_no_chip_selected'#13#10'msgid "No chip selecte'
+  +'d.\r\nPick one from the IC menu, or press Read ID."'#13#10'msgstr "No chip '
+  +'selected.\r\nPick one from the IC menu, or press Read ID."'#13#10#13#10'#: '
+  +'msgstr.str_hw_connected'#13#10'msgid "Programmer connected: "'#13#10'msgstr'
+  +' "Programmer connected: "'#13#10#13#10'#: msgstr.str_hw_disconnected'#13#10
+  +'msgid "No programmer connected"'#13#10'msgstr "No programmer connected"'#13
+  +#10#13#10'#: msgstr.str_hw_switched'#13#10'msgid "Switched to the programmer'
+  +' that is actually plugged in: "'#13#10'msgstr "Switched to the programmer t'
+  +'hat is actually plugged in: "'#13#10#13#10'#: msgstr.str_led_programmer'#13
+  +#10'msgid "Programmer"'#13#10'msgstr "Programmer"'#13#10#13#10'#: msgstr.str'
+  +'_led_chip'#13#10'msgid "Chip"'#13#10'msgstr "Chip"'#13#10#13#10'#: msgstr.s'
+  +'tr_pkg_unknown'#13#10'msgid "select a chip"'#13#10'msgstr "select a chip"'
+  +#13#10#13#10'#: msgstr.str_cmp_pick_first'#13#10'msgid "Pick the first file"'
+  +#13#10'msgstr "Pick the first file"'#13#10#13#10'#: msgstr.str_cmp_pick_seco'
+  +'nd'#13#10'msgid "Pick the second file"'#13#10'msgstr "Pick the second file"'
+  +#13#10#13#10'#: msgstr.str_cmp_files'#13#10'msgid "Comparing two files:"'#13
+  +#10'msgstr "Comparing two files:"'#13#10#13#10'#: msgstr.str_cmp_size_diff'
+  +#13#10'msgid "Sizes differ, comparing the common part only. Difference: "'#13
+  +#10'msgstr "Sizes differ, comparing the common part only. Difference: "'#13
+  +#10#13#10'#: msgstr.str_cmp_read_first'#13#10'msgid "Reading the first chip.'
+  +'.."'#13#10'msgstr "Reading the first chip..."'#13#10#13#10'#: msgstr.str_cm'
+  +'p_read_second'#13#10'msgid "Reading the second chip..."'#13#10'msgstr "Read'
+  +'ing the second chip..."'#13#10#13#10'#: msgstr.str_cmp_swap'#13#10'msgid "N'
+  +'ow swap in the second chip, then press OK."'#13#10'msgstr "Now swap in the '
+  +'second chip, then press OK."'#13#10#13#10'#: msgstr.str_hint_keys'#13#10'ms'
+  +'gid "F5 detect   Ctrl+O open   Esc cancel   F1 console"'#13#10'msgstr "F5 d'
+  +'etect   Ctrl+O open   Esc cancel   F1 console"'#13#10#13#10'#: msgstr.str_w'
+  +'orkflow_title'#13#10'msgid "Safe workflow"'#13#10'msgstr "Safe workflow"'#13
+  +#10#13#10'#: msgstr.str_workflow_detect'#13#10'msgid "1  Detect chip"'#13#10
+  +'msgstr "1  Detect chip"'#13#10#13#10'#: msgstr.str_workflow_open'#13#10'msg'
+  +'id "2  Open image"'#13#10'msgstr "2  Open image"'#13#10#13#10'#: msgstr.str'
+  +'_workflow_smart'#13#10'msgid "3  Smart write"'#13#10'msgstr "3  Smart write'
+  +'"'#13#10#13#10'#: msgstr.str_workflow_read msgstr.str_workspace_action_read'
+  +'_chip'#13#10'msgid "Read chip"'#13#10'msgstr "Read chip"'#13#10#13#10'#: ms'
+  +'gstr.str_workflow_verify'#13#10'msgid "Verify"'#13#10'msgstr "Verify"'#13#10
+  +#13#10'#: msgstr.str_workflow_connect'#13#10'msgid "Next: connect a programm'
+  +'er"'#13#10'msgstr "Next: connect a programmer"'#13#10#13#10'#: msgstr.str_w'
+  +'orkflow_pick_chip'#13#10'msgid "Next: detect or select a chip"'#13#10'msgst'
+  +'r "Next: detect or select a chip"'#13#10#13#10'#: msgstr.str_workflow_pick_'
+  +'list'#13#10'msgid "Next: pick the chip from the list (Read ID is SPI only)"'
+  +#13#10'msgstr "Next: pick the chip from the list (Read ID is SPI only)"'#13
+  +#10#13#10'#: msgstr.str_workflow_load'#13#10'msgid "Next: open an image or r'
+  +'ead the chip"'#13#10'msgstr "Next: open an image or read the chip"'#13#10#13
+  +#10'#: msgstr.str_workflow_ready'#13#10'msgid "Ready for Smart write"'#13#10
+  +'msgstr "Ready for Smart write"'#13#10#13#10'#: msgstr.str_workflow_legacy'
+  +#13#10'msgid "Ready - this memory type writes with the Write button"'#13#10
+  +'msgstr "Ready - this memory type writes with the Write button"'#13#10#13#10
+  ,'#: msgstr.str_workflow_running'#13#10'msgid "Operation in progress - Esc ca'
+  +'ncels safely"'#13#10'msgstr "Operation in progress - Esc cancels safely"'#13
+  +#10#13#10'#: msgstr.str_workflow_no_size'#13#10'msgid "Next: set the chip si'
+  +'ze"'#13#10'msgstr "Next: set the chip size"'#13#10#13#10'#: msgstr.str_work'
+  +'flow_bad_addr'#13#10'msgid "The start address is not a hexadecimal number"'
+  +#13#10'msgstr "The start address is not a hexadecimal number"'#13#10#13#10'#'
+  +': msgstr.str_workflow_too_big'#13#10'msgid "The image is %d bytes but only '
+  +'%d fit from 0x%s"'#13#10'msgstr "The image is %d bytes but only %d fit from'
+  +' 0x%s"'#13#10#13#10'#: msgstr.str_workflow_mw_odd'#13#10'msgid "MicroWire S'
+  +'mart write needs an even start address and length"'#13#10'msgstr "MicroWire'
+  +' Smart write needs an even start address and length"'#13#10#13#10'#: msgstr'
+  +'.str_workflow_bad_page'#13#10'msgid "Next: set a page size between 1 and 20'
+  +'48 bytes"'#13#10'msgstr "Next: set a page size between 1 and 2048 bytes"'#13
+  +#10#13#10'#: msgstr.str_wf_chip_picked'#13#10'msgid "Chip chosen by hand, no'
+  +'t identified - press Detect chip to confirm"'#13#10'msgstr "Chip chosen by '
+  +'hand, not identified - press Detect chip to confirm"'#13#10#13#10'#: msgstr'
+  +'.str_wf_unread'#13#10'msgid "Ready, but the chip has not been read - you do'
+  +' not know what is on it"'#13#10'msgstr "Ready, but the chip has not been re'
+  +'ad - you do not know what is on it"'#13#10#13#10'#: msgstr.str_wf_blank'#13
+  +#10'msgid "Chip reads blank - nothing to lose, ready to write"'#13#10'msgstr'
+  +' "Chip reads blank - nothing to lose, ready to write"'#13#10#13#10'#: msgst'
+  +'r.str_wf_hasdata_backup'#13#10'msgid "Chip HAS DATA and it will be backed u'
+  +'p first"'#13#10'msgstr "Chip HAS DATA and it will be backed up first"'#13#10
+  +#13#10'#: msgstr.str_wf_hasdata_nobak'#13#10'msgid "Chip HAS DATA and auto-b'
+  +'ackup is OFF - it will be lost"'#13#10'msgstr "Chip HAS DATA and auto-backu'
+  +'p is OFF - it will be lost"'#13#10#13#10'#: msgstr.str_wf_hasdata_nobak2'#13
+  +#10'msgid "Chip HAS DATA and this family cannot be auto-backed up"'#13#10'ms'
+  +'gstr "Chip HAS DATA and this family cannot be auto-backed up"'#13#10#13#10
+  +'#: msgstr.str_wf_same_as_chip'#13#10'msgid "Buffer was read from this chip '
+  +'- writing it back changes nothing"'#13#10'msgstr "Buffer was read from this'
+  +' chip - writing it back changes nothing"'#13#10#13#10'#: msgstr.str_wf_from'
+  +'_file'#13#10'msgid "from %s"'#13#10'msgstr "from %s"'#13#10#13#10'#: msgstr'
+  +'.str_wf_edited'#13#10'msgid "buffer edited by hand"'#13#10'msgstr "buffer e'
+  +'dited by hand"'#13#10#13#10'#: msgstr.str_compare_see_log'#13#10'msgid "The'
+  +' differing ranges are listed in the log below,\r\nand highlighted in the ed'
+  +'itor."'#13#10'msgstr "The differing ranges are listed in the log below,\r\n'
+  +'and highlighted in the editor."'#13#10#13#10'#: msgstr.str_diff_in_editor'
+  +#13#10'msgid "The editor shows the second side, with the differing bytes hig'
+  +'hlighted"'#13#10'msgstr "The editor shows the second side, with the differi'
+  +'ng bytes highlighted"'#13#10#13#10'#: msgstr.str_diff_too_many'#13#10'msgid'
+  +' "Too many differences to highlight them all, stopped early"'#13#10'msgstr '
+  +'"Too many differences to highlight them all, stopped early"'#13#10#13#10'#:'
+  +' msgstr.str_busy_timeout'#13#10'msgid "The chip stayed busy for more than %'
+  +'d seconds. Giving up. Check the wiring, the supply voltage and the write pr'
+  +'otection"'#13#10'msgstr "The chip stayed busy for more than %d seconds. Giv'
+  +'ing up. Check the wiring, the supply voltage and the write protection"'#13
+  +#10#13#10'#: msgstr.str_not_responding'#13#10'msgid "No chip is answering. T'
+  +'he status register reads back as FF, which is what an empty socket looks li'
+  +'ke. Check that the chip is seated the right way round, powered, and that CS'
+  +' is wired"'#13#10'msgstr "No chip is answering. The status register reads b'
+  +'ack as FF, which is what an empty socket looks like. Check that the chip is'
+  +' seated the right way round, powered, and that CS is wired"'#13#10#13#10'#:'
+  +' msgstr.str_wps_scanning'#13#10'msgid "WPS is set, so the individual block '
+  +'locks decide. Reading them"'#13#10'msgstr "WPS is set, so the individual bl'
+  +'ock locks decide. Reading them"'#13#10#13#10'#: msgstr.str_wps_locked'#13#10
+  +'msgid "Block 0x%.8x is locked by its own lock bit"'#13#10'msgstr "Block 0x%'
+  +'.8x is locked by its own lock bit"'#13#10#13#10'#: msgstr.str_wps_unreadabl'
+  +'e'#13#10'msgid "WPS is set but the block lock bits could not be read (3Dh).'
+  +' Whether the target area is protected is unknown"'#13#10'msgstr "WPS is set'
+  +' but the block lock bits could not be read (3Dh). Whether the target area i'
+  +'s protected is unknown"'#13#10#13#10'#: msgstr.str_wps_clear'#13#10'msgid "'
+  +'Block locks checked: no locked block covers the target area"'#13#10'msgstr '
+  +'"Block locks checked: no locked block covers the target area"'#13#10#13#10
+  +'#: msgstr.str_4b_native'#13#10'msgid "Using the chip''s own four byte opcod'
+  ,'es, no mode switch needed"'#13#10'msgstr "Using the chip''s own four byte o'
+  +'pcodes, no mode switch needed"'#13#10#13#10'#: msgstr.str_erase_map'#13#10
+  +'msgid "Erase plan from the SFDP sector map: %d commands covering 0x%.8x - 0'
+  +'x%.8x"'#13#10'msgstr "Erase plan from the SFDP sector map: %d commands cove'
+  +'ring 0x%.8x - 0x%.8x"'#13#10#13#10'#: msgstr.str_page_retry'#13#10'msgid "P'
+  +'age verify failed, writing it again. Attempt "'#13#10'msgstr "Page verify f'
+  +'ailed, writing it again. Attempt "'#13#10#13#10'#: msgstr.str_volt_warn'#13
+  +#10'msgid "This chip is a 1.8 V part.\r\n\r\nThe selected programmer does no'
+  +'t supply 1.8 V. Powering the chip from 3.3 V or 5 V will destroy it.\r\n\r\'
+  +'nOnly continue if the chip is powered from an external 1.8 V supply with al'
+  +'l grounds tied together.\r\n\r\nContinue?"'#13#10'msgstr "This chip is a 1.'
+  +'8 V part.\r\n\r\nThe selected programmer does not supply 1.8 V. Powering th'
+  +'e chip from 3.3 V or 5 V will destroy it.\r\n\r\nOnly continue if the chip '
+  +'is powered from an external 1.8 V supply with all grounds tied together.\r\'
+  +'n\r\nContinue?"'#13#10#13#10'#: msgstr.str_volt_aborted'#13#10'msgid "Abort'
+  +'ed because of the supply voltage"'#13#10'msgstr "Aborted because of the sup'
+  +'ply voltage"'#13#10#13#10'#: msgstr.str_not_blank'#13#10'msgid "The chip is'
+  +' not blank at 0x"'#13#10'msgstr "The chip is not blank at 0x"'#13#10#13#10
+  +'#: msgstr.str_not_blank_q'#13#10'msgid "The area to be written is not erase'
+  +'d.\r\nWriting over data that is not erased usually fails.\r\n\r\nContinue a'
+  +'nyway?"'#13#10'msgstr "The area to be written is not erased.\r\nWriting ove'
+  +'r data that is not erased usually fails.\r\n\r\nContinue anyway?"'#13#10#13
+  +#10'#: msgstr.str_blank_checking'#13#10'msgid "Checking that the target area'
+  +' is erased..."'#13#10'msgstr "Checking that the target area is erased..."'
+  +#13#10#13#10'#: msgstr.str_prot_header'#13#10'msgid "Status register: SR1=0x'
+  +'%.2x  SR2=0x%.2x"'#13#10'msgstr "Status register: SR1=0x%.2x  SR2=0x%.2x"'
+  +#13#10#13#10'#: msgstr.str_prot_range'#13#10'msgid "Protected: 0x%.8x - 0x%.'
+  +'8x  (%d KB)"'#13#10'msgstr "Protected: 0x%.8x - 0x%.8x  (%d KB)"'#13#10#13
+  +#10'#: msgstr.str_prot_none'#13#10'msgid "Nothing is write protected"'#13#10
+  +'msgstr "Nothing is write protected"'#13#10#13#10'#: msgstr.str_prot_caveat'
+  +#13#10'msgid "Bit layout read as Winbond W25Q, which most makers follow. Che'
+  +'ck the datasheet for anything unusual"'#13#10'msgstr "Bit layout read as Wi'
+  +'nbond W25Q, which most makers follow. Check the datasheet for anything unus'
+  +'ual"'#13#10#13#10'#: msgstr.str_prot_layout'#13#10'msgid "Protection bit la'
+  +'yout: %s"'#13#10'msgstr "Protection bit layout: %s"'#13#10#13#10'#: msgstr.'
+  +'str_prot_extent_unknown'#13#10'msgid "Something is protected on this chip, '
+  +'but the extent cannot be read from the status register alone on this vendor'
+  +'. Treating it as protected"'#13#10'msgstr "Something is protected on this c'
+  +'hip, but the extent cannot be read from the status register alone on this v'
+  +'endor. Treating it as protected"'#13#10#13#10'#: msgstr.str_wren_refused'#13
+  +#10'msgid "The chip did not accept write enable: WEL stayed clear. That is w'
+  +'hat a WP# pin held low, a locked status register or a bad connection looks '
+  +'like. Nothing was written"'#13#10'msgstr "The chip did not accept write ena'
+  +'ble: WEL stayed clear. That is what a WP# pin held low, a locked status reg'
+  +'ister or a bad connection looks like. Nothing was written"'#13#10#13#10'#: '
+  +'msgstr.str_chip_reported_fail'#13#10'msgid "The chip reported a failure: %s'
+  +'"'#13#10'msgstr "The chip reported a failure: %s"'#13#10#13#10'#: msgstr.st'
+  +'r_sr_lock'#13#10'msgid "Status register protection: %s"'#13#10'msgstr "Stat'
+  +'us register protection: %s"'#13#10#13#10'#: msgstr.str_fast_read'#13#10'msg'
+  +'id "Reading with the fast read opcode 0x%.2x"'#13#10'msgstr "Reading with t'
+  +'he fast read opcode 0x%.2x"'#13#10#13#10'#: msgstr.str_resetting'#13#10'msg'
+  +'id "Resetting the chip before starting"'#13#10'msgstr "Resetting the chip b'
+  +'efore starting"'#13#10#13#10'#: msgstr.str_qpi_recover'#13#10'msgid "The id'
+  +' read back as all %.2x. Trying a QPI exit and a reset in case another tool '
+  +'left the chip in a mode it cannot answer in"'#13#10'msgstr "The id read bac'
+  +'k as all %.2x. Trying a QPI exit and a reset in case another tool left the '
+  +'chip in a mode it cannot answer in"'#13#10#13#10'#: msgstr.str_contact_chec'
+  +'king'#13#10'msgid "Checking the connection is stable..."'#13#10'msgstr "Che'
+  +'cking the connection is stable..."'#13#10#13#10'#: msgstr.str_contact_unsta'
+  +'ble'#13#10'msgid "The chip id changed between reads (%s then %s). The conne'
+  +'ction is not reliable: reseat the clip, shorten the cable or lower the cloc'
+  +'k. Nothing was done"'#13#10'msgstr "The chip id changed between reads (%s t'
+  +'hen %s). The connection is not reliable: reseat the clip, shorten the cable'
+  +' or lower the clock. Nothing was done"'#13#10#13#10'#: msgstr.str_contact_o'
+  ,'k'#13#10'msgid "Connection stable: the id read back the same %d times"'#13
+  +#10'msgstr "Connection stable: the id read back the same %d times"'#13#10#13
+  +#10'#: msgstr.str_contact_busy'#13#10'msgid "The id reads all %.2x but the s'
+  +'tatus register answers %.2xh with the busy flag set: the chip is alive and '
+  +'still finishing an earlier erase or write. Waiting for it to finish instead'
+  +' of resetting it"'#13#10'msgstr "The id reads all %.2x but the status regis'
+  +'ter answers %.2xh with the busy flag set: the chip is alive and still finis'
+  +'hing an earlier erase or write. Waiting for it to finish instead of resetti'
+  +'ng it"'#13#10#13#10'#: msgstr.str_blank_after_erase'#13#10'msgid "Checking '
+  +'the erase actually took..."'#13#10'msgstr "Checking the erase actually took'
+  +'..."'#13#10#13#10'#: msgstr.str_erase_did_not_take'#13#10'msgid "The erase '
+  +'did not take: 0x%.8x still reads 0x%.2x. The chip accepted the command and '
+  +'ignored it, which means it is still protected"'#13#10'msgstr "The erase did'
+  +' not take: 0x%.8x still reads 0x%.2x. The chip accepted the command and ign'
+  +'ored it, which means it is still protected"'#13#10#13#10'#: msgstr.str_read'
+  +'_pass'#13#10'msgid "Read pass %d of %d"'#13#10'msgstr "Read pass %d of %d"'
+  +#13#10#13#10'#: msgstr.str_read_unstable'#13#10'msgid "The two reads of this'
+  +' chip disagree in %d bytes, first at 0x%.8x. One of them is wrong and there'
+  +' is no way to tell which. Reseat the clip and lower the clock"'#13#10'msgst'
+  +'r "The two reads of this chip disagree in %d bytes, first at 0x%.8x. One of'
+  +' them is wrong and there is no way to tell which. Reseat the clip and lower'
+  +' the clock"'#13#10#13#10'#: msgstr.str_read_stable'#13#10'msgid "Both reads'
+  +' agree, so the dump can be trusted"'#13#10'msgstr "Both reads agree, so the'
+  +' dump can be trusted"'#13#10#13#10'#: msgstr.str_read_retry_slower'#13#10'm'
+  +'sgid "Dropping the SPI clock to %s and reading again before giving up"'#13
+  +#10'msgstr "Dropping the SPI clock to %s and reading again before giving up"'
+  +#13#10#13#10'#: msgstr.str_erase_wear_warning'#13#10'msgid "Wear warning: %d'
+  +' blocks erased more than five times slower than the rest (worst %d ms at 0x'
+  +'%.8x, median %d ms). Flash slows down before it fails; consider retiring th'
+  +'is chip"'#13#10'msgstr "Wear warning: %d blocks erased more than five times'
+  +' slower than the rest (worst %d ms at 0x%.8x, median %d ms). Flash slows do'
+  +'wn before it fails; consider retiring this chip"'#13#10#13#10'#: msgstr.str'
+  +'_read_stable_slower'#13#10'msgid "The dump only became stable at %s, below '
+  +'the selected clock. Reseat the clip, or keep the clock at this speed"'#13#10
+  +'msgstr "The dump only became stable at %s, below the selected clock. Reseat'
+  +' the clip, or keep the clock at this speed"'#13#10#13#10'#: msgstr.str_img_'
+  +'stats'#13#10'msgid "Dump: %s"'#13#10'msgstr "Dump: %s"'#13#10#13#10'#: msgs'
+  +'tr.str_ifd_regions'#13#10'msgid "Intel flash descriptor regions (use --regi'
+  +'on NAME on the command line to work on one):"'#13#10'msgstr "Intel flash de'
+  +'scriptor regions (use --region NAME on the command line to work on one):"'
+  +#13#10#13#10'#: msgstr.str_img_kind'#13#10'msgid "The dump looks like a %s"'
+  +#13#10'msgstr "The dump looks like a %s"'#13#10#13#10'#: msgstr.str_img_susp'
+  +'ect'#13#10'msgid "Suspicious dump: %s"'#13#10'msgstr "Suspicious dump: %s"'
+  +#13#10#13#10'#: msgstr.str_ch347_vcc_set'#13#10'msgid "CH347 target voltage '
+  +'set to %d mV"'#13#10'msgstr "CH347 target voltage set to %d mV"'#13#10#13#10
+  +'#: msgstr.str_ch347_vcc_failed'#13#10'msgid "CH347 refused to set target vo'
+  +'ltage to %d mV"'#13#10'msgstr "CH347 refused to set target voltage to %d mV'
+  +'"'#13#10#13#10'#: msgstr.str_ch347_vcc_unknown'#13#10'msgid "CH347 target v'
+  +'oltage left unchanged: the selected chip does not declare a supported suppl'
+  +'y voltage"'#13#10'msgstr "CH347 target voltage left unchanged: the selected'
+  +' chip does not declare a supported supply voltage"'#13#10#13#10'#: msgstr.s'
+  +'tr_ch347_vcc_guide'#13#10'msgid "Voltage menu: Options -> SPI -> CH347 targ'
+  +'et voltage (\"Auto (match selected chip)\" follows the catalog)"'#13#10'msg'
+  +'str "Voltage menu: Options -> SPI -> CH347 target voltage (\"Auto (match se'
+  +'lected chip)\" follows the catalog)"'#13#10#13#10'#: msgstr.str_ch347_vcc_c'
+  +'hip'#13#10'msgid "Chip supply voltage from the catalog: %s"'#13#10'msgstr "'
+  +'Chip supply voltage from the catalog: %s"'#13#10#13#10'#: msgstr.str_ch347_'
+  +'vcc_auto_ok'#13#10'msgid "CH347 voltage is on Auto: %d mV will be applied w'
+  +'hen the operation starts"'#13#10'msgstr "CH347 voltage is on Auto: %d mV wi'
+  +'ll be applied when the operation starts"'#13#10#13#10'#: msgstr.str_ch347_v'
+  +'cc_match'#13#10'msgid "The pinned CH347 target voltage already suits this c'
+  +'hip"'#13#10'msgstr "The pinned CH347 target voltage already suits this chip'
+  +'"'#13#10#13#10'#: msgstr.str_ch347_vcc_too_high'#13#10'msgid "This chip is '
+  +'a %s part, but the CH347 target voltage is pinned at %s. Powering it there '
+  ,'can destroy it permanently"'#13#10'msgstr "This chip is a %s part, but the '
+  +'CH347 target voltage is pinned at %s. Powering it there can destroy it perm'
+  +'anently"'#13#10#13#10'#: msgstr.str_ch347_vcc_too_low'#13#10'msgid "This ch'
+  +'ip is a %s part, but the CH347 target voltage is pinned at %s. It will most'
+  +' likely not answer until the voltage matches; no damage is done"'#13#10'msg'
+  +'str "This chip is a %s part, but the CH347 target voltage is pinned at %s. '
+  +'It will most likely not answer until the voltage matches; no damage is done'
+  +'"'#13#10#13#10'#: msgstr.str_ch347_vcc_switch_q'#13#10'msgid "Switch to %s '
+  +'now?"'#13#10'msgstr "Switch to %s now?"'#13#10#13#10'#: msgstr.str_ch347_vc'
+  +'c_switched'#13#10'msgid "CH347 target voltage selection changed to %s. It i'
+  +'s applied the moment an operation starts"'#13#10'msgstr "CH347 target volta'
+  +'ge selection changed to %s. It is applied the moment an operation starts"'
+  +#13#10#13#10'#: msgstr.str_ch347_vcc_no_rail'#13#10'msgid "The catalog says '
+  +'this chip runs at %s, which the CH347 board cannot supply. Power it externa'
+  +'lly with a proper adapter"'#13#10'msgstr "The catalog says this chip runs a'
+  +'t %s, which the CH347 board cannot supply. Power it externally with a prope'
+  +'r adapter"'#13#10#13#10'#: msgstr.str_ch347_vcc_no_info'#13#10'msgid "The c'
+  +'atalog does not state this chip''s supply voltage. Check the datasheet befo'
+  +'re powering it; the CH347 keeps its current setting"'#13#10'msgstr "The cat'
+  +'alog does not state this chip''s supply voltage. Check the datasheet before'
+  +' powering it; the CH347 keeps its current setting"'#13#10#13#10'#: msgstr.s'
+  +'tr_ch347_vcc_ask'#13#10'msgid "The catalog does not state the supply voltag'
+  +'e for %s.\r\n\r\nOpen the chip datasheet and pick its supply voltage. Nothi'
+  +'ng is guessed for you here on purpose: sending 3.3 V to a 1.8 V part destro'
+  +'ys it permanently, while too low a rail only means the chip does not answer'
+  +' and you can try again.\r\n\r\nThis choice is remembered for this chip unti'
+  +'l you change it in Options -> SPI -> CH347 target voltage."'#13#10'msgstr "'
+  +'The catalog does not state the supply voltage for %s.\r\n\r\nOpen the chip '
+  +'datasheet and pick its supply voltage. Nothing is guessed for you here on p'
+  +'urpose: sending 3.3 V to a 1.8 V part destroys it permanently, while too lo'
+  +'w a rail only means the chip does not answer and you can try again.\r\n\r\n'
+  +'This choice is remembered for this chip until you change it in Options -> S'
+  +'PI -> CH347 target voltage."'#13#10#13#10'#: msgstr.str_ch347_vcc_ask_18'#13
+  +#10'msgid "1.8 V"'#13#10'msgstr "1.8 V"'#13#10#13#10'#: msgstr.str_ch347_vcc'
+  +'_ask_33'#13#10'msgid "3.3 V"'#13#10'msgstr "3.3 V"'#13#10#13#10'#: msgstr.s'
+  +'tr_ch347_vcc_ask_later'#13#10'msgid "Decide later"'#13#10'msgstr "Decide la'
+  +'ter"'#13#10#13#10'#: msgstr.str_ch347_vcc_ask_none'#13#10'msgid "Voltage le'
+  +'ft on Auto and no level was confirmed. The board stays at its safe 1.8 V de'
+  +'fault, so a 3.3 V chip will not answer until you pick a level"'#13#10'msgst'
+  +'r "Voltage left on Auto and no level was confirmed. The board stays at its '
+  +'safe 1.8 V default, so a 3.3 V chip will not answer until you pick a level"'
+  +#13#10#13#10'#: msgstr.str_ch347_vcc_confirmed'#13#10'msgid "Datasheet volta'
+  +'ge confirmed for %s: %s"'#13#10'msgstr "Datasheet voltage confirmed for %s:'
+  +' %s"'#13#10#13#10'#: msgstr.str_ch347_probe_3v3'#13#10'msgid "Probing at 3.'
+  +'3 V because the CH347 target voltage is pinned there. Pick 1.8 V or Auto be'
+  +'fore inserting a 1.8 V-only chip"'#13#10'msgstr "Probing at 3.3 V because t'
+  +'he CH347 target voltage is pinned there. Pick 1.8 V or Auto before insertin'
+  +'g a 1.8 V-only chip"'#13#10#13#10'#: msgstr.str_ch347_dead_1v8'#13#10'msgid'
+  +' "No chip answered at 1.8 V. A 3.3 V-only chip often cannot answer at this '
+  +'level"'#13#10'msgstr "No chip answered at 1.8 V. A 3.3 V-only chip often ca'
+  +'nnot answer at this level"'#13#10#13#10'#: msgstr.str_ch347_dead_1v8_q'#13
+  +#10'msgid "If you are sure the chip is a 3.3 V part, pin the CH347 target vo'
+  +'ltage to 3.3 V and read the ID again.\r\nIf it could be a 1.8 V part, keep '
+  +'1.8 V and check the clip contact first: 3.3 V can destroy a 1.8 V chip.\r\n'
+  +'\r\nPin 3.3 V for the next attempt?"'#13#10'msgstr "If you are sure the chi'
+  +'p is a 3.3 V part, pin the CH347 target voltage to 3.3 V and read the ID ag'
+  +'ain.\r\nIf it could be a 1.8 V part, keep 1.8 V and check the clip contact '
+  +'first: 3.3 V can destroy a 1.8 V chip.\r\n\r\nPin 3.3 V for the next attemp'
+  +'t?"'#13#10#13#10'#: msgstr.str_ch347_dead_3v3'#13#10'msgid "No chip answere'
+  +'d at 3.3 V. Check the clip and cable. If this could be a 1.8 V part, it may'
+  +' answer only at 1.8 V"'#13#10'msgstr "No chip answered at 3.3 V. Check the '
+  +'clip and cable. If this could be a 1.8 V part, it may answer only at 1.8 V"'
+  +#13#10#13#10'#: msgstr.str_ch347_volt_fix_q'#13#10'msgid "This chip is a 1.8'
+  +' V part. The CH347 target voltage is not pinned to 1.8 V right now.\r\nPowe'
+  ,'ring a 1.8 V chip at 3.3 V can destroy it permanently.\r\n\r\nPin 1.8 V and'
+  +' continue?"'#13#10'msgstr "This chip is a 1.8 V part. The CH347 target volt'
+  +'age is not pinned to 1.8 V right now.\r\nPowering a 1.8 V chip at 3.3 V can'
+  +' destroy it permanently.\r\n\r\nPin 1.8 V and continue?"'#13#10#13#10'#: ms'
+  +'gstr.str_timeout_from_chip'#13#10'msgid "Busy ceilings taken from the chip:'
+  +' page %d ms, erase %d ms, chip erase %d ms"'#13#10'msgstr "Busy ceilings ta'
+  +'ken from the chip: page %d ms, erase %d ms, chip erase %d ms"'#13#10#13#10
+  +'#: msgstr.str_global_unlock'#13#10'msgid "WPS is set, so the block protect '
+  +'bits decide nothing. Releasing the individual block locks as well (98h)"'#13
+  +#10'msgstr "WPS is set, so the block protect bits decide nothing. Releasing '
+  +'the individual block locks as well (98h)"'#13#10#13#10'#: msgstr.str_unlock'
+  +'_failed'#13#10'msgid "The chip accepted the unlock and stayed protected. Ch'
+  +'eck the WP# pin, and whether this part needs its configuration register cha'
+  +'nged too"'#13#10'msgstr "The chip accepted the unlock and stayed protected.'
+  +' Check the WP# pin, and whether this part needs its configuration register '
+  +'changed too"'#13#10#13#10'#: msgstr.str_unlock_ok'#13#10'msgid "Unlocked: n'
+  +'othing on this chip is write protected now"'#13#10'msgstr "Unlocked: nothin'
+  +'g on this chip is write protected now"'#13#10#13#10'#: msgstr.str_qe_kept'
+  +#13#10'msgid "Quad enable was left set, as it was before"'#13#10'msgstr "Qua'
+  +'d enable was left set, as it was before"'#13#10#13#10'#: msgstr.str_otp_tit'
+  +'le'#13#10'msgid "Security register"'#13#10'msgstr "Security register"'#13#10
+  +#13#10'#: msgstr.str_otp_which'#13#10'msgid "Which register, 1 to 3?"'#13#10
+  +'msgstr "Which register, 1 to 3?"'#13#10#13#10'#: msgstr.str_otp_erase_q'#13
+  +#10'msgid "Erase it instead of writing to it?"'#13#10'msgstr "Erase it inste'
+  +'ad of writing to it?"'#13#10#13#10'#: msgstr.str_otp_need_256'#13#10'msgid '
+  +'"The editor needs at least 256 bytes: its first 256 bytes are written"'#13
+  +#10'msgstr "The editor needs at least 256 bytes: its first 256 bytes are wri'
+  +'tten"'#13#10#13#10'#: msgstr.str_otp_confirm'#13#10'msgid "Security registe'
+  +'r %d can be locked permanently, and once locked nothing can change it again'
+  +'.\r\n\r\nContinue?"'#13#10'msgstr "Security register %d can be locked perma'
+  +'nently, and once locked nothing can change it again.\r\n\r\nContinue?"'#13
+  +#10#13#10'#: msgstr.str_otp_writing'#13#10'msgid "Writing security register '
+  +'%d..."'#13#10'msgstr "Writing security register %d..."'#13#10#13#10'#: msgs'
+  +'tr.str_otp_erasing'#13#10'msgid "Erasing security register %d..."'#13#10'ms'
+  +'gstr "Erasing security register %d..."'#13#10#13#10'#: msgstr.str_driver_hi'
+  +'nt'#13#10'msgid "If the programmer is plugged in, its driver is probably mi'
+  +'ssing. Install it from "'#13#10'msgstr "If the programmer is plugged in, it'
+  +'s driver is probably missing. Install it from "'#13#10#13#10'#: msgstr.str_'
+  +'driver_hint_com'#13#10'msgid "Check the COM port setting and that no other '
+  +'program is holding the port open"'#13#10'msgstr "Check the COM port setting'
+  +' and that no other program is holding the port open"'#13#10#13#10'#: msgstr'
+  +'.str_guard_blocked'#13#10'msgid "The area to be changed is write protected:'
+  +' 0x%.8x - 0x%.8x"'#13#10'msgstr "The area to be changed is write protected:'
+  +' 0x%.8x - 0x%.8x"'#13#10#13#10'#: msgstr.str_guard_q'#13#10'msgid "Part of '
+  +'the area you are about to change is write protected by the status register.'
+  +'\r\n\r\nThe chip will silently ignore the erase or the write, and the resul'
+  +'t will look like a verify failure.\r\n\r\nPress \"Unprotect\" first. Contin'
+  +'ue anyway?"'#13#10'msgstr "Part of the area you are about to change is writ'
+  +'e protected by the status register.\r\n\r\nThe chip will silently ignore th'
+  +'e erase or the write, and the result will look like a verify failure.\r\n\r'
+  +'\nPress \"Unprotect\" first. Continue anyway?"'#13#10#13#10'#: msgstr.str_g'
+  +'uard_refused'#13#10'msgid "Refusing to continue while the target area is wr'
+  +'ite protected. Press \"Unprotect\" first, or pass --force"'#13#10'msgstr "R'
+  +'efusing to continue while the target area is write protected. Press \"Unpro'
+  +'tect\" first, or pass --force"'#13#10#13#10'#: msgstr.str_guard_srp1'#13#10
+  +'msgid "SRP1 is set: the status register is locked by hardware and software '
+  +'cannot unprotect this chip"'#13#10'msgstr "SRP1 is set: the status register'
+  +' is locked by hardware and software cannot unprotect this chip"'#13#10#13#10
+  +'#: msgstr.str_guard_ok'#13#10'msgid "Write protection checked: the target a'
+  +'rea is writable"'#13#10'msgstr "Write protection checked: the target area i'
+  +'s writable"'#13#10#13#10'#: msgstr.str_op_result'#13#10'msgid "Result: "'#13
+  +#10'msgstr "Result: "'#13#10#13#10'#: msgstr.str_sfdp_4b_entry'#13#10'msgid '
+  +'"  4 byte address mode: "'#13#10'msgstr "  4 byte address mode: "'#13#10#13
+  +#10'#: msgstr.str_sfdp_4b_opcodes'#13#10'msgid "  4 byte opcodes: read 0x%.2'
+  ,'x, page program 0x%.2x"'#13#10'msgstr "  4 byte opcodes: read 0x%.2x, page '
+  +'program 0x%.2x"'#13#10#13#10'#: msgstr.str_sfdp_sr_wren'#13#10'msgid "  Sta'
+  +'tus register write enable: 0x%.2x"'#13#10'msgstr "  Status register write e'
+  +'nable: 0x%.2x"'#13#10#13#10'#: msgstr.str_sfdp_reset'#13#10'msgid "  Soft r'
+  +'eset: "'#13#10'msgstr "  Soft reset: "'#13#10#13#10'#: msgstr.str_sfdp_map_'
+  +'header'#13#10'msgid "  Sector map: %d regions, %s"'#13#10'msgstr "  Sector '
+  +'map: %d regions, %s"'#13#10#13#10'#: msgstr.str_sfdp_map_uniform'#13#10'msg'
+  +'id "uniform"'#13#10'msgstr "uniform"'#13#10#13#10'#: msgstr.str_sfdp_map_mi'
+  +'xed'#13#10'msgid "NOT uniform - this chip has boot blocks of a different si'
+  +'ze"'#13#10'msgstr "NOT uniform - this chip has boot blocks of a different s'
+  +'ize"'#13#10#13#10'#: msgstr.str_sfdp_map_region'#13#10'msgid "    region %d'
+  +': %d bytes, erase %d bytes with 0x%.2x"'#13#10'msgstr "    region %d: %d by'
+  +'tes, erase %d bytes with 0x%.2x"'#13#10#13#10'#: msgstr.str_chipsave_q'#13
+  +#10'msgid "Save this chip into %s so it is picked up next time?"'#13#10'msgs'
+  +'tr "Save this chip into %s so it is picked up next time?"'#13#10#13#10'#: m'
+  +'sgstr.str_chipsave_ok'#13#10'msgid "Chip saved into "'#13#10'msgstr "Chip s'
+  +'aved into "'#13#10#13#10'#: msgstr.str_chipsave_fail'#13#10'msgid "Could no'
+  +'t save the chip: "'#13#10'msgstr "Could not save the chip: "'#13#10#13#10'#'
+  +': msgstr.str_chipsave_noname'#13#10'msgid "Name for the new chip entry"'#13
+  +#10'msgstr "Name for the new chip entry"'#13#10#13#10'#: msgstr.str_prod_uid'
+  +'_seen'#13#10'msgid "This chip has already been programmed and logged as pas'
+  +'sed. Unique ID: "'#13#10'msgstr "This chip has already been programmed and '
+  +'logged as passed. Unique ID: "'#13#10#13#10'#: msgstr.str_prod_logged'#13#10
+  +'msgid "Production log updated: "'#13#10'msgstr "Production log updated: "'
+  +#13#10#13#10'#: msgstr.str_prod_log_fail'#13#10'msgid "Could not write the p'
+  +'roduction log: "'#13#10'msgstr "Could not write the production log: "'#13#10
+  +#13#10'#: msgstr.str_job_loaded'#13#10'msgid "Job file loaded: "'#13#10'msgs'
+  +'tr "Job file loaded: "'#13#10#13#10'#: msgstr.str_job_failed'#13#10'msgid "'
+  +'Job file rejected the buffer: "'#13#10'msgstr "Job file rejected the buffer'
+  +': "'#13#10#13#10'#: msgstr.str_job_ok'#13#10'msgid "Job file check passed"'
+  +#13#10'msgstr "Job file check passed"'#13#10#13#10'#: msgstr.str_workspace_r'
+  +'epair'#13#10'msgid "Repair"'#13#10'msgstr "Repair"'#13#10#13#10'#: msgstr.s'
+  +'tr_workspace_bench'#13#10'msgid "Bench"'#13#10'msgstr "Bench"'#13#10#13#10
+  +'#: msgstr.str_workspace_production'#13#10'msgid "Production"'#13#10'msgstr '
+  +'"Production"'#13#10#13#10'#: msgstr.str_workspace_repair_desc'#13#10'msgid '
+  +'"Guided backup and restoration for one-off repairs"'#13#10'msgstr "Guided b'
+  +'ackup and restoration for one-off repairs"'#13#10#13#10'#: msgstr.str_works'
+  +'pace_bench_desc'#13#10'msgid "Inspect, edit, compare and diagnose with full'
+  +' controls"'#13#10'msgstr "Inspect, edit, compare and diagnose with full con'
+  +'trols"'#13#10#13#10'#: msgstr.str_workspace_production_desc'#13#10'msgid "R'
+  +'epeat the configured batch with traceable results"'#13#10'msgstr "Repeat th'
+  +'e configured batch with traceable results"'#13#10#13#10'#: msgstr.str_works'
+  +'pace_operation_running'#13#10'msgid "OPERATION RUNNING"'#13#10'msgstr "OPER'
+  +'ATION RUNNING"'#13#10#13#10'#: msgstr.str_workspace_operation_running_title'
+  +#13#10'msgid "The current operation is in progress"'#13#10'msgstr "The curre'
+  +'nt operation is in progress"'#13#10#13#10'#: msgstr.str_workspace_operation'
+  +'_running_detail'#13#10'msgid "Progress and the safe cancellation state rema'
+  +'in visible below."'#13#10'msgstr "Progress and the safe cancellation state '
+  +'remain visible below."'#13#10#13#10'#: msgstr.str_workspace_action_safe_sto'
+  +'p'#13#10'msgid "Request safe stop"'#13#10'msgstr "Request safe stop"'#13#10
+  +#13#10'#: msgstr.str_workspace_repair_connect'#13#10'msgid "STEP 1 OF 4  /  '
+  +'CONNECT"'#13#10'msgstr "STEP 1 OF 4  /  CONNECT"'#13#10#13#10'#: msgstr.str'
+  +'_workspace_repair_connect_title'#13#10'msgid "Connect your programmer"'#13
+  +#10'msgstr "Connect your programmer"'#13#10#13#10'#: msgstr.str_workspace_re'
+  +'pair_connect_detail'#13#10'msgid "Plug in the programmer, then scan again. '
+  +'No command is sent to a chip during this step."'#13#10'msgstr "Plug in the '
+  +'programmer, then scan again. No command is sent to a chip during this step.'
+  +'"'#13#10#13#10'#: msgstr.str_workspace_action_scan_programmer'#13#10'msgid '
+  +'"Scan for programmer"'#13#10'msgstr "Scan for programmer"'#13#10#13#10'#: m'
+  +'sgstr.str_workspace_action_open_technical'#13#10'msgid "Open technical work'
+  +'space"'#13#10'msgstr "Open technical workspace"'#13#10#13#10'#: msgstr.str_'
+  +'workspace_repair_identify'#13#10'msgid "STEP 2 OF 4  /  IDENTIFY"'#13#10'ms'
+  +'gstr "STEP 2 OF 4  /  IDENTIFY"'#13#10#13#10'#: msgstr.str_workspace_repair'
+  +'_identify_title'#13#10'msgid "Identify the chip in the socket"'#13#10'msgst'
+  ,'r "Identify the chip in the socket"'#13#10#13#10'#: msgstr.str_workspace_re'
+  +'pair_identify_spi'#13#10'msgid "Read the live chip ID first. Selecting a mo'
+  +'del from the catalogue is not the same as confirming what answered."'#13#10
+  +'msgstr "Read the live chip ID first. Selecting a model from the catalogue i'
+  +'s not the same as confirming what answered."'#13#10#13#10'#: msgstr.str_wor'
+  +'kspace_repair_identify_other'#13#10'msgid "This protocol has no standard li'
+  +'ve ID command. Choose the exact part from its marking or datasheet."'#13#10
+  +'msgstr "This protocol has no standard live ID command. Choose the exact par'
+  +'t from its marking or datasheet."'#13#10#13#10'#: msgstr.str_workspace_repa'
+  +'ir_select_profile'#13#10'msgid "STEP 2 OF 4  /  SELECT PROFILE"'#13#10'msgs'
+  +'tr "STEP 2 OF 4  /  SELECT PROFILE"'#13#10#13#10'#: msgstr.str_workspace_re'
+  +'pair_select_profile_title'#13#10'msgid "Match the live ID to the exact chip'
+  +'"'#13#10'msgstr "Match the live ID to the exact chip"'#13#10#13#10'#: msgst'
+  +'r.str_workspace_repair_select_profile_detail'#13#10'msgid "A chip answered '
+  +'with live ID %s, but no exact catalogue profile was selected. Match the ful'
+  +'l part marking before reading or writing."'#13#10'msgstr "A chip answered w'
+  +'ith live ID %s, but no exact catalogue profile was selected. Match the full'
+  +' part marking before reading or writing."'#13#10#13#10'#: msgstr.str_worksp'
+  +'ace_action_choose_matching'#13#10'msgid "Choose matching chip profile..."'
+  +#13#10'msgstr "Choose matching chip profile..."'#13#10#13#10'#: msgstr.str_w'
+  +'orkspace_action_read_id_again'#13#10'msgid "Read chip ID again"'#13#10'msgs'
+  +'tr "Read chip ID again"'#13#10#13#10'#: msgstr.str_workspace_action_detect_'
+  +'chip'#13#10'msgid "Detect chip now"'#13#10'msgstr "Detect chip now"'#13#10
+  +#13#10'#: msgstr.str_workspace_action_choose_catalogue'#13#10'msgid "Choose '
+  +'chip from catalogue"'#13#10'msgstr "Choose chip from catalogue"'#13#10#13#10
+  +'#: msgstr.str_workspace_action_choose_manually'#13#10'msgid "Choose chip ma'
+  +'nually"'#13#10'msgstr "Choose chip manually"'#13#10#13#10'#: msgstr.str_wor'
+  +'kspace_repair_confirm'#13#10'msgid "STEP 2 OF 4  /  CONFIRM"'#13#10'msgstr '
+  +'"STEP 2 OF 4  /  CONFIRM"'#13#10#13#10'#: msgstr.str_workspace_repair_confi'
+  +'rm_title'#13#10'msgid "Confirm the selected chip against the socket"'#13#10
+  +'msgstr "Confirm the selected chip against the socket"'#13#10#13#10'#: msgst'
+  +'r.str_workspace_repair_confirm_detail'#13#10'msgid "The profile was selecte'
+  +'d by name, but the live chip identity has not been confirmed on the current'
+  +' setup."'#13#10'msgstr "The profile was selected by name, but the live chip'
+  +' identity has not been confirmed on the current setup."'#13#10#13#10'#: msg'
+  +'str.str_workspace_action_confirm_live_id'#13#10'msgid "Confirm with live ch'
+  +'ip ID"'#13#10'msgstr "Confirm with live chip ID"'#13#10#13#10'#: msgstr.str'
+  +'_workspace_action_choose_different'#13#10'msgid "Choose a different chip"'
+  +#13#10'msgstr "Choose a different chip"'#13#10#13#10'#: msgstr.str_workspace'
+  +'_repair_choose_task'#13#10'msgid "STEP 3 OF 4  /  CHOOSE TASK"'#13#10'msgst'
+  +'r "STEP 3 OF 4  /  CHOOSE TASK"'#13#10#13#10'#: msgstr.str_workspace_repair'
+  +'_choose_title'#13#10'msgid "Back up this chip or prepare a restoration"'#13
+  +#10'msgstr "Back up this chip or prepare a restoration"'#13#10#13#10'#: msgs'
+  +'tr.str_workspace_repair_choose_detail'#13#10'msgid "Reading is the safest n'
+  +'ext step because it establishes what is on this chip before any replacement'
+  +' image is considered."'#13#10'msgstr "Reading is the safest next step becau'
+  +'se it establishes what is on this chip before any replacement image is cons'
+  +'idered."'#13#10#13#10'#: msgstr.str_workspace_action_open_firmware'#13#10'm'
+  +'sgid "Open firmware image..."'#13#10'msgstr "Open firmware image..."'#13#10
+  +#13#10'#: msgstr.str_workspace_repair_preserve'#13#10'msgid "STEP 4 OF 4  / '
+  +' PRESERVE"'#13#10'msgstr "STEP 4 OF 4  /  PRESERVE"'#13#10#13#10'#: msgstr.'
+  +'str_workspace_repair_preserve_title'#13#10'msgid "The chip has been read"'
+  +#13#10'msgstr "The chip has been read"'#13#10#13#10'#: msgstr.str_workspace_'
+  +'repair_preserve_detail'#13#10'msgid "Save a copy before editing or loading '
+  +'another image. Saving the buffer does not change the chip."'#13#10'msgstr "'
+  +'Save a copy before editing or loading another image. Saving the buffer does'
+  +' not change the chip."'#13#10#13#10'#: msgstr.str_workspace_action_save_bac'
+  +'kup'#13#10'msgid "Save backup copy..."'#13#10'msgstr "Save backup copy..."'
+  +#13#10#13#10'#: msgstr.str_workspace_action_open_replacement'#13#10'msgid "O'
+  +'pen replacement image..."'#13#10'msgstr "Open replacement image..."'#13#10
+  +#13#10'#: msgstr.str_workspace_action_inspect_read'#13#10'msgid "Inspect the'
+  +' read"'#13#10'msgstr "Inspect the read"'#13#10#13#10'#: msgstr.str_workspac'
+  +'e_repair_review'#13#10'msgid "STEP 4 OF 4  /  REVIEW"'#13#10'msgstr "STEP 4'
+  +' OF 4  /  REVIEW"'#13#10#13#10'#: msgstr.str_workspace_repair_review_title'
+  ,#13#10'msgid "Review the image before changing the chip"'#13#10'msgstr "Revi'
+  +'ew the image before changing the chip"'#13#10#13#10'#: msgstr.str_workspace'
+  +'_repair_review_detail'#13#10'msgid "Smart Write will calculate the minimum '
+  +'erase and program work, preserve neighbouring bytes, create a trusted backu'
+  +'p, and verify the result."'#13#10'msgstr "Smart Write will calculate the mi'
+  +'nimum erase and program work, preserve neighbouring bytes, create a trusted'
+  +' backup, and verify the result."'#13#10#13#10'#: msgstr.str_workspace_block'
+  +'ed_prefix'#13#10'msgid "Blocked: "'#13#10'msgstr "Blocked: "'#13#10#13#10'#'
+  +': msgstr.str_workspace_action_review_smart'#13#10'msgid "Review Smart Write'
+  +' plan..."'#13#10'msgstr "Review Smart Write plan..."'#13#10#13#10'#: msgstr'
+  +'.str_workspace_action_preview_only'#13#10'msgid "Preview only"'#13#10'msgst'
+  +'r "Preview only"'#13#10#13#10'#: msgstr.str_workspace_action_verify_image'
+  +#13#10'msgid "Verify chip against image"'#13#10'msgstr "Verify chip against '
+  +'image"'#13#10#13#10'#: msgstr.str_workspace_prod_running'#13#10'msgid "PROD'
+  +'UCTION  /  UNIT RUNNING"'#13#10'msgstr "PRODUCTION  /  UNIT RUNNING"'#13#10
+  +#13#10'#: msgstr.str_workspace_prod_running_title'#13#10'msgid "Do not remov'
+  +'e the current unit"'#13#10'msgstr "Do not remove the current unit"'#13#10#13
+  +#10'#: msgstr.str_workspace_prod_running_detail'#13#10'msgid "The result is '
+  +'not PASS until programming and read-back verification have completed. Stopp'
+  +'ing cancels this unit safely; the batch controller then returns to its unit'
+  +' prompt."'#13#10'msgstr "The result is not PASS until programming and read-'
+  +'back verification have completed. Stopping cancels this unit safely; the ba'
+  +'tch controller then returns to its unit prompt."'#13#10#13#10'#: msgstr.str'
+  +'_workspace_action_stop_unit'#13#10'msgid "Stop current unit safely"'#13#10
+  +'msgstr "Stop current unit safely"'#13#10#13#10'#: msgstr.str_workspace_prod'
+  +'_refused'#13#10'msgid "PRODUCTION  /  CONFIGURATION REFUSED"'#13#10'msgstr '
+  +'"PRODUCTION  /  CONFIGURATION REFUSED"'#13#10#13#10'#: msgstr.str_workspace'
+  +'_prod_refused_title'#13#10'msgid "The configured job file could not be load'
+  +'ed"'#13#10'msgstr "The configured job file could not be loaded"'#13#10#13#10
+  +'#: msgstr.str_workspace_action_review_prod'#13#10'msgid "Review production '
+  +'settings..."'#13#10'msgstr "Review production settings..."'#13#10#13#10'#: '
+  +'msgstr.str_workspace_action_inspect_bench'#13#10'msgid "Inspect image in Be'
+  +'nch"'#13#10'msgstr "Inspect image in Bench"'#13#10#13#10'#: msgstr.str_work'
+  +'space_prod_prepare'#13#10'msgid "PRODUCTION  /  PREPARE"'#13#10'msgstr "PRO'
+  +'DUCTION  /  PREPARE"'#13#10#13#10'#: msgstr.str_workspace_prod_prepare_titl'
+  +'e'#13#10'msgid "Load the production image"'#13#10'msgstr "Load the producti'
+  +'on image"'#13#10#13#10'#: msgstr.str_workspace_prod_prepare_detail'#13#10'm'
+  +'sgid "This workspace runs the configured GUI batch flow. Authenticated HMAC'
+  +' jobs remain the stricter command-line workflow."'#13#10'msgstr "This works'
+  +'pace runs the configured GUI batch flow. Authenticated HMAC jobs remain the'
+  +' stricter command-line workflow."'#13#10#13#10'#: msgstr.str_workspace_acti'
+  +'on_open_prod_image'#13#10'msgid "Open production image..."'#13#10'msgstr "O'
+  +'pen production image..."'#13#10#13#10'#: msgstr.str_workspace_action_config'
+  +'ure_batch'#13#10'msgid "Configure batch..."'#13#10'msgstr "Configure batch.'
+  +'.."'#13#10#13#10'#: msgstr.str_workspace_action_inspect_in_bench'#13#10'msg'
+  +'id "Inspect in Bench"'#13#10'msgstr "Inspect in Bench"'#13#10#13#10'#: msgs'
+  +'tr.str_workspace_prod_configure'#13#10'msgid "PRODUCTION  /  CONFIGURE"'#13
+  +#10'msgstr "PRODUCTION  /  CONFIGURE"'#13#10#13#10'#: msgstr.str_workspace_p'
+  +'rod_configure_title'#13#10'msgid "Configure the repeat batch"'#13#10'msgstr'
+  +' "Configure the repeat batch"'#13#10#13#10'#: msgstr.str_workspace_prod_con'
+  +'figure_detail'#13#10'msgid "Set the unit count, operator, optional GUI job '
+  +'file, serial policy, and evidence log before starting."'#13#10'msgstr "Set '
+  +'the unit count, operator, optional GUI job file, serial policy, and evidenc'
+  +'e log before starting."'#13#10#13#10'#: msgstr.str_workspace_action_configu'
+  +'re_prod'#13#10'msgid "Configure production batch..."'#13#10'msgstr "Configu'
+  +'re production batch..."'#13#10#13#10'#: msgstr.str_workspace_action_replace'
+  +'_image'#13#10'msgid "Replace image..."'#13#10'msgstr "Replace image..."'#13
+  +#10#13#10'#: msgstr.str_workspace_prod_ready'#13#10'msgid "PRODUCTION  /  CO'
+  +'NFIGURED"'#13#10'msgstr "PRODUCTION  /  CONFIGURED"'#13#10#13#10'#: msgstr.'
+  +'str_workspace_prod_ready_title'#13#10'msgid "Batch configured - checks pend'
+  +'ing"'#13#10'msgstr "Batch configured - checks pending"'#13#10#13#10'#: msgs'
+  +'tr.str_workspace_prod_ready_detail'#13#10'msgid "Starting the batch opens t'
+  +'he unit prompt. Each unit still runs the checks provided by its selected pr'
+  +'otocol and backend, and is logged PASS only after a successful write and re'
+  ,'ad-back comparison. Live-ID and optional GUI job checks apply where support'
+  +'ed; authenticated HMAC production remains CLI-only."'#13#10'msgstr "Startin'
+  +'g the batch opens the unit prompt. Each unit still runs the checks provided'
+  +' by its selected protocol and backend, and is logged PASS only after a succ'
+  +'essful write and read-back comparison. Live-ID and optional GUI job checks '
+  +'apply where supported; authenticated HMAC production remains CLI-only."'#13
+  +#10#13#10'#: msgstr.str_workspace_action_run_prod'#13#10'msgid "Run producti'
+  +'on batch..."'#13#10'msgstr "Run production batch..."'#13#10#13#10'#: msgstr'
+  +'.str_workspace_action_review_config'#13#10'msgid "Review configuration..."'
+  +#13#10'msgstr "Review configuration..."'#13#10#13#10'#: msgstr.str_shell_wor'
+  +'kspace_access'#13#10'msgid "%s workspace"'#13#10'msgstr "%s workspace"'#13
+  +#10#13#10'#: msgstr.str_shell_current_workspace_access'#13#10'msgid "Current'
+  +' workspace. %s"'#13#10'msgstr "Current workspace. %s"'#13#10#13#10'#: msgst'
+  +'r.str_shell_safe_mode_access'#13#10'msgid "Read-only safe mode"'#13#10'msgs'
+  +'tr "Read-only safe mode"'#13#10#13#10'#: msgstr.str_shell_quick_setup'#13#10
+  +'msgid "QUICK SETUP"'#13#10'msgstr "QUICK SETUP"'#13#10#13#10'#: msgstr.str_'
+  +'shell_protocol_label'#13#10'msgid "Protocol"'#13#10'msgstr "Protocol"'#13#10
+  +#13#10'#: msgstr.str_shell_protocol_spi'#13#10'msgid "SPI flash"'#13#10'msgs'
+  +'tr "SPI flash"'#13#10#13#10'#: msgstr.str_shell_protocol_i2c'#13#10'msgid "'
+  +'I2C EEPROM"'#13#10'msgstr "I2C EEPROM"'#13#10#13#10'#: msgstr.str_shell_pro'
+  +'tocol_mw'#13#10'msgid "Microwire (16-bit)"'#13#10'msgstr "Microwire (16-bit'
+  +')"'#13#10#13#10'#: msgstr.str_shell_protocol_access'#13#10'msgid "Memory pr'
+  +'otocol"'#13#10'msgstr "Memory protocol"'#13#10#13#10'#: msgstr.str_shell_ta'
+  +'rget_voltage'#13#10'msgid "Target voltage (applies now)"'#13#10'msgstr "Tar'
+  +'get voltage (applies now)"'#13#10#13#10'#: msgstr.str_shell_rail_auto'#13#10
+  +'msgid "Auto (match selected chip)"'#13#10'msgstr "Auto (match selected chip'
+  +')"'#13#10#13#10'#: msgstr.str_shell_rail_fixed'#13#10'msgid "Not adjustable'
+  +' on this programmer"'#13#10'msgstr "Not adjustable on this programmer"'#13
+  +#10#13#10'#: msgstr.str_shell_rail_access'#13#10'msgid "Requested target vol'
+  +'tage"'#13#10'msgstr "Requested target voltage"'#13#10#13#10'#: msgstr.str_s'
+  +'hell_rail_access_desc'#13#10'msgid "A fixed CH347 level is applied immediat'
+  +'ely when available. This is a request, not a measurement."'#13#10'msgstr "A'
+  +' fixed CH347 level is applied immediately when available. This is a request'
+  +', not a measurement."'#13#10#13#10'#: msgstr.str_shell_actions'#13#10'msgid'
+  +' "ACTIONS"'#13#10'msgstr "ACTIONS"'#13#10#13#10'#: msgstr.str_shell_bench_d'
+  +'etect'#13#10'msgid "Detect chip"'#13#10'msgstr "Detect chip"'#13#10#13#10'#'
+  +': msgstr.str_shell_bench_open'#13#10'msgid "Open image..."'#13#10'msgstr "O'
+  +'pen image..."'#13#10#13#10'#: msgstr.str_shell_bench_save'#13#10'msgid "Sav'
+  +'e image..."'#13#10'msgstr "Save image..."'#13#10#13#10'#: msgstr.str_shell_'
+  +'bench_preview'#13#10'msgid "Preview Smart Write"'#13#10'msgstr "Preview Sma'
+  +'rt Write"'#13#10#13#10'#: msgstr.str_shell_bench_smart'#13#10'msgid "Smart '
+  +'Write and verify..."'#13#10'msgstr "Smart Write and verify..."'#13#10#13#10
+  +'#: msgstr.str_shell_destructive_admission'#13#10'msgid "DESTRUCTIVE ADMISSI'
+  +'ON"'#13#10'msgstr "DESTRUCTIVE ADMISSION"'#13#10#13#10'#: msgstr.str_shell_'
+  +'editor_access'#13#10'msgid "Firmware data editor"'#13#10'msgstr "Firmware d'
+  +'ata editor"'#13#10#13#10'#: msgstr.str_shell_editor_access_desc'#13#10'msgi'
+  +'d "View and edit the firmware buffer. Changes here do not reach the chip un'
+  +'til an operation is started."'#13#10'msgstr "View and edit the firmware buf'
+  +'fer. Changes here do not reach the chip until an operation is started."'#13
+  +#10#13#10'#: msgstr.str_shell_log_access'#13#10'msgid "Operation log, read-o'
+  +'nly"'#13#10'msgstr "Operation log, read-only"'#13#10#13#10'#: msgstr.str_sh'
+  +'ell_log_access_desc'#13#10'msgid "Detailed programmer messages and operatio'
+  +'n evidence."'#13#10'msgstr "Detailed programmer messages and operation evid'
+  +'ence."'#13#10#13#10'#: msgstr.str_shell_protocol_changed_log'#13#10'msgid "'
+  +'Protocol changed: the existing bytes were kept for inspection, but they are'
+  +' no longer treated as a backup of the current chip."'#13#10'msgstr "Protoco'
+  +'l changed: the existing bytes were kept for inspection, but they are no lon'
+  +'ger treated as a backup of the current chip."'#13#10#13#10'#: msgstr.str_sh'
+  +'ell_voltage_33_title'#13#10'msgid "Switch target voltage to 3.3 V?"'#13#10
+  +'msgstr "Switch target voltage to 3.3 V?"'#13#10#13#10'#: msgstr.str_shell_v'
+  +'oltage_33_warning'#13#10'msgid "3.3 V can permanently damage a 1.8 V memory'
+  +' chip. Confirm the full part marking or datasheet before applying this rail'
+  +'.\r\n\r\nApply 3.3 V now?"'#13#10'msgstr "3.3 V can permanently damage a 1.'
+  +'8 V memory chip. Confirm the full part marking or datasheet before applying'
+  ,' this rail.\r\n\r\nApply 3.3 V now?"'#13#10#13#10'#: msgstr.str_shell_volta'
+  +'ge_auto_title'#13#10'msgid "Enable automatic target voltage?"'#13#10'msgstr'
+  +' "Enable automatic target voltage?"'#13#10#13#10'#: msgstr.str_shell_voltag'
+  +'e_auto_warning'#13#10'msgid "Auto applies the voltage inferred from the sel'
+  +'ected chip profile immediately, and that may be 3.3 V. Confirm that the pro'
+  +'file matches the physical part before continuing.\r\n\r\nEnable Auto now?"'
+  +#13#10'msgstr "Auto applies the voltage inferred from the selected chip prof'
+  +'ile immediately, and that may be 3.3 V. Confirm that the profile matches th'
+  +'e physical part before continuing.\r\n\r\nEnable Auto now?"'#13#10#13#10'#:'
+  +' msgstr.str_shell_safe_on_caption'#13#10'msgid "READ-ONLY SAFE MODE: ON"'#13
+  +#10'msgstr "READ-ONLY SAFE MODE: ON"'#13#10#13#10'#: msgstr.str_shell_safe_o'
+  +'n_desc'#13#10'msgid "Chip changes are blocked at the protocol layer."'#13#10
+  +'msgstr "Chip changes are blocked at the protocol layer."'#13#10#13#10'#: ms'
+  +'gstr.str_shell_safe_off_caption'#13#10'msgid "Read-only safe mode: Off"'#13
+  +#10'msgstr "Read-only safe mode: Off"'#13#10#13#10'#: msgstr.str_shell_safe_'
+  +'off_desc'#13#10'msgid "Chip changes are allowed after all required safety c'
+  +'hecks."'#13#10'msgstr "Chip changes are allowed after all required safety c'
+  +'hecks."'#13#10#13#10'#: msgstr.str_shell_safe_reason'#13#10'msgid "read-onl'
+  +'y safe mode is on; erase, write, unlock and status edits are blocked"'#13#10
+  +'msgstr "read-only safe mode is on; erase, write, unlock and status edits ar'
+  +'e blocked"'#13#10#13#10'#: msgstr.str_shell_programmer_check'#13#10'msgid "'
+  +'Programmer connection: selected; checked when the operation starts"'#13#10
+  +'msgstr "Programmer connection: selected; checked when the operation starts"'
+  +#13#10#13#10'#: msgstr.str_shell_attempt_cancelled'#13#10'msgid "Last attemp'
+  +'t cancelled: %s"'#13#10'msgstr "Last attempt cancelled: %s"'#13#10#13#10'#:'
+  +' msgstr.str_shell_attempt_failed'#13#10'msgid "Last attempt failed: %s"'#13
+  +#10'msgstr "Last attempt failed: %s"'#13#10#13#10'#: msgstr.str_shell_job_re'
+  +'fused'#13#10'msgid "Job refused: %s"'#13#10'msgstr "Job refused: %s"'#13#10
+  +#13#10'#: msgstr.str_shell_job_loaded'#13#10'msgid "Loaded GUI job: %s (vali'
+  +'dated against each unit when the operation starts)"'#13#10'msgstr "Loaded G'
+  +'UI job: %s (validated against each unit when the operation starts)"'#13#10
+  +#13#10'#: msgstr.str_shell_job_chip'#13#10'msgid " / chip %s"'#13#10'msgstr '
+  +'" / chip %s"'#13#10#13#10'#: msgstr.str_shell_job_configured'#13#10'msgid "'
+  +'Configured job: %s"'#13#10'msgstr "Configured job: %s"'#13#10#13#10'#: msgs'
+  +'tr.str_shell_job_none'#13#10'msgid "No GUI job file is configured (optional'
+  +' legacy check)"'#13#10'msgstr "No GUI job file is configured (optional lega'
+  +'cy check)"'#13#10#13#10'#: msgstr.str_shell_job_batch_target'#13#10'msgid "'
+  +'Batch target: %d unit(s)"'#13#10'msgstr "Batch target: %d unit(s)"'#13#10#13
+  +#10'#: msgstr.str_shell_job_operator'#13#10'msgid " / operator %s"'#13#10'ms'
+  +'gstr " / operator %s"'#13#10#13#10'#: msgstr.str_shell_identity_none'#13#10
+  +'msgid "Caution: no chip profile is selected"'#13#10'msgstr "Caution: no chi'
+  +'p profile is selected"'#13#10#13#10'#: msgstr.str_shell_identity_unconfirme'
+  +'d'#13#10'msgid "Caution: selected profile is not live-confirmed"'#13#10'msg'
+  +'str "Caution: selected profile is not live-confirmed"'#13#10#13#10'#: msgst'
+  +'r.str_shell_identity_ready'#13#10'msgid "Ready: chip identity is confirmed '
+  +'or has no live ID"'#13#10'msgstr "Ready: chip identity is confirmed or has '
+  +'no live ID"'#13#10#13#10'#: msgstr.str_shell_bench_safe_on'#13#10'msgid "Re'
+  +'ad-only safe mode: ON - destructive actions blocked"'#13#10'msgstr "Read-on'
+  +'ly safe mode: ON - destructive actions blocked"'#13#10#13#10'#: msgstr.str_'
+  +'shell_bench_safe_off'#13#10'msgid "Read-only safe mode: Off - safety checks'
+  +' still required"'#13#10'msgstr "Read-only safe mode: Off - safety checks st'
+  +'ill required"'#13#10#13#10'#: msgstr.str_shell_bench_electrical'#13#10'msgi'
+  +'d "Electrical facts: checked when the backend exposes them; unavailable fac'
+  +'ts remain visible above"'#13#10'msgstr "Electrical facts: checked when the '
+  +'backend exposes them; unavailable facts remain visible above"'#13#10#13#10
+  +'#: msgstr.str_shell_bench_connection'#13#10'msgid "Connection: rechecked wh'
+  +'en an operation opens the programmer"'#13#10'msgstr "Connection: rechecked '
+  +'when an operation opens the programmer"'#13#10#13#10'#: msgstr.str_shell_be'
+  +'nch_backup'#13#10'msgid "Backup: confirm a trusted copy before erase or pro'
+  +'gram"'#13#10'msgstr "Backup: confirm a trusted copy before erase or program'
+  +'"'#13#10#13#10'#: msgstr.str_shell_tel_programmer'#13#10'msgid "PROGRAMMER"'
+  +#13#10'msgstr "PROGRAMMER"'#13#10#13#10'#: msgstr.str_shell_tel_interface'#13
+  +#10'msgid "INTERFACE / CLOCK"'#13#10'msgstr "INTERFACE / CLOCK"'#13#10#13#10
+  +'#: msgstr.str_shell_tel_power'#13#10'msgid "TARGET POWER / SAFETY"'#13#10'm'
+  ,'sgstr "TARGET POWER / SAFETY"'#13#10#13#10'#: msgstr.str_shell_tel_chip'#13
+  +#10'msgid "CHIP IDENTITY"'#13#10'msgstr "CHIP IDENTITY"'#13#10#13#10'#: msgs'
+  +'tr.str_shell_tel_last'#13#10'msgid "LAST OPERATION"'#13#10'msgstr "LAST OPE'
+  +'RATION"'#13#10#13#10'#: msgstr.str_shell_tel_initial'#13#10'msgid "No compl'
+  +'eted operation yet\r\nLive effective rate and ETA appear in the status bar"'
+  +#13#10'msgstr "No completed operation yet\r\nLive effective rate and ETA app'
+  +'ear in the status bar"'#13#10#13#10'#: msgstr.str_shell_tel_no_programmer'
+  +#13#10'msgid "Unavailable: no programmer selected"'#13#10'msgstr "Unavailabl'
+  +'e: no programmer selected"'#13#10#13#10'#: msgstr.str_shell_tel_no_protocol'
+  +#13#10'msgid "Protocol not available"'#13#10'msgstr "Protocol not available"'
+  +#13#10#13#10'#: msgstr.str_shell_tel_requested_not_set'#13#10'msgid "Request'
+  +'ed: not set"'#13#10'msgstr "Requested: not set"'#13#10#13#10'#: msgstr.str_'
+  +'shell_tel_measured_unavailable'#13#10'msgid "Measured: unavailable"'#13#10
+  +'msgstr "Measured: unavailable"'#13#10#13#10'#: msgstr.str_shell_tel_safe_on'
+  +'_short'#13#10'msgid "Safe mode: ON"'#13#10'msgstr "Safe mode: ON"'#13#10#13
+  +#10'#: msgstr.str_shell_tel_safe_off_short'#13#10'msgid "Safe mode: Off"'#13
+  +#10'msgstr "Safe mode: Off"'#13#10#13#10'#: msgstr.str_shell_tel_not_selecte'
+  +'d'#13#10'msgid "Not selected"'#13#10'msgstr "Not selected"'#13#10#13#10'#: '
+  +'msgstr.str_shell_tel_ezp_transport'#13#10'msgid "USB 1FC8:310B | libusb-win'
+  +'32 1.4.0.2"'#13#10'msgstr "USB 1FC8:310B | libusb-win32 1.4.0.2"'#13#10#13
+  +#10'#: msgstr.str_shell_tel_ezp_clock'#13#10'msgid "12 MHz requested (firmwa'
+  +'re setting)"'#13#10'msgstr "12 MHz requested (firmware setting)"'#13#10#13
+  +#10'#: msgstr.str_shell_tel_ezp_interface'#13#10'msgid "SPI NOR | %s\r\nNati'
+  +'ve erase | whole-chip read/write | full read-back verify"'#13#10'msgstr "SP'
+  +'I NOR | %s\r\nNative erase | whole-chip read/write | full read-back verify"'
+  +#13#10#13#10'#: msgstr.str_shell_tel_ezp_hint'#13#10'msgid "12 MHz is the co'
+  +'nfigured EZP2023+ firmware clock. It is not a measured oscilloscope frequen'
+  +'cy. Measured effective operation throughput is shown separately."'#13#10'ms'
+  +'gstr "12 MHz is the configured EZP2023+ firmware clock. It is not a measure'
+  +'d oscilloscope frequency. Measured effective operation throughput is shown '
+  +'separately."'#13#10#13#10'#: msgstr.str_shell_tel_serprog_transport'#13#10
+  +'msgid "Serial/USB-CDC transport"'#13#10'msgstr "Serial/USB-CDC transport"'
+  +#13#10#13#10'#: msgstr.str_shell_tel_serprog_interface'#13#10'msgid "SPI | c'
+  +'lock controlled by serprog firmware"'#13#10'msgstr "SPI | clock controlled '
+  +'by serprog firmware"'#13#10#13#10'#: msgstr.str_shell_tel_serial_transport'
+  +#13#10'msgid "Serial transport"'#13#10'msgstr "Serial transport"'#13#10#13#10
+  +'#: msgstr.str_shell_tel_usb_transport'#13#10'msgid "USB transport"'#13#10'm'
+  +'sgstr "USB transport"'#13#10#13#10'#: msgstr.str_shell_tel_clock_default'#13
+  +#10'msgid "firmware/default"'#13#10'msgstr "firmware/default"'#13#10#13#10'#'
+  +': msgstr.str_shell_tel_interface_requested'#13#10'msgid "SPI | %s requested'
+  +'\r\nMeasured effective throughput is reported per operation"'#13#10'msgstr '
+  +'"SPI | %s requested\r\nMeasured effective throughput is reported per operat'
+  +'ion"'#13#10#13#10'#: msgstr.str_shell_tel_clock_hint'#13#10'msgid "The menu'
+  +' value is the requested bus clock, not a measured waveform. Operation speed'
+  +' is measured from bytes and time."'#13#10'msgstr "The menu value is the req'
+  +'uested bus clock, not a measured waveform. Operation speed is measured from'
+  +' bytes and time."'#13#10#13#10'#: msgstr.str_shell_tel_connection_selected'
+  +#13#10'msgid "SELECTED | %s\r\nConnection is checked when an operation start'
+  +'s"'#13#10'msgstr "SELECTED | %s\r\nConnection is checked when an operation '
+  +'starts"'#13#10#13#10'#: msgstr.str_shell_tel_connection_available'#13#10'ms'
+  +'gid "AVAILABLE | %s"'#13#10'msgstr "AVAILABLE | %s"'#13#10#13#10'#: msgstr.'
+  +'str_shell_tel_connection_disconnected'#13#10'msgid "DISCONNECTED | %s"'#13
+  +#10'msgstr "DISCONNECTED | %s"'#13#10#13#10'#: msgstr.str_shell_tel_requeste'
+  +'d'#13#10'msgid "Requested: %s"'#13#10'msgstr "Requested: %s"'#13#10#13#10'#'
+  +': msgstr.str_shell_tel_requested_auto'#13#10'msgid "Requested: Auto - resol'
+  +'ved from the selected chip"'#13#10'msgstr "Requested: Auto - resolved from '
+  +'the selected chip"'#13#10#13#10'#: msgstr.str_shell_tel_measured'#13#10'msg'
+  +'id "Measured: %s"'#13#10'msgstr "Measured: %s"'#13#10#13#10'#: msgstr.str_s'
+  +'hell_tel_measured_unknown'#13#10'msgid "Measured: unknown"'#13#10'msgstr "M'
+  +'easured: unknown"'#13#10#13#10'#: msgstr.str_shell_tel_measured_not_measura'
+  +'ble'#13#10'msgid "Measured: not measurable"'#13#10'msgstr "Measured: not me'
+  +'asurable"'#13#10#13#10'#: msgstr.str_shell_tel_safe_on'#13#10'msgid "Safe m'
+  +'ode: ON - changes blocked"'#13#10'msgstr "Safe mode: ON - changes blocked"'
+  +#13#10#13#10'#: msgstr.str_shell_tel_safe_off'#13#10'msgid "Safe mode: Off -'
+  ,' checks required"'#13#10'msgstr "Safe mode: Off - checks required"'#13#10#13
+  +#10'#: msgstr.str_shell_tel_id_confirmed'#13#10'msgid "live confirmed"'#13#10
+  +'msgstr "live confirmed"'#13#10#13#10'#: msgstr.str_shell_tel_id_read'#13#10
+  +'msgid "live read"'#13#10'msgstr "live read"'#13#10#13#10'#: msgstr.str_shel'
+  +'l_tel_id_selected'#13#10'msgid "selected, not read"'#13#10'msgstr "selected'
+  +', not read"'#13#10#13#10'#: msgstr.str_shell_tel_id_unavailable'#13#10'msgi'
+  +'d "ID unavailable"'#13#10'msgstr "ID unavailable"'#13#10#13#10'#: msgstr.st'
+  +'r_shell_tel_id_unconfirmed'#13#10'msgid "unconfirmed"'#13#10'msgstr "unconf'
+  +'irmed"'#13#10#13#10'#: msgstr.str_shell_tel_addr_4'#13#10'msgid "4-byte add'
+  +'ress"'#13#10'msgstr "4-byte address"'#13#10#13#10'#: msgstr.str_shell_tel_a'
+  +'ddr_3'#13#10'msgid "3-byte address"'#13#10'msgstr "3-byte address"'#13#10#13
+  +#10'#: msgstr.str_shell_tel_addr_protocol'#13#10'msgid "addressing by select'
+  +'ed protocol"'#13#10'msgstr "addressing by selected protocol"'#13#10#13#10'#'
+  +': msgstr.str_shell_tel_vcc_unspecified'#13#10'msgid "VCC not specified"'#13
+  +#10'msgstr "VCC not specified"'#13#10#13#10'#: msgstr.str_shell_tel_profile_'
+  +'none'#13#10'msgid "PROFILE NOT SELECTED"'#13#10'msgstr "PROFILE NOT SELECTE'
+  +'D"'#13#10#13#10'#: msgstr.str_shell_tel_live_id'#13#10'msgid "Live ID read:'
+  +' %s"'#13#10'msgstr "Live ID read: %s"'#13#10#13#10'#: msgstr.str_shell_tel_'
+  +'live_id_none'#13#10'msgid "No live chip identity has been established"'#13
+  +#10'msgstr "No live chip identity has been established"'#13#10#13#10'#: msgs'
+  +'tr.str_shell_tel_page'#13#10'msgid "page %d B"'#13#10'msgstr "page %d B"'#13
+  +#10#13#10'#: msgstr.str_shell_tel_sector'#13#10'msgid "sector %s/%sh"'#13#10
+  +'msgstr "sector %s/%sh"'#13#10#13#10'#: msgstr.str_shell_tel_running'#13#10
+  +'msgid "%s RUNNING\r\nLive effective rate and ETA: status bar"'#13#10'msgstr'
+  +' "%s RUNNING\r\nLive effective rate and ETA: status bar"'#13#10#13#10'#: ms'
+  +'gstr.str_shell_tel_cancelled'#13#10'msgid "CANCELLED"'#13#10'msgstr "CANCEL'
+  +'LED"'#13#10#13#10'#: msgstr.str_shell_tel_failed'#13#10'msgid "FAILED"'#13
+  +#10'msgstr "FAILED"'#13#10#13#10'#: msgstr.str_shell_tel_ok'#13#10'msgid "OK'
+  +'"'#13#10'msgstr "OK"'#13#10#13#10'#: msgstr.str_shell_tel_effective'#13#10
+  +'msgid "%s effective"'#13#10'msgstr "%s effective"'#13#10#13#10'#: msgstr.st'
+  +'r_shell_tel_failure_address'#13#10'msgid "Failure address 0x%s"'#13#10'msgs'
+  +'tr "Failure address 0x%s"'#13#10#13#10'#: msgstr.str_shell_op_operation'#13
+  +#10'msgid "OPERATION"'#13#10'msgstr "OPERATION"'#13#10#13#10'#: msgstr.str_s'
+  +'hell_op_read'#13#10'msgid "READ"'#13#10'msgstr "READ"'#13#10#13#10'#: msgst'
+  +'r.str_shell_op_write'#13#10'msgid "WRITE"'#13#10'msgstr "WRITE"'#13#10#13#10
+  +'#: msgstr.str_shell_op_erase'#13#10'msgid "ERASE"'#13#10'msgstr "ERASE"'#13
+  +#10#13#10'#: msgstr.str_shell_op_verify'#13#10'msgid "VERIFY"'#13#10'msgstr '
+  +'"VERIFY"'#13#10#13#10'#: msgstr.str_shell_op_blank_check'#13#10'msgid "BLAN'
+  +'K CHECK"'#13#10'msgstr "BLANK CHECK"'#13#10#13#10'#: msgstr.str_shell_op_de'
+  +'tect'#13#10'msgid "DETECT"'#13#10'msgstr "DETECT"'#13#10#13#10'#: msgstr.st'
+  +'r_shell_shortcuts'#13#10'msgid "Alt+1 %s   Alt+2 %s   Alt+3 %s"'#13#10'msgs'
+  +'tr "Alt+1 %s   Alt+2 %s   Alt+3 %s"'#13#10
+]);

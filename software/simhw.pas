@@ -76,6 +76,8 @@ type
     // The bytes the next SPIRead will serve.
     FReply: TBytes;
     FReplyPos: integer;
+    FMemoryRead: boolean;
+    FMemoryReadAddress: QWord;
 
     procedure BuildSFDP;
     procedure ClearPending;
@@ -248,6 +250,8 @@ begin
   FPendingValid := False;
   SetLength(FReply, 0);
   FReplyPos := 0;
+  FMemoryRead := False;
+  FMemoryReadAddress := 0;
 end;
 
 function TSimulatedHardware.GetLastError: string;
@@ -326,6 +330,8 @@ var
 begin
   SetLength(FReply, 0);
   FReplyPos := 0;
+  FMemoryRead := False;
+  FMemoryReadAddress := 0;
   if Length(Cmd) < 1 then Exit;
 
   case Cmd[0] of
@@ -371,15 +377,12 @@ begin
     OP_READ, OP_FASTRD:
       begin
         Addr := AddressOf(Cmd, 1, 3);
-        //A read that runs off the end of the die returns FF rather than
-        //wrapping. Wrapping is what some real parts do, but reproducing it
-        //would hide a caller's arithmetic error behind plausible data.
-        SetLength(FReply, SIM_CAPACITY);
-        for i := 0 to High(FReply) do
-          if Addr + QWord(i) < SIM_CAPACITY then
-            FReply[i] := FMemory[Addr + QWord(i)]
-          else
-            FReply[i] := $FF;
+        // Serve only the requested bytes during SPIRead. Materializing an
+        // entire 8 MiB reply for each 4 KiB transfer made normal backup reads
+        // quadratic in the simulated chip capacity.
+        FMemoryRead := True;
+        if Addr < SIM_CAPACITY then FMemoryReadAddress := Addr
+        else FMemoryReadAddress := SIM_CAPACITY;
       end;
   end;
 end;
@@ -510,6 +513,19 @@ var
 begin
   Result := -1;
   if (not FOpened) or (BufferLen < 0) or (BufferLen > Length(buffer)) then Exit;
+
+  if FMemoryRead then
+  begin
+    for i := 0 to BufferLen - 1 do
+      if FMemoryReadAddress < SIM_CAPACITY then
+      begin
+        buffer[i] := FMemory[FMemoryReadAddress];
+        Inc(FMemoryReadAddress);
+      end
+      else buffer[i] := $FF;
+    if CS = 1 then ClearPending;
+    Exit(BufferLen);
+  end;
 
   for i := 0 to BufferLen - 1 do
     if FReplyPos + i <= High(FReply) then

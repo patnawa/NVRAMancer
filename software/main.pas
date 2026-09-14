@@ -14,14 +14,14 @@ uses
   utilfunc, findchip, DateUtils, lazUTF8, sfdp, opthread, fileformats, prodconfig, serialnum, jedec, protbits,
   opresult, prodlog, chipsave, flashops, imgcheck, ifd, chiptest,
   operationmodel, norplanner, norengine, spi25noradapter, prodcrypto,
-  prodevidence, eepromengine, eepromadapters,
+  prodevidence, eepromengine, eepromadapters, eepromsession,
   pascalc, ScriptsFunc, ScriptEdit, comparewnd, appver,
   electricalpreflight, railreport, sessionstate, clocktune, clicontract,
   safemode,
   norgeometrybuild, sfdpprofile, quadpolicy, sessionreport,
   labtools, synaser, Spin,
   writeadmission, voltagewarning, writejournal,
-  workspacemodel,
+  workspacemodel, writeworkflow, recoveryworkflow, chipcatalog, LCLIntf,
   baseHW, UsbAspHW, ch341hw, ch347hw, avrisphw, arduinohw, buzzpirathw,
   serproghw, ezphw, simhw;
 
@@ -364,6 +364,13 @@ type
     procedure StartAddressEditKeyPress(Sender: TObject; var Key: char);
     procedure VerifyFlash(BlankCheck: boolean = false);
   private
+    FWritePanel, FWriteActions, FRecoveryRow, FProfileRow: TPanel;
+    FWriteSummary: TMemo;
+    FWriteCommit, FWritePrepare, FOpenBackups, FConnectionHelp: TButton;
+    FRecoveryList, FProfileList: TComboBox;
+    FUseProfile: TButton;
+    FRecoveryPrepare: TButton;
+    FAutoPreparePending, FStartupScanPending: boolean;
     FWorkspaceMode: TWorkspaceMode;
     FWorkspaceControlsUpdating: boolean;
     FWorkspaceBar: TPanel;
@@ -414,6 +421,16 @@ type
     FOperationStartedAt: TDateTime;
     FLastOperationText: string;
     FLastOperationHint: string;
+    procedure CreateInlineWritePanel;
+    procedure UpdateInlineWrite;
+    procedure InlineWriteClick(Sender: TObject);
+    procedure RefreshRecoveryList;
+    procedure RecoveryPrepareClick(Sender: TObject);
+    procedure PresentProfileChoices(Choices: TStrings);
+    procedure UseProfileClick(Sender: TObject);
+    function LoadImageFile(const FileName: string): boolean;
+    function CurrentWriteContext: string;
+    function PresentDirectWrite(const Description: string): boolean;
     procedure CreateWorkspaceShell;
     procedure LayoutWorkspaceShell(Sender: TObject);
     procedure SetWorkspaceMode(Mode: TWorkspaceMode);
@@ -727,19 +744,29 @@ implementation
 //implementation เป็นเรื่องที่ Pascal ยอม และเป็นตะเข็บที่ทำให้ย้าย UI ออก
 //จาก main.pas ได้ทีละหน้าต่างโดยไม่ต้องรื้อทั้งไฟล์พร้อมกัน
 uses
-  labtoolsui;
+  labtoolsui, uilanguage;
 
 
 var
   TimeCounter: TDateTime;
   CurrentLang: string = 'en';
+  StartupLoadNotice: string = '';
   //Set only after a trusted snapshot has been atomically published.  Plan
   //previews use this to distinguish an in-memory safety snapshot from a
   //recoverable backup file without ever promising a file that was not saved.
   LastBackupFileName: string = '';
-  //Older settings files have no marker, so existing users see the new doctor
-  //once.  Afterwards it remains available from Options.
+  //Retain the old marker for settings compatibility. The doctor runs only
+  //when explicitly opened from Options.
   ConnectionDoctorSeen: boolean = False;
+  SavedWorkspace: TWorkspaceMode = wmRepair;
+  WriteGate: TInlineWriteGate = nil;
+  InlinePlanText, InlineNotice, InlinePlanIdentity: string;
+  CommitInlineWrite: boolean = False;
+  RecoveryRequestedPath: string;
+  PreparedSerial: TSerialAllocation;
+  PreparedSerialContext: string;
+  BackupRoot: string;
+  BufferRevision: QWord = 0;
   //สมุดบันทึกของงานเขียนที่กำลังเดินอยู่ ว่างเมื่อไม่มีงานเขียน
   //
   //ตั้งค่าหลังจากไฟล์สำรองถูกเผยแพร่แล้วเท่านั้น สมุดบันทึกที่ชี้ไปยังไฟล์
@@ -1142,7 +1169,7 @@ begin
     except
       on E: EXMLReadError do
       begin
-        ShowMessage(E.Message);
+        StartupLoadNotice := StartupLoadNotice + E.Message + LineEnding;
         ChipListFile := nil;
       end;
     end;
@@ -1156,7 +1183,7 @@ begin
     except
       on E: EXMLReadError do
       begin
-        ShowMessage(E.Message);
+        StartupLoadNotice := StartupLoadNotice + E.Message + LineEnding;
         ChipListFile2 := nil;
       end;
     end;
@@ -1170,7 +1197,7 @@ begin
     except
       on E: EXMLReadError do
       begin
-        ShowMessage(E.Message);
+        StartupLoadNotice := StartupLoadNotice + E.Message + LineEnding;
         ChipListFile3 := nil;
       end;
     end;
@@ -1183,7 +1210,7 @@ begin
     except
       on E: EXMLReadError do
       begin
-        ShowMessage(E.Message);
+        StartupLoadNotice := StartupLoadNotice + E.Message + LineEnding;
         ChipListFile4 := nil;
       end;
     end;
@@ -1196,7 +1223,7 @@ begin
     except
       on E: EXMLReadError do
       begin
-        ShowMessage(E.Message);
+        StartupLoadNotice := StartupLoadNotice + E.Message + LineEnding;
         ChipListFile5 := nil;
       end;
     end;
@@ -1209,7 +1236,7 @@ begin
     except
       on E: EXMLReadError do
       begin
-        ShowMessage(E.Message);
+        StartupLoadNotice := StartupLoadNotice + E.Message + LineEnding;
         SettingsFile := nil;
       end;
     end;
@@ -1227,9 +1254,7 @@ procedure TMainForm.ChangeLang(Sender: TObject);
 begin
   CurrentLang := TMenuItem(Sender).Hint;
 
-  Translations.TranslateResourceStrings(GetCurrentDir + '/lang/' + CurrentLang + '.po');
-  LRSTranslator.Free;
-  LRSTranslator:= TPOTranslator.Create(GetCurrentDir + '/lang/' + CurrentLang + '.po');
+  ApplyUILanguage(CurrentLang);
   TPOTranslator(LRSTranslator).UpdateTranslation(MainForm);
   TPOTranslator(LRSTranslator).UpdateTranslation(ScriptEditForm);
   TPOTranslator(LRSTranslator).UpdateTranslation(ChipSearchForm);
@@ -1246,11 +1271,18 @@ var
   SearchRec : TSearchRec;
   MenuItem: TMenuItem;
 begin
-  LangDir := GetCurrentDir + '/lang/';
+  LangDir := LanguageDirectory;
+  MenuItem := NewItem('English', 0, False, True, @MainForm.ChangeLang, 0, '');
+  MenuItem.Hint := 'en';
+  MenuItem.AutoCheck := True;
+  MenuItem.RadioItem := True;
+  MenuItem.Checked := CurrentLang = 'en';
+  MainForm.LangMenuItem.Add(MenuItem);
 
   If FindFirstUTF8(LangDir+'*.po', faAnyFile, SearchRec) = 0 then
   begin
     Repeat
+      if SameText(SearchRec.Name, 'en.po') then Continue;
       AssignFile(LangFile, LangDir+SearchRec.Name);
       Reset(LangFile);
       ReadLn(LangFile, LangName);
@@ -1265,50 +1297,24 @@ begin
       if MenuItem.Hint = Currentlang then MenuItem.Checked := true;
 
     Until FindNextUTF8(SearchRec) <> 0;
+    FindCloseUTF8(SearchRec);
   end;
-
-  FindCloseUTF8(SearchRec);
 end;
 
 procedure Translate(XMLfile: TXMLDocument);
 var
-   PODirectory: String;
-   Node: TDOMNode;
+  Node: TDOMNode;
 begin
-
-  PODirectory:= GetCurrentDir + '/lang/';
-  CurrentLang:='';
-
-  if XMLfile <> nil then
+  CurrentLang := 'en';
+  if (XMLfile <> nil) and (XMLfile.DocumentElement <> nil) then
   begin
-
-      Node := XMLfile.DocumentElement.FindNode('locale');
-
-      if (Node <> nil) then
-      if (Node.HasAttributes) then
-      begin
-
-        if  Node.Attributes.GetNamedItem('lang') <> nil then
-          CurrentLang := UTF16ToUTF8(Node.Attributes.GetNamedItem('lang').NodeValue);
-
-      end;
+    Node := XMLfile.DocumentElement.FindNode('locale');
+    if (Node <> nil) and Node.HasAttributes and
+       (Node.Attributes.GetNamedItem('lang') <> nil) then
+      CurrentLang := UTF16ToUTF8(Node.Attributes.GetNamedItem('lang').NodeValue);
   end;
-
-  if CurrentLang = '' then
-  begin
-    CurrentLang := 'en';
-    LRSTranslator:= TPOTranslator.Create(PODirectory + CurrentLang + '.po');
-    Translations.TranslateResourceStrings(PODirectory + CurrentLang + '.po');
-    Exit;
-  end;
-
-  if FileExistsUTF8(PODirectory + CurrentLang + '.po') then
-  begin
-    LRSTranslator:= TPOTranslator.Create(PODirectory + CurrentLang + '.po');
-    Translations.TranslateResourceStrings(PODirectory + CurrentLang + '.po');
-  end;
-
-end;               
+  ApplyUILanguage(CurrentLang);
+end;
 
 procedure LogPrint(text: string);
 begin
@@ -1623,10 +1629,31 @@ begin
 end;
 
 //บัฟเฟอร์มาจากไฟล์ ไม่ใช่จากชิปที่เสียบอยู่
+function WorkBackupDirectory: string;
+begin
+  if BackupRoot <> '' then Exit(IncludeTrailingPathDelimiter(BackupRoot));
+  Result := GetEnvironmentVariable('LOCALAPPDATA');
+  if Result = '' then Result := GetAppConfigDir(False);
+  Result := IncludeTrailingPathDelimiter(Result) + 'NVRAMancer' +
+    DirectorySeparator + 'backups' + DirectorySeparator;
+end;
+
+procedure ShowInlineNotice(const Text: string);
+begin
+  InlineNotice := Text;
+  LogPrint(Text);
+  if (not CLIMode) and (MainForm <> nil) then MainForm.UpdateInlineWrite;
+end;
+
 procedure NoteBufferFromFile(const FileName: string);
 begin
   BufferSource := bsFile;
   BufferSourceName := ExtractFileName(FileName);
+  RecoveryRequestedPath := '';
+  InlinePlanText := '';
+  InlineNotice := '';
+  if WriteGate <> nil then WriteGate.Clear;
+  MainForm.FAutoPreparePending := True;
   MainForm.UpdateWorkflowState;
 end;
 
@@ -1667,7 +1694,7 @@ var
 begin
   if FWorkspaceBar <> nil then Exit;
 
-  FWorkspaceMode := wmRepair;
+  FWorkspaceMode := SavedWorkspace;
   FWorkspaceControlsUpdating := False;
 
   FWorkspaceBar := TPanel.Create(Self);
@@ -2035,6 +2062,7 @@ begin
   if OperationRunning and (Mode <> FWorkspaceMode) then Exit;
   PreviousMode := FWorkspaceMode;
   FWorkspaceMode := Mode;
+  SavedWorkspace := Mode;
 
   //The workspace changes presentation only.  Every action still enters the
   //existing handlers and the same protocol-layer safety gates.
@@ -2127,7 +2155,15 @@ begin
     waOpenImage:
       ButtonOpenHexClick(Sender);
     waReviewSmartWrite:
-      MenuSmartWriteClick(Sender);
+      begin
+        CommitInlineWrite := (WriteGate <> nil) and
+          WriteGate.ReadyFor(CurrentWriteContext);
+        try
+          ButtonWriteClick(Sender);
+        finally
+          CommitInlineWrite := False;
+        end;
+      end;
     waPreviewSmartWrite:
       MenuSmartWritePreviewClick(Sender);
     waVerify:
@@ -2174,37 +2210,16 @@ begin
 end;
 
 procedure TMainForm.WorkspaceRailChange(Sender: TObject);
-var
-  WarningTitle, WarningText: string;
-  NeedsWarning: boolean;
 begin
   if FWorkspaceControlsUpdating or OperationRunning then Exit;
-  NeedsWarning := False;
-  if (FTaskRail.ItemIndex = 1) and (not RadioCH347Vcc3V3.Checked) then
-  begin
-    NeedsWarning := True;
-    WarningTitle := STR_SHELL_VOLTAGE_33_TITLE;
-    WarningText := STR_SHELL_VOLTAGE_33_WARNING;
-  end
-  else if (FTaskRail.ItemIndex = 2) and
-          (not RadioCH347VccAuto.Checked) then
-  begin
-    NeedsWarning := True;
-    WarningTitle := STR_SHELL_VOLTAGE_AUTO_TITLE;
-    WarningText := STR_SHELL_VOLTAGE_AUTO_WARNING;
-  end;
-  if NeedsWarning then
-    if MessageDlg(WarningTitle, WarningText, mtWarning,
-      [mbYes, mbNo], 0) <> mrYes then
-    begin
-      UpdateWorkflowState;
-      Exit;
-    end;
   case FTaskRail.ItemIndex of
     0: RadioCH347Vcc1V8.Checked := True;
     1: RadioCH347Vcc3V3.Checked := True;
     2: RadioCH347VccAuto.Checked := True;
   end;
+  InlineNotice := '';
+  if WriteGate <> nil then WriteGate.Clear;
+  FAutoPreparePending := BufferSource in [bsFile, bsEdited];
   UpdateWorkflowState;
 end;
 
@@ -2352,6 +2367,10 @@ begin
                              FWorkflowVerify.Enabled;
   RepairContext.SmartWritePreviewAvailable :=
     (FWorkflowSmart <> nil) and FWorkflowSmart.Enabled;
+  if (NVRAMancer.Current_HW = CHW_EZP) and RepairContext.IdentityProven and
+     RepairContext.HasBuffer and (CurrentICParam.Size > 0) and
+     (MPHexEditorEx.DataSize <= CurrentICParam.Size) then
+    RepairContext.SmartWritePreviewAvailable := True;
   RepairContext.SmartWriteAvailable :=
     RepairContext.SmartWritePreviewAvailable and (not SafeModeActive);
   if SafeModeActive then
@@ -2420,6 +2439,17 @@ begin
   else
     Presentation := BuildRepairPresentation(RepairContext);
 
+  if (WriteGate <> nil) and WriteGate.ReadyFor(CurrentWriteContext) and
+     (not OperationRunning) and (FWorkspaceMode <> wmProduction) then
+  begin
+    Presentation.Eyebrow := 'READY';
+    Presentation.Title := 'Ready to write';
+    Presentation.Detail := 'The plan and backup are shown below. Write starts ' +
+      'programming, then verifies the result in two sessions.';
+    Presentation.Primary.Action := waReviewSmartWrite;
+    Presentation.Primary.Caption := 'Write';
+    Presentation.Primary.Enabled := RepairContext.SmartWriteAvailable;
+  end;
   FTaskEyebrow.Caption := Presentation.Eyebrow;
   FTaskTitle.Caption := Presentation.Title;
   FTaskDetail.Caption := Presentation.Detail;
@@ -2462,6 +2492,10 @@ begin
     STR_SHELL_BENCH_CONNECTION + LineEnding +
     STR_SHELL_BENCH_BACKUP + LineEnding +
     SafeLine;
+  if (WriteGate <> nil) and WriteGate.ReadyFor(CurrentWriteContext) then
+    FBenchSmart.Caption := 'Write'
+  else FBenchSmart.Caption := 'Prepare write';
+  UpdateInlineWrite;
   //Captions can change with both workspace state and the active translation.
   //Re-measure the header buttons after those changes so they do not clip.
   LayoutWorkspaceShell(nil);
@@ -5268,39 +5302,10 @@ var
 //คำตอบไปปักหมุดที่เมนูโดยตรง ไม่ใช่เก็บในตัวแปรลับ ผู้ใช้จะได้เห็นค่าที่
 //กำลังใช้อยู่ตลอดเวลา และเปลี่ยนเองได้ทีหลังจากที่เดิม
 procedure AskChipVccFromDatasheet;
-var
-  Key: string;
 begin
-  if NVRAMancer.Current_HW <> CHW_CH347 then Exit;
-  //ปักหมุดไว้แล้วแปลว่าผู้ใช้ตัดสินใจไปแล้ว ไม่ต้องไปกวนอีก
-  if SelectedCH347Vcc <> 0 then Exit;
-
-  Key := UpperCase(Trim(CurrentICParam.Name));
-  if Key = '' then Exit;
-  if Key = AskedVccForChip then Exit;
-  //จำไว้ก่อนถาม ผู้ใช้กด "ไว้ก่อน" แล้วจะได้ไม่โดนถามซ้ำทุกครั้งที่ตรวจชิป
-  AskedVccForChip := Key;
-
-  case QuestionDlg('NVRAMancer',
-         Format(STR_CH347_VCC_ASK, [CurrentICParam.Name]), mtWarning,
-         [mrNo, STR_CH347_VCC_ASK_18, mrYes, STR_CH347_VCC_ASK_33,
-          mrCancel, STR_CH347_VCC_ASK_LATER], 0) of
-    mrNo:
-      begin
-        PinCH347VccMenu(CH347_VCC_1V8_MV);
-        LogPrint(Format(STR_CH347_VCC_CONFIRMED,
-          [CurrentICParam.Name, CH347VccLevelText(CH347_VCC_1V8_MV)]));
-      end;
-    mrYes:
-      begin
-        PinCH347VccMenu(CH347_VCC_3V3_MV);
-        LogPrint(Format(STR_CH347_VCC_CONFIRMED,
-          [CurrentICParam.Name, CH347VccLevelText(CH347_VCC_3V3_MV)]));
-      end;
-  else
-    //ไม่เลือกก็ไม่เป็นไร แต่ต้องบอกให้ชัดว่าจะเกิดอะไรขึ้นต่อจากนี้
-    LogPrint(STR_CH347_VCC_ASK_NONE);
-  end;
+  if CLIMode or (SelectedCH347Vcc <> 0) then Exit;
+  ShowInlineNotice('The chip voltage is not in this profile. Select 1.8 V or ' +
+    '3.3 V from its datasheet using Target voltage in the work window.');
 end;
 
 procedure CH347ChipVccGuidance;
@@ -5356,14 +5361,8 @@ begin
           Exit;
         end;
 
-        if MessageDlg('NVRAMancer',
-             Mismatch + '.' + LineEnding + LineEnding +
-             Format(STR_CH347_VCC_SWITCH_Q, [WantText]) + LineEnding +
-             STR_CH347_VCC_GUIDE,
-             mtWarning, [mbYes, mbNo], 0) = mrYes then
-          PinCH347VccMenu(WantMv)
-        else
-          LogPrint(STR_CH347_VCC_GUIDE);
+        ShowInlineNotice(Mismatch + '. Select ' + WantText +
+          ' using Target voltage, then prepare again.');
       end;
   end;
 end;
@@ -6971,7 +6970,8 @@ begin
            ' ABh=' + sAB + ' 15h=' + s15);
 
   if CLIMode then Exit(False);
-  Result := MessageDlg('NVRAMancer', STR_ID_MISMATCH_Q, mtWarning, [mbYes, mbNo], 0) = mrYes;
+  ShowInlineNotice('The chip ID does not match this profile. Use Detect chip or Choose chip to select the matching profile.');
+  Result := False;
 end;
 
 //เตือนก่อนแตะชิป 1.8 โวลต์ ถ้าเครื่องโปรแกรมจ่ายไฟให้ไม่ได้
@@ -7016,45 +7016,40 @@ begin
     //"บังเอิญถูก" อย่างสิ้นเชิง voltagewarning เป็นคนแยกสองอย่างนี้
     Ctx.AutoResolvesToMv := 0;
 
+  if Ctx.RailSelectable then
+  begin
+    if (Ctx.SelectedRailMv = 0) and (Ctx.AutoResolvesToMv = 0) then
+    begin
+      ShowInlineNotice('Voltage is unknown for this chip. Select its datasheet ' +
+        'voltage in the work window before reading or writing.');
+      Exit(False);
+    end;
+    if (Ctx.SelectedRailMv > 0) and
+       VccRangeMv(CurrentChipVccText, VMinMv, VMaxMv) and
+       ((Ctx.SelectedRailMv < VMinMv) or (Ctx.SelectedRailMv > VMaxMv)) then
+    begin
+      ShowInlineNotice('The selected voltage does not fit this chip. Choose Auto ' +
+        'or the matching Target voltage before retrying.');
+      Exit(False);
+    end;
+  end;
   case AdviseVoltage(Ctx) of
-    vaProceed, vaProductionGateDecides:
-      Exit(True);
-
+    vaProceed, vaProductionGateDecides: Result := True;
     vaOfferPinLowRail:
       begin
-        //ทั้งสองปุ่มปลอดภัย ไม่มีปุ่มไหนแปลว่า "จ่าย 3.3V ใส่ชิป 1.8V ต่อไป"
-        if CLIMode then
-        begin
-          LogPrint(STR_VOLT_ABORTED);
-          Exit(False);
-        end;
-        Result := MessageDlg('NVRAMancer', STR_CH347_VOLT_FIX_Q,
-                             mtWarning, [mbYes, mbNo], 0) = mrYes;
-        if Result then
-          PinCH347VccMenu(CH347_VCC_1V8_MV)
-        else
-          LogPrint(STR_VOLT_ABORTED);
+        ShowInlineNotice('This chip needs 1.8 V. Select 1.8 V in Target voltage, then retry.');
+        Result := False;
       end;
-
     vaWarnRailTooHigh:
       begin
-        if CLIMode then
-        begin
-          LogPrint(STR_VOLT_ABORTED);
-          Exit(False);
-        end;
-        Result := MessageDlg('NVRAMancer', STR_VOLT_WARN,
-                             mtWarning, [mbYes, mbNo], 0) = mrYes;
-        if not Result then LogPrint(STR_VOLT_ABORTED);
+        ShowInlineNotice('This chip needs 1.8 V. Connect a suitable voltage adapter or programmer before retrying.');
+        Result := False;
       end;
   else
-    //ค่าใหม่ที่ยังไม่มีใครเขียนทางเดินให้ ต้องถือว่าไม่ปลอดภัย
     Result := False;
   end;
 end;
 
-//ถามผู้ใช้ ถ้าไม่มีใครนั่งอยู่ก็ตอบตามค่าที่ปลอดภัย
-//โหมดบรรทัดคำสั่งต้องไม่ค้างรอคนกดปุ่ม เพราะมันรันจากสคริปต์
 function AskUser(const Question: string; DefaultWhenHeadless: boolean): boolean;
 begin
   if CLIMode then
@@ -7063,7 +7058,13 @@ begin
     Exit(DefaultWhenHeadless);
   end;
 
-  Result := MessageDlg('NVRAMancer', Question, mtWarning, [mbYes, mbNo], 0) = mrYes;
+  if Question = STR_GUARD_Q then
+    ShowInlineNotice('The target is write protected. Inspect its status registers in Bench and change protection before preparing again.')
+  else if Question = STR_NOT_BLANK_Q then
+    ShowInlineNotice('The chip is not blank. Use Smart write to preserve bytes outside the requested range.')
+  else
+    ShowInlineNotice('This chip was already programmed. Review the duplicate-chip policy in Production settings before retrying.');
+  Result := False;
 end;
 
 //เลขประจำตัวจากโรงงาน อ่านด้วยคำสั่ง 4Bh
@@ -7744,7 +7745,8 @@ begin
       'serial=' + EvidenceValue(LocalSerial) + #10 +
       'trusted_read_passes=' + IntToStr(ReadPasses) + #10 +
       'backup=trusted_full_chip' + #10 +
-      'physical_verify=full_affected_blocks' + #10;
+      'physical_verify=full_affected_blocks' + #10 +
+      'fresh_session_verify=full_affected_blocks' + #10;
     SetLength(Payload, Length(Text));
     if Length(Text) > 0 then Move(Text[1], Payload[0], Length(Text));
     FileName := IncludeTrailingPathDelimiter(EvidenceDirectory) +
@@ -8103,9 +8105,9 @@ begin
     Exit;
   end;
 
-  Dir := 'backup' + DirectorySeparator;
+  Dir := WorkBackupDirectory;
   if not DirectoryExists(Dir) then
-    if not CreateDir(Dir) then
+    if not ForceDirectories(Dir) then
     begin
       OpFail('the backup directory could not be created');
       LogPrint(STR_BACKUP_FAILED);
@@ -10802,6 +10804,18 @@ begin
     NVRAMancer.Current_HW := CHW_ARDUINO;
   end;
 
+  if programmer = CHW_SIM then
+  begin
+    MainForm.MenuSPIClock.Visible := False;
+    MainForm.MenuCH347SPIClock.Visible := False;
+    MainForm.MenuAVRISPSPIClock.Visible := False;
+    MainForm.MenuArduinoSPIClock.Visible := False;
+    MainForm.MenuFT232SPIClock.Visible := False;
+    MainForm.MenuMicrowire.Enabled := False;
+    NVRAMancer.Current_HW := CHW_SIM;
+    SetHardwareMenuCheck(CHW_SIM);
+  end;
+
   if programmer = CHW_EZP then
   begin
     //ความเร็วอยู่ในแพ็กเก็ตบอกชิป ไม่มีเมนูฝั่งนี้ และเครื่องนี้ทำ SPI
@@ -11047,6 +11061,10 @@ end;
 
 //เลือกชิปตามชื่อ โดยหาในไฟล์หลักก่อน แล้วค่อยหาในไฟล์เสริม
 function SelectChipAny(const AName: string): boolean;
+var
+  ResolvedDocument: TXMLDocument;
+  ResolvedChip: TDOMNode;
+  Err: string;
 begin
   //เปลี่ยนชิปแล้ว สิ่งที่รู้เกี่ยวกับตัวเก่าใช้ไม่ได้อีก
   //ถ้าไม่ล้าง opcode ที่เลือกตามยี่ห้อจะเป็นของชิปตัวก่อนหน้า
@@ -11057,19 +11075,14 @@ begin
   //ผู้เรียกที่ยืนยันได้จริง (Read ID) จะตั้งธงกลับหลังเรียกฟังก์ชันนี้เอง
   ForgetChipSelectionKnowledge;
 
-  Result := findchip.SelectChip(ChipListFile, AName);
-  if not Result then
-    Result := findchip.SelectChip(ChipListFile2, AName);
-  if not Result then
-    Result := findchip.SelectChip(ChipListFile3, AName);
-  if not Result then
-    Result := findchip.SelectChip(ChipListFile4, AName);
-  if not Result then
-    Result := findchip.SelectChip(ChipListFile5, AName);
+  if not ResolveChipSelection([ChipListFile, ChipListFile2, ChipListFile3,
+    ChipListFile4, ChipListFile5], AName, ResolvedDocument, ResolvedChip, Err) then
+  begin
+    ShowInlineNotice(Err);
+    Exit(False);
+  end;
+  Result := findchip.SelectChip(ResolvedDocument, ChipSelectionKey(ResolvedChip));
   UpdateChipInfo;
-
-  //รู้จักชิปแล้วก็รู้แรงดันที่มันต้องการแล้ว บอกตอนนี้เลย ไม่ใช่รอให้กดอ่าน
-  //แล้วชิปเงียบ (ปัก 1.8 ไว้กับชิป 3.3) หรือแย่กว่านั้นคือพัง (กลับกัน)
   if Result then CH347ChipVccGuidance;
 end;
 
@@ -11091,6 +11104,7 @@ end;
 
 procedure TMainForm.MPHexEditorExChange(Sender: TObject);
 begin
+  Inc(BufferRevision);
   //ทางรวมของบัฟเฟอร์ ทุกทางที่โหลดไฟล์ อ่านจากชิป หรือแก้ด้วยมือ ผ่านที่นี่
   //หมด การไปดักที่ LoadFromStream ทีละจุด (มีแปดจุด) จะพลาดจุดที่เก้าที่มี
   //คนเพิ่มทีหลังเสมอ
@@ -11968,19 +11982,15 @@ begin
   if RadioSPI.Checked and (ComboSPICMD.ItemIndex = SPI_CMD_25) and
      (NVRAMancer.Current_HW = CHW_EZP) then
   begin
-    if Sender <> ComboItem1 then
-      if MessageDlg('NVRAMancer',
-           'The EZP2023+ writes the whole chip in one operation: ' +
-           'everything on it is replaced by the buffer, and anything past ' +
-           'the end of the buffer becomes FF.' + LineEnding + LineEnding +
-           'Write the whole chip?',
-           mtWarning, [mbYes, mbNo], 0) <> mrYes then
-      begin
-        OpBegin(opkWrite);
-        OpCancel;
-        Exit;
-      end;
+    if (not CLIMode) and (Sender <> ComboItem1) then
+      if not PresentDirectWrite('Replace the whole chip from the image. Bytes ' +
+        'past the image become FF. A full backup is saved before erase; ' +
+        'the result is checked by two independent readbacks.') then Exit;
     RunEZPWholeChipWrite(False);
+    InlinePlanText := '';
+    if OpOK and (not CLIMode) then ShowInlineNotice(
+      'Write complete. Both readbacks passed. Backup: ' + LastBackupFileName);
+    UpdateInlineWrite;
     Exit;
   end;
 
@@ -11989,6 +11999,16 @@ begin
     MenuSmartWriteClick(Sender);
     Exit;
   end;
+
+  if IsEEPROMSmartWriteTarget then
+  begin
+    MenuSmartWriteClick(Sender);
+    Exit;
+  end;
+
+  if (not CLIMode) and (Sender <> ComboItem1) then
+    if not PresentDirectWrite('Write the loaded image using the selected chip ' +
+      'protocol. A full backup is saved before programming.') then Exit;
 
   I2C_ChunkSize := 65535;
   OpBegin(opkWrite);
@@ -12008,13 +12028,6 @@ try
     OpFail('the programmer could not be opened');
     exit;
   end;
-  if Sender <> ComboItem1 then
-    if MessageDlg('NVRAMancer', STR_START_WRITE, mtConfirmation, [mbYes, mbNo], 0)
-      <> mrYes then
-    begin
-      OpCancel;
-      Exit;
-    end;
   LockControl();
 
   //SPI scripts can issue destructive commands of their own, so they run only
@@ -13173,9 +13186,7 @@ begin
                      'manually');
             if not CLIMode then
             begin
-              ChipSearchForm.EditSearch.Text := '';
-              ChipSearchForm.ListBoxChips.Items.Assign(Matches);
-              ChipSearchForm.Show;
+              PresentProfileChoices(Matches);
             end;
           end;
         end
@@ -13185,9 +13196,7 @@ begin
                    'the exact part')
         else
         begin
-          ChipSearchForm.EditSearch.Text := '';
-          ChipSearchForm.ListBoxChips.Items.Assign(Matches);
-          ChipSearchForm.Show;
+          PresentProfileChoices(Matches);
         end;
       end
       else
@@ -13243,51 +13252,9 @@ begin
 end;
 
 procedure TMainForm.ButtonOpenHexClick(Sender: TObject);
-var
-  Stream: TMemoryStream;
-  ChipSize: cardinal;
-  BlankByte: byte;
-  ErrMsg: string;
 begin
-  if not OpenDialog.Execute then Exit;
-
-  //ไฟล์ไบนารีโหลดแบบเดิม ไม่ต้องผ่านบัฟเฟอร์กลาง
-  if DetectFormat(OpenDialog.FileName) = ffBinary then
-  begin
-    MPHexEditorEx.LoadFromFile(OpenDialog.FileName);
-    StatusBar.Panels.Items[2].Text := OpenDialog.FileName;
-    NoteBufferFromFile(OpenDialog.FileName);
-    Exit;
-  end;
-
-  //ไฟล์รูปแบบข้อความจะกางออกเป็นภาพเต็มขนาดชิป
-  //ช่องว่างยังคงสถานะถูกลบไว้
-  ChipSize := 0;
-  if IsNumber(ComboChipSize.Text) then ChipSize := StrToInt(ComboChipSize.Text);
-
-  if RadioSPI.Checked and (ComboSPICMD.ItemIndex = SPI_CMD_KB) then
-    BlankByte := $00
-  else
-    BlankByte := $FF;
-
-  Stream := TMemoryStream.Create;
-  try
-    if not LoadFirmware(OpenDialog.FileName, Stream, ChipSize, BlankByte, ErrMsg) then
-    begin
-      LogPrint(ErrMsg);
-      Exit;
-    end;
-
-    if ErrMsg <> '' then LogPrint(ErrMsg);   //เป็นแค่คำเตือน ข้อมูลโหลดสำเร็จแล้ว
-
-    Stream.Position := 0;
-    MPHexEditorEx.LoadFromStream(Stream);
-    StatusBar.Panels.Items[2].Text := OpenDialog.FileName;
-    NoteBufferFromFile(OpenDialog.FileName);
-    LogPrint(STR_FILE_LOADED + IntToStr(Stream.Size) + ' bytes');
-  finally
-    Stream.Free;
-  end;
+  if OperationRunning then Exit;
+  if OpenDialog.Execute then LoadImageFile(OpenDialog.FileName);
 end;
 
 procedure TMainForm.ButtonSaveHexClick(Sender: TObject);
@@ -13980,7 +13947,20 @@ end;
 
 procedure TMainForm.HwTimerTimer(Sender: TObject);
 begin
-  PollProgrammer(False);
+  if (not AppReady) or OperationRunning then Exit;
+  if FStartupScanPending then
+  begin
+    FStartupScanPending := False;
+    PollProgrammer(False, True);
+  end
+  else PollProgrammer(False);
+  if FAutoPreparePending and ProgrammerPresent and ChipDetected and
+     (MPHexEditorEx.DataSize > 0) and (not ProdSettings.SNEnabled) and
+     (not StrictProductionMode) then
+  begin
+    FAutoPreparePending := False;
+    MenuSmartWritePreviewClick(nil);
+  end;
 end;
 
 //อธิบายบิตป้องกันการเขียนเป็นภาษาคน พร้อมบอกว่าช่วงไหนของชิปถูกล็อกอยู่
@@ -14857,7 +14837,7 @@ begin
          end;
 
          for i := 0 to (Item[j].ChildNodes.Count - 1) do
-           VendorItem.Add(NewItem(UTF16ToUTF8(Item[j].ChildNodes.Item[i].NodeName),
+           VendorItem.Add(NewItem(ChipSelectionKey(Item[j].ChildNodes.Item[i]),
                                   0, False, True, @MainForm.ChipClick, 0, '' )); //ชิป
        end;
      finally
@@ -14914,10 +14894,14 @@ begin
   CreateWorkspaceShell;
   CreateWorkflowBar;
   CreateTelemetryPanel;
+  CreateInlineWritePanel;
+  RefreshRecoveryList;
+  if StartupLoadNotice <> '' then
+    ShowInlineNotice('Some saved data could not be loaded: ' + StartupLoadNotice);
   LayoutLeftPanel;
   ApplyTheme(MenuDarkTheme.Checked);
   UpdateChipInfo;
-  SetWorkspaceMode(wmRepair);
+  SetWorkspaceMode(SavedWorkspace);
 
   //ค้นหาเครื่องโปรแกรมที่เสียบอยู่ตั้งแต่เปิดโปรแกรม แล้วเฝ้าดูต่อเป็นระยะ
   //CLI admission runs after FormCreate, so it must not inherit an earlier
@@ -14928,7 +14912,7 @@ begin
     HwTimer.Enabled := False
   else
   begin
-    PollProgrammer(True, True);
+    FStartupScanPending := True;
     HwTimer.Enabled := True;
   end;
 end;
@@ -15008,15 +14992,8 @@ begin
     end;
   end;
 
-  //The first-run doctor is deliberately delayed until the form is visible:
-  //its modal results window and driver guidance must never appear while LCL
-  //is still constructing controls.  It remains available from Options.
-  if (not CLIMode) and (not ConnectionDoctorSeen) then
-    MenuConnectionDoctorClick(nil);
-
   //The form resource points at the hidden SPI radio button.  Establish a
-  //visible Repair focus target after startup detection and any first-run
-  //dialog have finished, without stealing focus from an open chip chooser.
+  //visible Repair focus target as soon as the work window is ready.
   if (not CLIMode) and (Screen.ActiveForm = Self) and
      FTaskPrimary.Visible and FTaskPrimary.Enabled and
      FTaskPrimary.CanFocus then
@@ -15026,50 +15003,11 @@ end;
 //ลากไฟล์มาวางบนหน้าต่างแล้วโหลดเข้าเอดิเตอร์ได้เลย
 //รองรับทุกนามสกุลที่เมนูเปิดไฟล์รองรับ รวมถึง .hex และ S-record
 procedure TMainForm.FormDropFiles(Sender: TObject; const FileNames: array of string);
-var
-  Stream: TMemoryStream;
-  ErrMsg: string;
-  BlankByte: byte;
 begin
-  if OperationRunning then Exit;
-  if Length(FileNames) = 0 then Exit;
-
-  if DetectFormat(FileNames[0]) = ffBinary then
-  begin
-    MPHexEditorEx.LoadFromFile(FileNames[0]);
-    StatusBar.Panels.Items[2].Text := FileNames[0];
-    NoteBufferFromFile(FileNames[0]);
-    LogPrint(STR_FILE_LOADED + ExtractFileName(FileNames[0]));
-    Exit;
-  end;
-
-  if RadioSPI.Checked and (ComboSPICMD.ItemIndex = SPI_CMD_KB) then
-    BlankByte := $00
-  else
-    BlankByte := $FF;
-
-  Stream := TMemoryStream.Create;
-  try
-    if not LoadFirmware(FileNames[0], Stream, UIChipSize, BlankByte, ErrMsg) then
-    begin
-      LogPrint(ErrMsg);
-      Exit;
-    end;
-    if ErrMsg <> '' then LogPrint(ErrMsg);
-
-    Stream.Position := 0;
-    MPHexEditorEx.LoadFromStream(Stream);
-    StatusBar.Panels.Items[2].Text := FileNames[0];
-    NoteBufferFromFile(FileNames[0]);
-    LogPrint(STR_FILE_LOADED + ExtractFileName(FileNames[0]));
-  finally
-    Stream.Free;
-  end;
+  if OperationRunning or (Length(FileNames) = 0) then Exit;
+  LoadImageFile(FileNames[0]);
 end;
 
-//ปุ่มลัดของเส้นทางหลักมีอยู่ทั้งในคำใบ้บนปุ่มและตรงนี้ ผู้ใช้จึงทำงานซ้ำ ๆ
-//ได้โดยไม่ต้องเล็งไอคอนเล็ก ๆ ส่วน ESC ยังคงเป็นการขอยกเลิกแบบปลอดภัย:
-//คำสั่ง erase/program ที่ส่งไปแล้วจะรอจนชิปกลับมาว่างก่อนหยุด
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key = VK_ESCAPE then
@@ -15148,10 +15086,12 @@ begin
   //the operating system reclaim process-lifetime globals on this path: the
   //interactive cleanup order below assumes a fully running LCL session.
   if CLIMode then Exit;
+  HwTimer.Enabled := False;
+  SaveOptions(SettingsFile);
+  FreeAndNil(WriteGate);
   NVRAMancer.Free;
   MainForm.MPHexEditorEx.Free;
   RomF.Free;
-  SaveOptions(SettingsFile);
   ChipListFile.Free;
   ChipListFile2.Free;
   ChipListFile3.Free;
@@ -15313,6 +15253,10 @@ try
 
   //ทุกโปรโตคอลมาบรรจบที่นี่ เป็นจุดเดียวที่รู้ว่าการอ่านทั้งตัวสำเร็จแล้ว
   //จึงเป็นที่ที่ควรจำว่าชิปตัวนี้เปล่าหรือมีข้อมูล และบัฟเฟอร์มาจากชิป
+  if (RomF.Size > 0) and (RomF.Size <= High(cardinal)) then
+    if not PersistTrustedBackup(RomF, cardinal(RomF.Size)) then Exit;
+  if not CLIMode then
+    ShowInlineNotice('Read complete. Saved to ' + LastBackupFileName);
   RememberChipContent(RomF);
   BufferSource := bsChip;
   BufferSourceName := CurrentICParam.Name;
@@ -15925,26 +15869,33 @@ begin
   end;
 end;
 
+{$I workflowui.inc}
+
 function ConfirmSmartWritePreview(const Preview: string;
   HasDestructiveSteps: boolean; AllowPrompt: boolean = True): boolean;
-var
-  Text: string;
 begin
-  Result := True;
   LogPrint('--- Smart Write plan preview ---');
   LogPreviewText(Preview);
-  if CLIMode or (not AllowPrompt) then Exit;
-
-  if SmartWritePlanOnly or (not HasDestructiveSteps) then
+  if CLIMode or (not AllowPrompt) then Exit(True);
+  if WriteGate = nil then WriteGate := TInlineWriteGate.Create;
+  Result := WriteGate.Present(MainForm.CurrentWriteContext, InlinePlanIdentity,
+    not SmartWritePlanOnly);
+  if Result then
   begin
-    MessageDlg(STR_SMART_PREVIEW_TITLE, Preview, mtInformation, [mbOK], 0);
-    Exit;
+    InlineNotice := 'Writing. A backup is saved; verification runs automatically.';
+    InlinePlanText := Preview;
+  end
+  else
+  begin
+    InlinePlanText := Preview;
+    if CommitInlineWrite then
+      InlineNotice := 'The chip or setup changed. Review the updated plan and press Write.'
+    else
+      InlineNotice := 'Ready. Review the plan below; Write starts the operation.';
+    PreparedSerial := CurrentSerial;
+    PreparedSerialContext := MainForm.CurrentWriteContext;
   end;
-
-  Text := Preview + LineEnding + STR_SMART_PREVIEW_GO;
-  Result := MessageDlg(STR_SMART_PREVIEW_TITLE, Text, mtWarning,
-                       [mbYes, mbNo], 0) = mrYes;
-  if not Result then LogPrint(STR_SMART_PREVIEW_STOP);
+  MainForm.UpdateInlineWrite;
 end;
 
 procedure TMainForm.MenuSmartWritePreviewClick(Sender: TObject);
@@ -15977,7 +15928,6 @@ var
   Request: TOperationRequest;
   Token: TCancellationToken;
   Adapter: TSPI25NORAdapter;
-  Executor: TNORPlanExecutor;
   Outcome: TOperationOutcome;
   Bridge: TNORUIBridge;
   Digest: TSHA256Digest;
@@ -15989,6 +15939,8 @@ var
   ThisTimeout: cardinal;
   Preview: string;
   JournalHeader: TJournalHeader;
+  Job: TPreparedNORWrite;
+  WasPreparedOnly: boolean;
 
   procedure ReleasePreflightSession;
   begin
@@ -16050,8 +16002,8 @@ var
 
   procedure ExecutePlan;
   begin
-    Outcome := Executor.ExecuteBound(Request, Plan, Geometry, CurrentBytes,
-      Token);
+    Outcome := Job.Execute(Adapter, Job.Context, ExecutorOptions,
+      Token, @Bridge.Receive, @Bridge.CommitEvidence);
   end;
 
 begin
@@ -16062,15 +16014,10 @@ begin
   //เฟิร์มแวร์ ปุ่ม Write ปกติคือเส้นทางที่ถูกต้องและตรวจกลับทุกไบต์ให้เอง
   if NVRAMancer.Current_HW = CHW_EZP then
   begin
-    OpBegin(opkWrite);
-    OpFail('Smart write is not available through the EZP2023+: its firmware ' +
-      'only accepts a whole-chip image. Use ordinary Write; it still reads ' +
-      'the entire chip back and verifies every byte.');
+    ButtonWriteClick(Sender);
     Exit;
   end;
 
-  //ตระกูลที่ลบไม่ได้ (24Cxx, 93xx, 95xx) มีตัวจัดการของตัวเอง: ไม่มีขั้นลบ
-  //แผนจึงเป็นแค่ "เขียนเฉพาะหน้าที่ต่าง แล้วตรวจทุกหน้าที่แตะ"
   if IsEEPROMSmartWriteTarget then
   begin
     SmartWriteEEPROM(Sender);
@@ -16081,7 +16028,9 @@ begin
   //FillChar ห้ามใช้กับเรคคอร์ดที่มีสตริง (ดูคำอธิบายที่จุดเดียวกันใน
   //ButtonWriteClick)
   CurrentSerial := Default(TSerialAllocation);
-  CurrentSerialValid := False;
+  if (not CLIMode) and (PreparedSerialContext = CurrentWriteContext) then
+    CurrentSerial := PreparedSerial;
+  CurrentSerialValid := CurrentSerial.Valid;
   CurrentSerialReserved := False;
   LastChipUID := '';
   LastProgramCRC := BufferCRC32;
@@ -16094,7 +16043,8 @@ begin
   PatchStream := nil;
   Token := nil;
   Adapter := nil;
-  Executor := nil;
+  Job := nil;
+  WasPreparedOnly := False;
   Bridge := TNORUIBridge.Create;
   CurrentBytes := nil;
   PatchBytes := nil;
@@ -16404,10 +16354,51 @@ begin
         end;
     end;
 
-    if not BuildNORDifferentialPlan(CurrentBytes, PatchBytes, PatchStart,
-                                    Geometry, Plan, Err) then
+    Request.Chip.Name := CurrentICParam.Name;
+    Request.Chip.JedecID :=
+      IntToHex(PreflightID.ID9FH[0], 2) +
+      IntToHex(PreflightID.ID9FH[1], 2) +
+      IntToHex(PreflightID.ID9FH[2], 2);
+    Request.Chip.UniqueID := LastChipUID;
+    Request.Chip.Capacity := ChipSize;
+    Request.Policy.RequireTrustedBackup := True;
+    Request.Policy.RequireStableIdentity := True;
+    Request.Policy.RequireFullVerify := True;
+    Request.Policy.RequireEvidenceCommit :=
+      StrictProductionMode or (ProdSettings.ProdLogFile <> '');
+    Request.Policy.PreserveOutsideRange := True;
+
+    //The immutable plan owns all bytes it may program, while CurrentBytes is
+    //retained through execution so the reopened session can prove that the
+    //same complete preimage is still connected before any WREN.
+    if RecoveryRequestedPath <> '' then
     begin
-      OpFail('cannot construct the preservation-aware write plan: ' + Err);
+      if not PrepareRecovery(RecoveryRequestedPath, Request, Geometry,
+        CurrentBytes, CurrentWriteContext, Job, JournalHeader, Err) then
+      begin
+        OpFail('cannot prepare recovery: ' + Err);
+        Exit;
+      end;
+      Request := Job.Request;
+      LastBackupFileName := JournalHeader.BackupPath;
+      PatchBytes := Job.Patch;
+      PatchStart := 0;
+      PatchSize := Length(PatchBytes);
+      LastProgramCRC := UpdateCRC32($FFFFFFFF, @PatchBytes[0], Length(PatchBytes));
+    end
+    else if not TPreparedNORWrite.Prepare(Request, Geometry, CurrentBytes,
+      PatchBytes, CurrentWriteContext, Job, Err) then
+    begin
+      OpFail('cannot prepare the immutable write job: ' + Err);
+      Exit;
+    end;
+    Plan := Job.Plan;
+    if not WriteInputIdentity(CurrentBytes, PatchBytes,
+      NORGeometryIdentity(Geometry) + Request.Chip.JedecID + ':' +
+      Request.Chip.UniqueID + ':' + IntToStr(Request.Target.Address),
+      InlinePlanIdentity, Err) then
+    begin
+      OpFail('cannot identify the prepared plan: ' + Err);
       Exit;
     end;
     PlanBuilt := True;
@@ -16422,12 +16413,16 @@ begin
                                     NORPlanHasDestructiveSteps(Plan),
                                     Sender <> ComboItem1) then
     begin
-      OpCancel;
+      WasPreparedOnly := True;
       Exit;
     end;
     //โหมดดูแผนอย่างเดียวจบตรงนี้ ก่อนด่านป้องกันและก่อน UnlockCurrentSPI25
     //ซึ่งเขียน status register จริง แผนถูกแสดงครบแล้ว และชิปยังไม่ถูกแตะ
-    if SmartWritePlanOnly then Exit;
+    if SmartWritePlanOnly then
+    begin
+      WasPreparedOnly := True;
+      Exit;
+    end;
 
     if NORPlanHasDestructiveSteps(Plan) then
     begin
@@ -16520,23 +16515,6 @@ begin
       Exit;
     end;
 
-    Request.Chip.Name := CurrentICParam.Name;
-    Request.Chip.JedecID :=
-      IntToHex(PreflightID.ID9FH[0], 2) +
-      IntToHex(PreflightID.ID9FH[1], 2) +
-      IntToHex(PreflightID.ID9FH[2], 2);
-    Request.Chip.UniqueID := LastChipUID;
-    Request.Chip.Capacity := ChipSize;
-    Request.Policy.RequireTrustedBackup := True;
-    Request.Policy.RequireStableIdentity := True;
-    Request.Policy.RequireFullVerify := True;
-    Request.Policy.RequireEvidenceCommit :=
-      StrictProductionMode or (ProdSettings.ProdLogFile <> '');
-    Request.Policy.PreserveOutsideRange := True;
-
-    //The immutable plan owns all bytes it may program, while CurrentBytes is
-    //retained through execution so the reopened session can prove that the
-    //same complete preimage is still connected before any WREN.
     PatchBytes := nil;
     FreeAndNil(Trusted);
     FreeAndNil(PatchStream);
@@ -16556,42 +16534,22 @@ begin
     //และเราจดแฮชของมันไว้เพื่อให้รู้ทีหลังว่ามันยังเป็นไฟล์เดิมอยู่หรือเปล่า
     //สมุดที่ชี้ไปยังไฟล์สำรองที่ยังไม่มีจริงจะถูกปฏิเสธตอนกู้ ซึ่งถูกต้อง
     //แต่เสียเวลาเปล่า เพราะรู้ได้ตั้งแต่ตอนนี้
-    ActiveWriteJournal := '';
-    if LastBackupFileName <> '' then
+    ActiveWriteJournal := RecoveryRequestedPath;
+    if (ActiveWriteJournal = '') and NORPlanHasDestructiveSteps(Plan) then
     begin
-      JournalHeader := Default(TJournalHeader);
-      JournalHeader.ProgramVersion := PROX_VERSION;
-      JournalHeader.StartedUtc :=
-        FormatDateTime('yyyy-mm-dd"T"hh:nn:ss"Z"', LocalTimeToUniversal(Now));
-      JournalHeader.ChipName := CurrentICParam.Name;
-      JournalHeader.ChipJedecID := CurrentICParam.ID;
-      JournalHeader.ChipCapacity := ChipSize;
-      JournalHeader.ImageSha256 := LowerCase(Request.ImageHash);
-      JournalHeader.Address := PatchStart;
-      JournalHeader.Length := PatchSize;
-      JournalHeader.BackupPath := LastBackupFileName;
-      if SHA256File(LastBackupFileName, Digest, Err) then
-        JournalHeader.BackupSha256 := LowerCase(DigestToHex(Digest))
-      else
-        JournalHeader.BackupSha256 := '';
-
-      //สมุดที่เปิดไม่ได้ไม่ใช่เหตุให้ล้มงาน งานเขียนที่ถูกต้องทุกอย่างไม่ควร
-      //ถูกปฏิเสธเพราะจดบันทึกไม่ได้ แต่ต้องบอก เพราะแปลว่าถ้าสายหลุด
-      //จะกู้ต่อไม่ได้ ต้องเขียนใหม่ทั้งตัว
-      if BeginJournal(LastBackupFileName + '.journal', JournalHeader, Err) then
-        ActiveWriteJournal := LastBackupFileName + '.journal'
-      else
-        LogPrint('write journal: ' + Err +
-                 ' -- an interrupted write will have to be redone in full');
+      if not SaveRecoveryInputs(LastBackupFileName, Job, PROX_VERSION,
+        ActiveWriteJournal, Err) then
+      begin
+        OpFail('the recovery inputs could not be saved: ' + Err);
+        Exit;
+      end;
     end;
 
     Token := TCancellationToken.Create;
     ActiveNORCancellation := Token;
     try
       Adapter := TSPI25NORAdapter.Create(NVRAMancer.Programmer, Config);
-      Executor := TNORPlanExecutor.Create(Adapter, @Bridge.Receive, nil,
-                                          @Bridge.CommitEvidence);
-      ExecutorOptions := Executor.Options;
+      ExecutorOptions := DefaultNORExecutorOptions;
       ExecutorOptions.ProgramTimeoutMs := PageProgTimeout;
       ExecutorOptions.EraseTimeoutMs := 1;
       for GeometryIndex := 0 to High(Geometry.Blocks) do
@@ -16601,7 +16559,6 @@ begin
           ExecutorOptions.EraseTimeoutMs := ThisTimeout;
       end;
       ExecutorOptions.StatusPollDelayMs := 1;
-      Executor.Options := ExecutorOptions;
 
       //The transactional executor always runs on the device worker so the GUI
       //can deliver cancellation while a long erase/program is being drained.
@@ -16634,6 +16591,11 @@ begin
               DeleteFile(ActiveWriteJournal);
               ActiveWriteJournal := '';
             end;
+            RecoveryRequestedPath := '';
+            InlinePlanText := '';
+            if not CLIMode then
+              ShowInlineNotice('Write complete. Both verification sessions passed. Backup: ' +
+                LastBackupFileName);
             LogPrint(STR_DONE);
           end;
         osCancelled:
@@ -16659,14 +16621,6 @@ begin
     //รอบนี้จบแล้ว
     ActiveWriteJournal := '';
     ActiveNORCancellation := nil;
-    try
-      Executor.Free;
-    except
-      on E: Exception do
-        if not LastOp.Failed then
-          OpFail('executor cleanup raised ' + E.ClassName + ': ' + E.Message);
-    end;
-    Executor := nil;
     try
       Adapter.Free;
     except
@@ -16695,7 +16649,7 @@ begin
 
     //Failures before the engine's evidence phase are logged here.  A success
     //already committed by the engine must never be appended a second time.
-    if (not SmartWritePlanOnly) and (ProdSettings.ProdLogFile <> '') and
+    if (not WasPreparedOnly) and (not SmartWritePlanOnly) and (ProdSettings.ProdLogFile <> '') and
        ((Bridge = nil) or (not Bridge.EvidenceCommitted)) then
       WriteProdLogEntry(MPHexEditorEx.DataSize, LastProgramCRC, LastChipUID);
 
@@ -16708,6 +16662,7 @@ begin
                  E.Message);
     end;
     Bridge := nil;
+    Job.Free;
     Trusted.Free;
     PatchStream.Free;
     CurrentBytes := nil;
@@ -16716,6 +16671,7 @@ begin
     SetProgressPos(0);
     LogPrint(STR_OP_RESULT + OpSummary);
     if ControlsLocked then UnlockControl;
+    if not CLIMode then RefreshRecoveryList;
   end;
 end;
 
@@ -16732,10 +16688,11 @@ var
   Request: TOperationRequest;
   Outcome: TOperationOutcome;
   Plan: TEEPROMPlan;
-  PlanBuilt, ControlsLocked, Opened, BusEntered: boolean;
+  PlanBuilt, ControlsLocked, Opened, BusEntered, WasPreparedOnly: boolean;
+  SessionBus: TEEPROMBus;
   Snapshot, SnapshotConfirm, PatchStream: TMemoryStream;
   Current, Patch: TBytes;
-  ChipSize, PageSize, PatchStart, PatchSize, WriteCycleMs: cardinal;
+  ChipSize, PageSize, PatchStart, PatchSize, WriteCycleMs, SessionVoltage: cardinal;
   DevAddr: byte;
   Parsed: QWord;
   Err: string;
@@ -16752,7 +16709,9 @@ begin
   if OperationRunning then Exit;
   OpBegin(opkWrite);
   CurrentSerial := Default(TSerialAllocation);
-  CurrentSerialValid := False;
+  if (not CLIMode) and (PreparedSerialContext = CurrentWriteContext) then
+    CurrentSerial := PreparedSerial;
+  CurrentSerialValid := CurrentSerial.Valid;
   CurrentSerialReserved := False;
   LastChipUID := '';
   LastProgramCRC := BufferCRC32;
@@ -16766,6 +16725,7 @@ begin
   Current := nil;
   Patch := nil;
   PlanBuilt := False;
+  WasPreparedOnly := False;
   ControlsLocked := False;
   Opened := False;
   BusEntered := False;
@@ -17010,15 +16970,26 @@ begin
       [Plan.ChangedBytes, EEPROMPlanCountKind(Plan, epsWrite),
        Plan.VerifyBytes]));
 
+    if not WriteInputIdentity(Current, Patch,
+      IntToStr(ChipSize) + ':' + IntToStr(PageSize) + ':' + IntToStr(PatchStart),
+      InlinePlanIdentity, Err) then
+    begin
+      OpFail('cannot identify the EEPROM write plan: ' + Err);
+      Exit;
+    end;
     Preview := EEPROMPlanPreviewText(Plan, WriteCycleMs);
     if not ConfirmSmartWritePreview(
       Preview, EEPROMPlanCountKind(Plan, epsWrite) > 0,
       Sender <> ComboItem1) then
     begin
-      OpCancel;
+      WasPreparedOnly := True;
       Exit;
     end;
-    if SmartWritePlanOnly then Exit;
+    if SmartWritePlanOnly then
+    begin
+      WasPreparedOnly := True;
+      Exit;
+    end;
 
     if EEPROMPlanCountKind(Plan, epsWrite) > 0 then
     begin
@@ -17033,6 +17004,32 @@ begin
       Exit;
     end;
 
+    // Release preparation before the session owner opens, proves the snapshot,
+    // writes, closes and independently reopens for verification.
+    if RadioI2C.Checked then
+    begin
+      SessionBus := ebI2C;
+      NVRAMancer.Programmer.I2CDeinit;
+    end
+    else if RadioMW.Checked then
+    begin
+      SessionBus := ebMicroWire;
+      NVRAMancer.Programmer.MWDeinit;
+    end
+    else
+    begin
+      SessionBus := ebSPI;
+      ExitProgMode25;
+    end;
+    BusEntered := False;
+    SessionVoltage := 0;
+    if NVRAMancer.Programmer.SupportsTargetVoltage then
+      SessionVoltage := NVRAMancer.Programmer.GetTargetVoltageMv;
+    NVRAMancer.Programmer.DevClose;
+    Opened := False;
+    Device := TEEPROMSession.Create(Device, NVRAMancer.Programmer,
+      SessionBus, SetSPISpeed(0), SessionVoltage,
+      PageSize, Current);
     Token := TCancellationToken.Create;
     ActiveNORCancellation := Token;
     Executor := TEEPROMPlanExecutor.Create(Device);
@@ -17050,6 +17047,9 @@ begin
         osSucceeded:
           begin
             OpProgress(PatchSize, PatchSize);
+            InlinePlanText := '';
+            if not CLIMode then ShowInlineNotice(
+              'Write complete. Both verification sessions passed. Backup: ' + LastBackupFileName);
             LogPrint(STR_DONE);
           end;
         osCancelled:
@@ -17095,7 +17095,7 @@ begin
       end;
     if Opened then NVRAMancer.Programmer.DevClose;
 
-    if (not SmartWritePlanOnly) and (ProdSettings.ProdLogFile <> '') and
+    if (not WasPreparedOnly) and (not SmartWritePlanOnly) and (ProdSettings.ProdLogFile <> '') and
        (MPHexEditorEx.DataSize > 0) then
       WriteProdLogEntry(MPHexEditorEx.DataSize, LastProgramCRC, LastChipUID);
 
@@ -17198,19 +17198,7 @@ try
   ApplySFDPInfo(Info);
 
   //ชิปที่ไม่มีในตารางใด ๆ เก็บไว้ใช้รอบหน้าได้ ไม่ต้องมาตรวจใหม่ทุกครั้ง
-  if not CLIMode then
-    if MessageDlg('NVRAMancer', Format(STR_CHIPSAVE_Q, [ChipListFile3Name]),
-                  mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-    begin
-      NewName := CurrentICParam.Name;
-      if InputQuery('NVRAMancer', STR_CHIPSAVE_NONAME, NewName) then
-        if Trim(NewName) <> '' then
-        begin
-          CurrentICParam.Name := Trim(NewName);
-          LabelChipName.Caption := CurrentICParam.Name;
-          SaveCurrentChipToUserList(CurrentICParam.Name);
-        end;
-    end;
+  ShowInlineNotice('Chip geometry loaded. Save this profile from the Chip menu when needed.');
 
 finally
   LogPrint(STR_OP_RESULT + OpSummary);
@@ -17284,6 +17272,9 @@ begin
 
     //Recovery backups are an admission requirement, not a user preference.
     TDOMElement(ParentNode).SetAttribute('auto_backup', '1');
+
+    TDOMElement(ParentNode).SetAttribute('workspace', IntToStr(Ord(SavedWorkspace)));
+    TDOMElement(ParentNode).SetAttribute('backup_directory', WorkBackupDirectory);
 
     TDOMElement(ParentNode).SetAttribute('connection_doctor_seen',
       BoolToStr(ConnectionDoctorSeen, '1', '0'));
@@ -17476,6 +17467,15 @@ begin
       //Migrate older profiles that allowed this safety gate to be disabled.
       MainForm.MenuAutoBackup.Checked := True;
 
+      if Node.Attributes.GetNamedItem('workspace') <> nil then
+      begin
+        OptVal := UTF16ToUTF8(Node.Attributes.GetNamedItem('workspace').NodeValue);
+        if (StrToIntDef(OptVal, -1) >= Ord(Low(TWorkspaceMode))) and
+           (StrToIntDef(OptVal, -1) <= Ord(High(TWorkspaceMode))) then
+          SavedWorkspace := TWorkspaceMode(StrToInt(OptVal));
+      end;
+      if Node.Attributes.GetNamedItem('backup_directory') <> nil then
+        BackupRoot := UTF16ToUTF8(Node.Attributes.GetNamedItem('backup_directory').NodeValue);
       if Node.Attributes.GetNamedItem('connection_doctor_seen') <> nil then
         ConnectionDoctorSeen :=
           Node.Attributes.GetNamedItem('connection_doctor_seen').NodeValue = '1';

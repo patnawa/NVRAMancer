@@ -477,7 +477,7 @@ var
   Pending: TPendingFailure;
   R: TEEPROMIOResult;
   Opened, Initialized, CancelAfterDrain: boolean;
-  StepIndex, ByteIndex: SizeInt;
+  StepIndex, ByteIndex, VerifyIndex: SizeInt;
   DoneBytes, TotalBytes: QWord;
   ReadBack: TBytes;
   Err, EvidenceError: string;
@@ -609,7 +609,7 @@ begin
           State.AdvanceTo(opPlanning);
           State.AdvanceTo(opExecuting);
           DoneBytes := 0;
-          TotalBytes := Plan.WriteBytes + Plan.VerifyBytes;
+          TotalBytes := Plan.WriteBytes + 2 * Plan.VerifyBytes;
           State.ReportProgress(0, TotalBytes);
 
           for StepIndex := 0 to High(Plan.Steps) do
@@ -707,6 +707,68 @@ begin
         begin
           State.AdvanceTo(opVerifying);
           State.MarkPhysicalVerifyCompleted;
+
+          // A close/reopen before programming proves the preimage. This second
+          // session proves the programmed result independently of driver state.
+          // Every expected byte belongs to the immutable accepted plan.
+          PerformCleanup;
+          if (Pending.Code = oeNone) and State.CancellationPending then
+            CancelAfterDrain := True;
+          if (Pending.Code = oeNone) and (not CancelAfterDrain) then
+          begin
+            R := FDevice.Open;
+            if not R.Success then
+              FailFromIO('verification device reopen', R, oeOpenFailed,
+                0, False, False)
+            else
+              Opened := True;
+            if Pending.Code = oeNone then
+            begin
+              R := FDevice.Initialize;
+              if not R.Success then
+                FailFromIO('verification bus initialization', R,
+                  oeBusInitFailed, 0, False, False)
+              else
+                Initialized := True;
+            end;
+            if Pending.Code = oeNone then
+              for VerifyIndex := 0 to High(Plan.Steps) do
+              begin
+                if Plan.Steps[VerifyIndex].Kind <> epsVerify then Continue;
+                if State.CancellationPending then
+                begin
+                  CancelAfterDrain := True;
+                  Break;
+                end;
+                ReadBack := nil;
+                R := FDevice.ReadPage(Plan.Steps[VerifyIndex].Address,
+                  Plan.Steps[VerifyIndex].Length, ReadBack);
+                if not R.Success then
+                  FailFromIO('fresh-session verify read', R, oeTransport,
+                    Plan.Steps[VerifyIndex].Address, True, False)
+                else if (R.Transferred <> Plan.Steps[VerifyIndex].Length) or
+                        (Length(ReadBack) <> Plan.Steps[VerifyIndex].Length) then
+                  SetPending(Pending, oeShortTransfer,
+                    'fresh-session verification returned an incomplete block',
+                    ddKnownSafe, Plan.Steps[VerifyIndex].Address, True)
+                else
+                  for ByteIndex := 0 to High(ReadBack) do
+                    if ReadBack[ByteIndex] <>
+                       Plan.Steps[VerifyIndex].Data[ByteIndex] then
+                    begin
+                      SetPending(Pending, oeVerifyMismatch,
+                        'chip differs from the accepted image in a fresh session',
+                        ddKnownSafe,
+                        Plan.Steps[VerifyIndex].Address + QWord(ByteIndex), True);
+                      Break;
+                    end;
+                if Pending.Code <> oeNone then Break;
+                Inc(DoneBytes, Plan.Steps[VerifyIndex].Length);
+                State.ReportProgress(DoneBytes, TotalBytes);
+              end;
+            if (Pending.Code = oeNone) and (not CancelAfterDrain) then
+              State.MarkFreshSessionVerifyCompleted;
+          end;
         end;
 
         if Ord(State.Outcome.Phase) < Ord(opQuiescing) then

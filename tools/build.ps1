@@ -97,7 +97,7 @@ if ($python) {
     $(if (Test-Path "$root\chiplist-imsprog.xml") { "$root\chiplist-imsprog.xml" })
   if ($LASTEXITCODE -ne 0) { Die "the chip tables have errors" }
 } else {
-  Write-Host "    python not found, skipped" -ForegroundColor Yellow
+  Die "Python is required to validate the chip tables and project metadata"
 }
 
 # --- tests, they need no hardware ---
@@ -123,7 +123,7 @@ function Run-Suite($name, $dir, $files, [switch]$WithSfdpCorpus) {
   }
   Push-Location $dir
   & "$fpcBin\fpc.exe" -Twin32 -Pi386 -Mobjfpc -Sh "$name.lpr" | Out-Null
-  if (-not (Test-Path "$dir\$name.exe")) { Pop-Location; Die "$name did not compile" }
+  if (($LASTEXITCODE -ne 0) -or (-not (Test-Path "$dir\$name.exe"))) { Pop-Location; Die "$name did not compile" }
   & "$dir\$name.exe"
   $code = $LASTEXITCODE
   Pop-Location
@@ -329,7 +329,24 @@ $runnerDir = Join-Path $env:TEMP "aspx-tests-operation-runner"
 Run-Suite "operationrunner_tests" $runnerDir @(
   "$root\tests\operationrunner_tests.lpr", "$root\tests\virtualspi25.pas",
   "$root\software\operationmodel.pas", "$root\software\norplanner.pas",
-  "$root\software\norengine.pas", "$root\software\operationrunner.pas")
+  "$root\software\norengine.pas", "$root\software\writeworkflow.pas",
+  "$root\software\operationrunner.pas")
+
+# Prepared job ownership, explicit commit, durable recovery, and real EEPROM sessions.
+$workflowDir = Join-Path $env:TEMP "aspx-tests-write-workflow"
+Run-Suite "writeworkflow_tests" $workflowDir @(
+  "$root\tests\writeworkflow_tests.lpr", "$root\tests\virtualspi25.pas",
+  "$root\tests\virtualeeprom.pas", "$root\software\operationmodel.pas",
+  "$root\software\norplanner.pas", "$root\software\norengine.pas",
+  "$root\software\writeworkflow.pas", "$root\software\recoveryworkflow.pas",
+  "$root\software\writejournal.pas", "$root\software\prodcrypto.pas",
+  "$root\software\prodevidence.pas", "$root\software\eepromengine.pas",
+  "$root\software\eepromsession.pas", "$root\software\basehw.pas",
+  "$root\software\electricalpreflight.pas")
+
+$catalogDir = Join-Path $env:TEMP "aspx-tests-chip-catalog"
+Run-Suite "chipcatalog_tests" $catalogDir @(
+  "$root\tests\chipcatalog_tests.lpr", "$root\software\chipcatalog.pas")
 
 # SPI NAND geometry and bad-block-aware planning: the arithmetic that decides
 # whether a bad block is ever touched.
@@ -420,7 +437,7 @@ Step "building the tools"
 foreach ($tool in "ezpsmoke", "ezpwrite", "ezppowercheck") {
   & "$fpcBin\fpc.exe" -Twin32 -Pi386 -Mobjfpc -Sh "-Fu$root\software" `
     "$root\tools\$tool.lpr" | Out-Null
-  if (-not (Test-Path "$root\tools\$tool.exe")) { Die "$tool did not compile" }
+  if (($LASTEXITCODE -ne 0) -or (-not (Test-Path "$root\tools\$tool.exe"))) { Die "$tool did not compile" }
   Write-Host "    $tool.exe"
 }
 
@@ -474,6 +491,12 @@ if ($LASTEXITCODE -ne 0) { Die "the build failed" }
 $exe = "$root\software\NVRAMancer.exe"
 if (-not (Test-Path $exe)) { Die "no executable was produced" }
 Write-Host ("    {0:N0} bytes" -f (Get-Item $exe).Length)
+
+# Keep a double-clicked development executable on the validated catalogs.
+# User settings and the separate chiplist-user.xml are never overwritten here.
+foreach ($catalogName in @('chiplist.xml', 'chiplist-flashrom.xml', 'chiplist-ezp.xml', 'chiplist-imsprog.xml')) {
+  Copy-Item -LiteralPath (Join-Path $root $catalogName) -Destination (Join-Path "$root\software" $catalogName) -Force
+}
 
 if (-not $Release) {
   Remove-Item -LiteralPath $headlessDir -Recurse -Force

@@ -121,8 +121,8 @@
 	  <EN25S40_1.8V id="1C3813" otp="256" page="256" size="524288"/>
       <EN25Q80A id="1C3014" otp="4080" page="256" size="1048576"/>
       <EN25Q16A id="1C3015" otp="8176" page="256" size="2097152"/>
-      <EN25Q32A id="1C3016" otp="16368" page="256" size="4194304"/>
-      <EN25Q32A id="1C7016" otp="16368" page="256" size="4194304"/>
+      <EN25Q32A-1C3016 alias="EN25Q32A" id="1C3016" otp="16368" page="256" size="4194304"/>
+      <EN25Q32A-1C7016 alias="EN25Q32A" id="1C7016" otp="16368" page="256" size="4194304"/>
       <EN25Q32B id="1C3016" otp="16368" page="256" size="4194304"/>
       <EN25Q64 id="1C3017" otp="32752" page="256" size="8388608"/>
       <EN25Q128 id="1C3018" otp="65520" page="256" size="16777216"/>
@@ -175,7 +175,7 @@
       <P25D80SH id="856014" page="256" size="1048576"/>
   </PUYA>
 	<TERRA>
-	  <TS25L512A id="373010" page="256" size="65536"/>
+	  <TS25L512A-373010 alias="TS25L512A" id="373010" page="256" size="65536"/>
 	  <TS25L010A id="373011" page="256" size="131072"/>
 	  <TS25L020A id="373012" page="256" size="262144"/>
 	  <TS25L16AP id="202015" page="256" size="2097152"/>
@@ -813,8 +813,8 @@
 	  <W25Q128JW_1.8V id="EF6018" page="256" size="16777216"/>
 	  <W25Q128FW_1.8V id="EF6018" page="256" size="16777216"/>
 	  <W25Q256FV id="EF4019" page="256" size="33554432"/>
-	  <W25Q256JV id="EF4019" page="256" size="33554432"/>
-	  <W25Q256JV id="EF7019" page="256" size="33554432"/>
+	  <W25Q256JV-EF4019 alias="W25Q256JV" id="EF4019" page="256" size="33554432" vcc="3.3" vcc_source="https://www.winbond.com/export/sites/winbond/product-selection-guide/file/2025-Product-Selection-Guide-Winbond-Code-Storage-Flash-Memory.pdf"/>
+	  <W25Q256JV-EF7019 alias="W25Q256JV" id="EF7019" page="256" size="33554432" vcc="3.3" vcc_source="https://www.winbond.com/export/sites/winbond/product-selection-guide/file/2025-Product-Selection-Guide-Winbond-Code-Storage-Flash-Memory.pdf"/>
       <W25Q16 id="EF4015" page="256" size="2097152"/>
       <W25Q16BV id="EF4015" page="256" size="2097152"/>
       <W25Q16CL id="EF4015" page="256" size="2097152"/>
@@ -836,7 +836,7 @@
       <W25Q64BV id="EF4017" page="256" size="8388608" vcc="3.3"/>
       <W25Q64CV id="EF4017" page="256" size="8388608" vcc="3.3"/>
       <W25Q64FV id="EF4017" page="256" size="8388608" vcc="3.3"/>
-	  <W25Q64JV id="EF4017" page="256" size="8388608" vcc="3.3"/>
+	  <W25Q64JV id="EF4017" page="256" size="8388608" vcc="3.3" vcc_source="https://www.winbond.com/export/sites/winbond/product-selection-guide/file/2025-Product-Selection-Guide-Winbond-Code-Storage-Flash-Memory.pdf"/>
 	  <W25Q64JW-IQ_1.8V id="EF6017" page="256" size="8388608"/>
 	  <W25Q64JW-IM_1.8V id="EF8017" page="256" size="8388608"/>
       <W25Q64FW_1.8V id="EF6017" page="256" size="8388608"/>
@@ -890,10 +890,10 @@
 	  <W74M12JWSSIQ_1.8V id="EF6018" page="256" size="16777216"/>
 	  <W74M12JWZPIQ_1.8V id="EF6018" page="256" size="16777216"/>
 	  <W74M12JWZEIQ_1.8V id="EF6018" page="256" size="16777216"/>
-      <W25Q256JV-IM-JM id="EF7019" page="256" size="33554432"/>
-      <W25Q256JV-IQ-JQ id="EF4019" page="256" size="33554432"/>
-      <W25Q64JV-IM-JM id="EF7017" page="256" size="8388608"/>
-      <W25Q64JV-IQ-JQ id="EF4017" page="256" size="8388608" vcc="3.3"/>
+      <W25Q256JV-IM-JM id="EF7019" page="256" size="33554432" vcc="3.3" vcc_source="https://www.winbond.com/export/sites/winbond/product-selection-guide/file/2025-Product-Selection-Guide-Winbond-Code-Storage-Flash-Memory.pdf"/>
+      <W25Q256JV-IQ-JQ id="EF4019" page="256" size="33554432" vcc="3.3" vcc_source="https://www.winbond.com/export/sites/winbond/product-selection-guide/file/2025-Product-Selection-Guide-Winbond-Code-Storage-Flash-Memory.pdf"/>
+      <W25Q64JV-IM-JM id="EF7017" page="256" size="8388608" vcc="3.3" vcc_source="https://www.winbond.com/export/sites/winbond/product-selection-guide/file/2025-Product-Selection-Guide-Winbond-Code-Storage-Flash-Memory.pdf"/>
+      <W25Q64JV-IQ-JQ id="EF4017" page="256" size="8388608" vcc="3.3" vcc_source="https://www.winbond.com/export/sites/winbond/product-selection-guide/file/2025-Product-Selection-Guide-Winbond-Code-Storage-Flash-Memory.pdf"/>
       <W25Q01JV id="EF4021" page="256" size="134217728"/>
       <W25Q128JV-xM id="EF7018" page="256" size="16777216"/>
       <W25Q128JV-xQ id="EF4018" page="256" size="16777216"/>
@@ -956,7 +956,7 @@
            here with exactly the same id and size as the TERRA entries above.
            Nothing could ever reach the copies: picking by name takes the
            first match, and detecting by id finds the first match too. -->
-      <TS25L512A id="372010" page="256" size="65536"/>
+      <TS25L512A-372010 alias="TS25L512A" id="372010" page="256" size="65536"/>
       <TS25L16P id="372015" page="256" size="2097152"/>
     </ZEMPRO>
 	<Zbit>

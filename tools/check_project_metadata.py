@@ -289,6 +289,19 @@ def main() -> int:
 
         resources = parse_pascal_resourcestrings(read("software/msgstr.pas"))
         en_po_text = read("software/lang/en.po")
+        # lazres writes Pascal literals and decimal byte escapes. Verify the
+        # compiled English fallback whenever the translation source changes.
+        embedded = read("software/englishcatalog.lrs").split("[", 1)[1]
+        embedded_bytes = bytearray()
+        for token in re.findall(r"'(?:''|[^'])*'|#\d+", embedded):
+            if token.startswith("#"):
+                embedded_bytes.append(int(token[1:]))
+            else:
+                embedded_bytes.extend(token[1:-1].replace("''", "'").encode("latin1"))
+        if bytes(embedded_bytes).replace(b"\r\n", b"\n") != (
+            ROOT / "software/lang/en.po"
+        ).read_bytes().replace(b"\r\n", b"\n"):
+            failures.append("embedded English is stale: run lazres software/englishcatalog.lrs software/lang/en.po")
         catalog_resource_names = {
             name.lower()
             for name in re.findall(r"msgstr[.:](str_[A-Za-z0-9_]+)", en_po_text)

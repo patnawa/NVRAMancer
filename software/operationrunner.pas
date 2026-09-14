@@ -13,7 +13,7 @@ unit operationrunner;
 interface
 
 uses
-  SysUtils, operationmodel, norplanner, norengine;
+  SysUtils, operationmodel, norplanner, norengine, writeworkflow;
 
 type
   TNOROperationMode = (
@@ -351,7 +351,9 @@ function TNOROperationRunner.Execute(const Input: TNOROperationInput;
 var
   Snapshot: TBytes;
   Err, BackupError: string;
-  Executor: TNORPlanExecutor;
+  Job: TPreparedNORWrite;
+  PreparedRequest: TOperationRequest;
+  Context: string;
   PreviewState: TOperationStateMachine;
 begin
   Result := Default(TNOROperationResponse);
@@ -365,6 +367,7 @@ begin
     Exit;
   end;
 
+  Job := nil;
   try
 
     if not ValidateNORGeometry(Input.Geometry, Err) then
@@ -404,12 +407,17 @@ begin
         Result.Data := Snapshot;
         if Result.Outcome.Status <> osSucceeded then Exit;
 
-        if not BuildNORDifferentialPlan(Snapshot, Input.Patch,
-          Input.Operation.Target.Address, Input.Geometry, Result.Plan, Err) then
+        PreparedRequest := Input.Operation;
+        PreparedRequest.Chip.Capacity := Input.Geometry.ChipSize;
+        Context := Input.Operation.OperationID;
+        if Context = '' then Context := 'headless';
+        if not TPreparedNORWrite.Prepare(PreparedRequest, Input.Geometry,
+          Snapshot, Input.Patch, Context, Job, Err) then
         begin
           Result.Outcome := FailedOutcome(Input.Operation, oeInvalidPlan, Err);
           Exit;
         end;
+        Result.Plan := Job.Plan;
         Result.HasPlan := True;
 
         if Input.Mode = nomSmartPreview then
@@ -466,17 +474,12 @@ begin
           end;
         end;
 
-        Executor := TNORPlanExecutor.Create(FDevice, FOnEvent, FClock,
-          FEvidenceCommit);
-        try
-          Result.Outcome := Executor.ExecuteBound(Input.Operation, Result.Plan,
-            Input.Geometry, Snapshot, Token);
-        finally
-          Executor.Free;
-        end;
+        Result.Outcome := Job.Execute(FDevice, Context,
+          DefaultNORExecutorOptions, Token, FOnEvent, FEvidenceCommit, FClock);
       end;
     end;
   finally
+    Job.Free;
     InterlockedExchange(FExecuting, 0);
   end;
 end;

@@ -157,6 +157,8 @@ begin
     AppendStateDetail(Result.Detail, Context.StateDetail);
     SetCommand(Result.Primary, waScanProgrammer,
       STR_WORKSPACE_ACTION_SCAN_PROGRAMMER);
+    SetCommand(Result.Secondary, waOpenImage,
+      STR_WORKSPACE_ACTION_OPEN_FIRMWARE);
     SetCommand(Result.Tertiary, waOpenBench,
       STR_WORKSPACE_ACTION_OPEN_TECHNICAL);
     Exit;

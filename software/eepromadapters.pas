@@ -277,17 +277,7 @@ end;
 
 function TMWEEPROMAdapter.Initialize: TEEPROMIOResult;
 begin
-  // EWEN is session state on 93xx; it is undone exactly once in
-  // Deinitialize, which the engine guarantees to call.
-  //
-  // The flag goes up BEFORE the attempt on purpose: a short EWEN means some
-  // of the frame already reached the chip, so it may well be write-enabled.
-  // Marking it only on success would skip EWDS in cleanup and leave the part
-  // write-enabled on the socket for whatever the next tool does.
-  FWriteEnabled := True;
-  if UsbAspMW_Ewen(FAddrBitLen) <> FAddrBitLen + 3 then
-    Exit(EEPROMIOFailure(eioRejected,
-      'the MicroWire EEPROM did not accept EWEN'));
+  FWriteEnabled := False;
   Result := EEPROMIOSuccess;
 end;
 
@@ -302,6 +292,12 @@ begin
     Exit(EEPROMIOFailure(eioRejected,
       'MicroWire writes are two bytes at an even address'));
 
+  if not FWriteEnabled then
+  begin
+    FWriteEnabled := True;
+    if UsbAspMW_Ewen(FAddrBitLen) <> FAddrBitLen + 3 then
+      Exit(EEPROMIOFailure(eioRejected, 'the MicroWire EEPROM did not accept EWEN'));
+  end;
   Wrote := UsbAspMW_Write(FAddrBitLen, word(Address div 2), Data, 2);
   if Wrote <> 2 then
     Exit(EEPROMIOFailure(eioTransport,
