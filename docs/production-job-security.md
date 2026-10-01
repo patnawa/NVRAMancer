@@ -8,6 +8,20 @@ them to the same transactional Smart Write executor used by the application;
 an unimplemented or uncertain hardware capability remains an admission
 failure rather than being guessed.
 
+## Application rename and station configuration
+
+Asprogrammer PN 4.45.0.0 retains the `NVRAMancer/...` persisted format identifiers
+and HMAC domain strings shown below. They are protocol identifiers, independent
+of the executable name. Editing them invalidates authentication or parsing.
+
+The Windows application's production CLI reads the station's trusted key ID from
+`ASPROGRAMMER_PN_PROD_KEY_ID` and its hexadecimal HMAC key from
+`ASPROGRAMMER_PN_PROD_HMAC_KEY`. The key must encode at least 32 bytes.
+`--prod-key-env` must name `ASPROGRAMMER_PN_PROD_HMAC_KEY`; it cannot select an
+arbitrary variable. Update old station variable names and CLI arguments during
+upgrade: previous names are not aliases. Provision secrets through the station's
+protected configuration, never as command-line key values.
+
 ## Artifacts and invariants
 
 A production job is a versioned, canonical ASCII manifest. Version 1 has a

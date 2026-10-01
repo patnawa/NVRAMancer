@@ -1,7 +1,6 @@
 # Workspace, verification and recovery
 
-Version 4.44.0.0 follows the six priorities from the project
-review. The app opens its working window directly. Connection Doctor is an
+Asprogrammer PN opens its working window directly. Connection Doctor is an
 optional command; there is no automatic first-run modal. The chosen workspace
 and backup directory are saved. English is embedded in the executable and is
 the default when a language preference or optional catalog is missing. An
@@ -27,10 +26,20 @@ unknown or incompatible voltage, identity mismatch, and protection problems
 are reported in the workspace. Optional diagnostic and expert operations,
 including OTP and explicit erase tools, retain their own interactions.
 
+## Firmware import
+
+Intel HEX and Motorola S-record imports reject malformed records and data
+outside the selected chip capacity. A rejected import preserves the existing
+buffer; it does not silently load only the records that fit. Select the correct
+chip profile and resolve the image error before preparing a write.
+
 ## Backups and recovery
 
 The default Windows backup directory is
-`%LOCALAPPDATA%\Asprogrammer PN\backups`. **Open backups** opens that directory.
+`%LOCALAPPDATA%\Asprogrammer PN\backups` for fresh installations. An explicitly
+configured backup directory takes priority. Without one, an existing
+`%LOCALAPPDATA%\NVRAMancer\backups` directory remains the default after upgrade.
+**Open backups** opens the directory actually in use.
 Ordinary reads are saved there too; the write workflow still establishes its
 own repeated-read trusted snapshot. A backup failure blocks the write.
 
@@ -49,6 +58,11 @@ backup plus patch, and plans the differences against the current chip.
 **Write** is still required. Completion marks are history; they never replace
 physical readback or justify skipping an erased neighbour. The bundle supports
 another retry if recovery itself is interrupted.
+
+If interruption leaves a partial final journal line, appending the next progress
+mark discards only that incomplete tail. Complete prior records are retained,
+and later progress remains readable. Recovery still validates the saved inputs
+and reads the physical chip before constructing a new plan.
 
 After successful verification, the journal is retired and the original backup
 remains. Even an already-written image must pass verification before its
@@ -96,6 +110,8 @@ including automatic preparation, explicit Write and interrupted-write recovery.
 It also checks English fallback and the absence of routine modal forms.
 See [testing instructions](testing.md).
 
-Physical programmers were not exercised for these changes. Visual automation
-was unavailable in this session; the desktop smoke checks behavior and form
-state, not visual layout.
+The 4.45.0.0 release passed Windows and Linux CI and the Windows desktop
+simulator smoke test. Physical programmers were not exercised for that release.
+The smoke test checks behavior and form state; its optional
+`ASPROGRAMMER_PN_SCREENSHOT` capture supports manual visual review and is not
+an automated layout assertion.

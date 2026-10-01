@@ -44,6 +44,35 @@ Unknown voltage is shown in the workspace, beside the controls needed to select 
 
 ---
 
+## Download and upgrade
+
+Download the Windows ZIP from the [latest release](https://github.com/patnawa/NVRAMancer/releases/latest),
+extract the complete archive, and run `AsprogrammerPN.exe`. Keep its bundled
+DLLs and data files together. No installer is required. Release assets include
+`SHA256SUMS.txt`; [release verification](docs/releasing.md#tagging) describes
+checksum and provenance checks.
+
+Asprogrammer PN 4.45.0.0 replaces the NVRAMancer application name. Update
+shortcuts and scripts to `AsprogrammerPN.exe` or `AsprogrammerPNCLI.exe`.
+The GitHub repository address remains `patnawa/NVRAMancer`.
+
+- Explicit backup-directory settings take priority. Otherwise, an existing
+  `%LOCALAPPDATA%\NVRAMancer\backups` folder remains in use; fresh installations
+  use `%LOCALAPPDATA%\Asprogrammer PN\backups`.
+- Saved production manifests, authentication domains, evidence, projects and
+  recovery journals retain their legacy format identifiers. Do not rename
+  identifiers inside those files; authenticated bytes must remain unchanged.
+- Automation now uses `ASPROGRAMMER_PN_PROD_KEY_ID`,
+  `ASPROGRAMMER_PN_PROD_HMAC_KEY`, `ASPROGRAMMER_PN_NAND_LIVE_VALIDATED`, and
+  `ASPROGRAMMER_PN_ENABLE_UNVALIDATED_CH347_WRITE`. Previous environment-variable
+  names are not aliases. Update station configuration and `--prod-key-env`
+  arguments; see [production security](docs/production-job-security.md) and
+  [headless hardware validation](docs/design-cross-platform.md).
+
+For usage, see [workspace and recovery](docs/workspace-workflow.md). For
+contributors, see [testing](docs/testing.md), [release procedure](docs/releasing.md),
+and the [changelog](CHANGELOG.md).
+
 ## What it does
 
 <table>
@@ -64,7 +93,7 @@ Unknown voltage is shown in the workspace, beside the controls needed to select 
 <tr><td><b>🖥️ No hardware needed</b></td><td>A simulated programmer with a 25-series part in memory, so the program runs, demos and reproduces bug reports with nothing plugged in</td></tr>
 </table>
 
-Every rule above lives in a hardware-free core unit and is covered by the test suite — **37 suites, no hardware required**. See [`docs/testing.md`](docs/testing.md).
+The core logic is checked by **37 hardware-free suites**, with a separate desktop simulator smoke test. These checks do not establish physical programmer compatibility. See [`docs/testing.md`](docs/testing.md).
 
 ---
 
@@ -259,9 +288,19 @@ The four panels under the toolbar answer "why is this not working" without diggi
 
 ### Command line
 
-`AsprogrammerPNCLI.exe` drives the same engine headlessly for scripting and CI. `AsprogrammerPN.exe` takes the same switches with the full chip catalogue behind them. Run either with `--help`.
+The executables share lower-level programming engines but expose different interfaces:
 
-For callers that are not people, `--json` emits one versioned line:
+| Executable | Scope |
+|---|---|
+| `AsprogrammerPN.exe` | Windows application with command-line access to the GUI's chip catalogue and programmer backends, JSON reporting, and authenticated production jobs |
+| `AsprogrammerPNCLI.exe` (Windows), `AsprogrammerPNCLI` (Linux) | LCL-free CLI for CH347 over libusb: detect, read, Smart Write preview, gated Smart Write, offline image scan and SFDP decode |
+
+Run the selected executable with `--help`; switches are not interchangeable.
+Headless destructive operations remain gated pending live validation. See
+[headless commands and validation requirements](docs/design-cross-platform.md).
+
+The following JSON example, `--preflight` option and exit-code table apply to
+`AsprogrammerPN.exe`. Its `--json` option emits one versioned line:
 
 ```json
 {"schema_version":1,"action":"detect","ok":true,"result":"ok",
@@ -305,18 +344,32 @@ The board is a commercial CH347Ⅱ V2.13, so [`hardware/`](hardware/) is reverse
 
 ## Building
 
-Needs [Lazarus](https://www.lazarus-ide.org/) with FPC 3.2.2 (32-bit).
+On Windows, use 32-bit [Lazarus](https://www.lazarus-ide.org/) with FPC 3.2.2
+(CI uses Lazarus 4.8). The script defaults to `C:\lazarus32`; pass
+`-Lazarus "C:\path\to\lazarus"` for another installation.
 
-```sh
-powershell -ExecutionPolicy Bypass -File tools\build.ps1     # Windows
-./tools/build.sh                                             # Linux
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\build.ps1
+powershell -ExecutionPolicy Bypass -File tools\test_desktop.ps1
 ```
 
-Add `-Release` to zip a runnable release folder with the DLLs in place. Tests:
+The build runs the hardware-free suites and builds the Windows application.
+The second command runs the desktop simulator smoke test. Add `-Release` to
+`tools\build.ps1` to assemble `release\AsprogrammerPN-<version>.zip` with its
+runtime DLLs and data files.
 
-```sh
-fpc -Mobjfpc -Sh -Fusoftware -FUtests/lib -otests/unittests.exe tests/unittests.lpr && ./tests/unittests.exe
+On Debian/Ubuntu, install `fp-compiler`, `fp-units-fcl`, and the system OpenSSL
+`libcrypto` runtime, then run:
+
+```bash
+./tools/build.sh
 ```
+
+The Linux script runs the hardware-free suites and compile-checks the headless
+CLI; it does not build the Windows GUI or produce a Linux release package.
+Running the headless CLI against CH347 hardware also requires libusb 1.0.
+See [testing instructions](docs/testing.md) and
+[headless build and usage](docs/design-cross-platform.md).
 
 ## Changelog
 
