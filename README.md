@@ -1,6 +1,6 @@
 <div align="center">
 
-# NVRAMancer
+# Asprogrammer PN
 
 **A flash programmer that refuses to guess your chip's voltage.**
 
@@ -18,9 +18,9 @@ SPI NOR · SPI NAND · I²C EEPROM · Microwire — across nine programmers.
 ---
 
 <div align="center">
-<img src="assets/nvramancer-main.png" alt="NVRAMancer reading a Winbond W74M12JWSSIQ over a CH347" width="880">
+<img src="assets/asprogrammer-pn-main.png" alt="Asprogrammer PN preparing a write on its simulated programmer" width="880">
 <br>
-<sub>A Winbond <code>W74M12JWSSIQ</code> identified live as <code>EF6018</code> — 16 MiB, 1.8 V — with the target rail already matched to it.</sub>
+<sub>The Repair workspace preparing an eight-byte image on the built-in simulated programmer, without physical hardware.</sub>
 </div>
 
 <br>
@@ -34,7 +34,7 @@ SPI NOR · SPI NAND · I²C EEPROM · Microwire — across nine programmers.
 
 That is a CH341A in a repair jig — and it has a **red wire soldered across it**. That mod exists because these boards are widely reported to drive **5 V logic on the SPI lines while VCC reads 3.3 V**. Two boards that look identical can behave completely differently, and no software can see the difference.
 
-So NVRAMancer does not claim to know things it cannot measure. It reports the rail it *asked for* and the rail it *measured* as separate facts, and where the hardware has no sensor it says **"not measurable on this programmer"** instead of showing a number that reads like a confirmation.
+So Asprogrammer PN does not claim to know things it cannot measure. It reports the rail it *asked for* and the rail it *measured* as separate facts, and where the hardware has no sensor it says **"not measurable on this programmer"** instead of showing a number that reads like a confirmation.
 
 Unknown voltage is shown in the workspace, beside the controls needed to select its datasheet value.
 
@@ -80,8 +80,9 @@ The plan stays in the main window; **Write** is the explicit commitment. NOR and
 EEPROM writes save a backup and verify again after closing and reopening the
 programmer. Preparation itself never programs the image.
 
-Backups normally go to `%LOCALAPPDATA%\NVRAMancer\backups`. Use **Open backups**
-to find them. An unfinished NOR write appears in the recovery row: select it,
+Backups normally go to `%LOCALAPPDATA%\Asprogrammer PN\backups`. Use **Open backups**
+to find them. Existing installations continue using their previous backup folder
+so interrupted jobs stay discoverable. An unfinished NOR write appears in the recovery row: select it,
 choose **Prepare interrupted write**, review the reconstructed plan, then
 **Write**. Connection Doctor remains an optional command in Options.
 
@@ -91,9 +92,9 @@ See [workspace and recovery details](docs/workspace-workflow.md).
 
 Sending **3.3 V to a 1.8 V flash chip destroys it permanently**. Sending too little only means the chip doesn't answer, and you try again.
 
-Those two outcomes are not equally bad — so NVRAMancer never treats them as if they were. Every path that cannot work out a chip's supply voltage **fails low**, and when it does not know, it displays the voltage requirement in the workspace for you to resolve from the datasheet.
+Those two outcomes are not equally bad — so Asprogrammer PN never treats them as if they were. Every path that cannot work out a chip's supply voltage **fails low**, and when it does not know, it displays the voltage requirement in the workspace for you to resolve from the datasheet.
 
-Earlier catalog versions carried voltage metadata for only a handful of chips. NVRAMancer combines explicit metadata with restricted identification rules, and blocks a selected rail that conflicts with the known chip requirement.
+Earlier catalog versions carried voltage metadata for only a handful of chips. Asprogrammer PN combines explicit metadata with restricted identification rules, and blocks a selected rail that conflicts with the known chip requirement.
 
 ## Supported programmers
 
@@ -115,13 +116,13 @@ Earlier catalog versions carried voltage metadata for only a handful of chips. N
 
 The **CH347 II V2.13** board is the only one of the nine with a switchable target rail. It's driven from **GPIO6** — low = 3.3 V, high = 1.8 V. That pin assignment is not documented by WCH; it was recovered from the vendor binary's `CH347GPIO_Set` call sites and then confirmed against real hardware.
 
-**GPIO4** is the board's green activity LED, and NVRAMancer has to drive it: the board does not. That was established the hard way — the code was once removed on the assumption that bus traffic lit the lamp by itself, and the lamp simply went dark. Sampling GPIO4 across 400 SPI transfers showed it never moving, so there is no drive circuit to defer to. The two pins are written with separate one-bit masks, so switching the rail can never disturb the LED or the reverse.
+**GPIO4** is the board's green activity LED, and Asprogrammer PN has to drive it: the board does not. That was established the hard way — the code was once removed on the assumption that bus traffic lit the lamp by itself, and the lamp simply went dark. Sampling GPIO4 across 400 SPI transfers showed it never moving, so there is no drive circuit to defer to. The two pins are written with separate one-bit masks, so switching the rail can never disturb the LED or the reverse.
 
 > **Options → SPI → CH347 target voltage** — `1.8 V` · `3.3 V` · `Auto`
 
 The same switch sits directly on the main window whenever a CH347 is selected: a **Target voltage** box with the three radio buttons and a `Chip:` line showing the selected part's supply voltage — the same front-screen control the board vendor's own software has. The box and the menu mirror each other, and either applies immediately while the device is open.
 
-The board powers up at 1.8 V and NVRAMancer applies 1.8 V when it starts, so a rail left high by a previous session can never greet the next chip you seat. Within a session the level you pick stays put — it is not wound back between operations, or picking 3.3 V would never survive the read you picked it for.
+The board powers up at 1.8 V and Asprogrammer PN applies 1.8 V when it starts, so a rail left high by a previous session can never greet the next chip you seat. Within a session the level you pick stays put — it is not wound back between operations, or picking 3.3 V would never survive the read you picked it for.
 
 ### How a chip's voltage is worked out
 
@@ -158,7 +159,7 @@ Signal (CS/CLK/MOSI):      1.8 V (assumed to follow the rail, not measured)
 
 "not measurable" is the answer, not a gap. Showing only the requested level reads as confirmation — a CH347 with a stuck GPIO, a clip on the wrong pad, and a rail loaded down by a motherboard all display an identical "1.8 V". No CH341, CH347 or FT232H has an ADC on the target rail, a sense resistor, a load switch or backfeed detection, so today that is the honest reply for all three. A board with sensing fills the same fields and these lines start carrying real numbers with no other change.
 
-The last line is the one to take seriously. A board that switches VCC to 1.8 V while its logic keeps swinging to 3.3 V passes every other electrical check and destroys 1.8 V parts. Nobody has put a scope on this board's signal pins at both rails, so NVRAMancer says *assumed* rather than claiming a figure — and [`hardware/test-procedure.md`](hardware/test-procedure.md) is the fifteen minutes that settles it.
+The last line is the one to take seriously. A board that switches VCC to 1.8 V while its logic keeps swinging to 3.3 V passes every other electrical check and destroys 1.8 V parts. Nobody has put a scope on this board's signal pins at both rails, so Asprogrammer PN says *assumed* rather than claiming a figure — and [`hardware/test-procedure.md`](hardware/test-procedure.md) is the fifteen minutes that settles it.
 
 Before CS or CLK moves, the same electrical preflight that authenticated production has always used runs under a bench policy. A rail outside the chip's range, or a signal level above what the part tolerates, stops the operation before the first clock edge. Things nobody has characterised produce a note and continue; requiring proof no supported programmer can give would just teach people to switch the gate off.
 
@@ -168,7 +169,7 @@ Before CS or CLK moves, the same electrical preflight that authenticated product
 
 Clip leads and long cables do not survive 60 MHz, and the failure reads back as FF — which looks exactly like a blank chip. Picking a number from a menu with no feedback means guessing which side of that line you are on.
 
-So NVRAMancer finds the line. It starts at the slowest clock, where the wiring cannot be the reason an answer is wrong, and establishes what the chip says about itself. Then it climbs, asking three times per rung. The first rung whose answer changes ends the climb, and it steps down one more for margin.
+So Asprogrammer PN finds the line. It starts at the slowest clock, where the wiring cannot be the reason an answer is wrong, and establishes what the chip says about itself. Then it climbs, asking three times per rung. The first rung whose answer changes ends the climb, and it steps down one more for margin.
 
 Three reads, not one, because above the boundary the failures are intermittent — a single read accepts a marginal clock most of the time, which is the worst outcome: fast, plausible, and wrong during the write. The fingerprint is the JEDEC ID **and** a CRC of a real 4 KB read, because a clock that corrupts long transfers but not three-byte ones sails through an ID-only check.
 
@@ -185,7 +186,7 @@ Separately, erase and write read three sample regions — start, middle, end —
 
 Any of the nine supported programmers will do. The one above is a WCH board with a ZIF socket — `PWR` and `RUN` on the silkscreen are the power and activity lamps.
 
-NVRAMancer drives the **CH347** and **CH341A** through WCH's own DLLs, so the same driver package covers both.
+Asprogrammer PN drives the **CH347** and **CH341A** through WCH's own DLLs, so the same driver package covers both.
 
 Seat the chip with **pin 1 at the lever end** of the socket and close the lever before plugging in.
 
@@ -195,7 +196,7 @@ Seat the chip with **pin 1 at the lever end** of the socket and close the lever 
 
 1. Install the CH347 driver from **[`drivers/CH347T-Driver/`](drivers/CH347T-Driver)** — the CH341PAR package behind `wch.cn 2.6.2025.4`, confirmed working with this board.
 2. Plug the programmer in. Windows should show *USB HighSpeed-SPI/I2C… CH347T* with no warning icon.
-3. Download [`NVRAMancer-<version>.zip`](https://github.com/patnawa/NVRAMancer/releases) and unpack it. `NVRAMancer.exe` runs from the folder — no installer.
+3. Download [`AsprogrammerPN-<version>.zip`](https://github.com/patnawa/NVRAMancer/releases) and unpack it. `AsprogrammerPN.exe` runs from the folder — no installer.
 
 ## Usage
 
@@ -258,7 +259,7 @@ The four panels under the toolbar answer "why is this not working" without diggi
 
 ### Command line
 
-`NVRAMancerCLI.exe` drives the same engine headlessly for scripting and CI. `NVRAMancer.exe` takes the same switches with the full chip catalogue behind them. Run either with `--help`.
+`AsprogrammerPNCLI.exe` drives the same engine headlessly for scripting and CI. `AsprogrammerPN.exe` takes the same switches with the full chip catalogue behind them. Run either with `--help`.
 
 For callers that are not people, `--json` emits one versioned line:
 
@@ -323,7 +324,7 @@ Every release tells its story in **[`CHANGELOG.md`](CHANGELOG.md)** — what was
 
 ## Credits
 
-NVRAMancer is written by **Patnawa**.
+Asprogrammer PN is written by **Patnawa**.
 
 The safety architecture is this project's own work: the electrical preflight and target-rail reporting, the session admission ladder, clock auto-tuning, the connection-stability gate, read-only safe mode, the erase-geometry builder, the write-admission rule, the machine-facing JSON and exit-code contract, CH347 voltage control, the production job and evidence chain, and the Lab Tools — with the test suite that holds all of it in place.
 

@@ -3,7 +3,7 @@
 
 function TMainForm.CurrentWriteContext: string;
 begin
-  Result := IntToStr(Ord(NVRAMancer.Current_HW)) + '|' + CurrentICParam.Name +
+  Result := IntToStr(Ord(AsprogrammerPN.Current_HW)) + '|' + CurrentICParam.Name +
     '|' + CurrentICParam.ID + '|' + CurrentICParam.Vcc + '|' +
     IntToStr(Ord(RadioSPI.Checked)) + IntToStr(Ord(RadioI2C.Checked)) +
     IntToStr(Ord(RadioMW.Checked)) + '|' + IntToStr(ComboSPICMD.ItemIndex) +

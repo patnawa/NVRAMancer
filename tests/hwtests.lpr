@@ -498,7 +498,7 @@ begin
 end;
 
 begin
-  WriteLn('NVRAMancer protocol tests');
+  WriteLn('Asprogrammer PN protocol tests');
   WriteLn;
 
   TestI2CAddrTypes;

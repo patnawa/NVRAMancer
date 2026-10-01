@@ -284,7 +284,7 @@ end;
 function Script_SPIExitProgMode(Sender:TObject; var A:TVarList) : boolean;
 begin
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   Result := true;
 end;
 
@@ -455,7 +455,7 @@ end;
 function Script_I2CEnterProgMode(Sender:TObject; var A:TVarList) : boolean;
 begin
   if not OpenDevice() then Exit(false);
-  NVRAMancer.Programmer.I2CInit;
+  AsprogrammerPN.Programmer.I2CInit;
   Result := true;
 end;
 
@@ -463,8 +463,8 @@ end;
  ปิดการใช้งานขา}
 function Script_I2CExitProgMode(Sender:TObject; var A:TVarList) : boolean;
 begin
-  NVRAMancer.Programmer.I2CDeinit;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.I2CDeinit;
+  AsprogrammerPN.Programmer.DevClose;
   Result := true;
 end;
 
@@ -503,7 +503,7 @@ begin
     WDataArr[i] := TPVar(A.Items[i+3])^.Value;
   end;
 
-  R.Value := NVRAMancer.Programmer.I2CReadWrite(DevAddr, wsize, WDataArr, rsize, RDataArr);
+  R.Value := AsprogrammerPN.Programmer.I2CReadWrite(DevAddr, wsize, WDataArr, rsize, RDataArr);
 
   if rsize < 1 then Exit(true);
 
@@ -528,7 +528,7 @@ end;
  }
 function Script_I2CStart(Sender:TObject) : boolean;
 begin
-  NVRAMancer.Programmer.I2CStart;
+  AsprogrammerPN.Programmer.I2CStart;
   result := true;
 end;
 
@@ -537,7 +537,7 @@ end;
  }
 function Script_I2CStop(Sender:TObject) : boolean;
 begin
-  NVRAMancer.Programmer.I2CStop;
+  AsprogrammerPN.Programmer.I2CStop;
   result := true;
 end;
 
@@ -550,7 +550,7 @@ function Script_I2CWriteByte(Sender:TObject; var A:TVarList; var R: TVar) : bool
 begin
   if A.Count < 1 then Exit(false);
 
-  R.Value := NVRAMancer.Programmer.I2CWriteByte(TPVar(A.Items[0])^.Value);
+  R.Value := AsprogrammerPN.Programmer.I2CWriteByte(TPVar(A.Items[0])^.Value);
   result := true;
 end;
 
@@ -563,7 +563,7 @@ function Script_I2CReadByte(Sender:TObject; var A:TVarList; var R: TVar) : boole
 begin
   if A.Count < 1 then Exit(false);
 
-  R.Value := NVRAMancer.Programmer.I2CReadByte(TPVar(A.Items[0])^.Value);
+  R.Value := AsprogrammerPN.Programmer.I2CReadByte(TPVar(A.Items[0])^.Value);
   result := true;
 end;
 

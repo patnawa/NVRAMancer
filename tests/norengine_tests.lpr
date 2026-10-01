@@ -892,7 +892,7 @@ begin
 end;
 
 begin
-  WriteLn('NVRAMancer preservation-aware NOR engine tests');
+  WriteLn('Asprogrammer PN preservation-aware NOR engine tests');
   WriteLn;
 
   TestLifecycleCancellation;

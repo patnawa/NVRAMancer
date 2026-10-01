@@ -1,6 +1,6 @@
 # Third-party notices
 
-NVRAMancer is MIT-licensed, but a runnable Windows release also contains
+Asprogrammer PN is MIT-licensed, but a runnable Windows release also contains
 separately licensed runtime libraries and data files. Their inclusion does not
 change the project's source-code license.
 

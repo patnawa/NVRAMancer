@@ -190,7 +190,7 @@ begin
 
   finally
     ExitProgMode25;
-    NVRAMancer.Programmer.DevClose;
+    AsprogrammerPN.Programmer.DevClose;
   end;
   end;
 end;
@@ -247,7 +247,7 @@ begin
 
   finally
     ExitProgMode25;
-    NVRAMancer.Programmer.DevClose;
+    AsprogrammerPN.Programmer.DevClose;
   end;
   end;
 end;

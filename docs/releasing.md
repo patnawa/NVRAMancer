@@ -7,7 +7,7 @@ Releases are built, tested, checksummed, attested, and published from an exact
 
 The version source is `PROX_VERSION` in `software/appver.pas`. Before tagging:
 
-1. set the same value in `software/NVRAMancer.lpi`;
+1. set the same value in `software/AsprogrammerPN.lpi`;
 2. add that version as the first `##` entry in `CHANGELOG.md`;
 3. run `python tools/check_project_metadata.py`; and
 4. run both platform build scripts or confirm their protected CI jobs pass.
@@ -97,7 +97,7 @@ passing build jobs for the tagged commit.
 
 ```bash
 python tools/check_project_metadata.py
-git tag -s v<version> -m "NVRAMancer <version>"
+git tag -s v<version> -m "Asprogrammer PN <version>"
 git push origin v<version>
 ```
 
@@ -108,7 +108,7 @@ After publication, download the ZIP and checksum file on a separate machine:
 
 ```bash
 sha256sum -c SHA256SUMS.txt
-gh attestation verify NVRAMancer-*.zip --repo patnawa/NVRAMancer
+gh attestation verify AsprogrammerPN-*.zip --repo patnawa/NVRAMancer
 ```
 
 Smoke-start both executables from the extracted ZIP with no programmers

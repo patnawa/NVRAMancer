@@ -189,7 +189,47 @@ begin
   end;
 end;
 
+procedure RejectFixture(const Name, Extension, Content: string);
+var
+  Lines: TStringList;
+  St: TMemoryStream;
+  Err, FileName: string;
+  Original: byte;
 begin
+  FileName := 'invalid.' + Extension;
+  Lines := TStringList.Create;
+  St := TMemoryStream.Create;
+  try
+    Lines.Text := Content;
+    Lines.SaveToFile(FileName);
+    Original := $5A;
+    St.WriteBuffer(Original, 1);
+    Check(Name + ': rejected', not LoadFirmware(FileName, St, 512, $FF, Err));
+    Check(Name + ': explains refusal', Err <> '');
+    Check(Name + ': preserves loaded image',
+      (St.Size = 1) and (PByte(St.Memory)^ = Original));
+  finally
+    Lines.Free;
+    St.Free;
+    DeleteFile(FileName);
+  end;
+end;
+
+procedure InvalidRecordTests;
+begin
+  RejectFixture('HEX outside chip', 'hex', ':01020000AA53' + #10 + ':00000001FF');
+  RejectFixture('HEX address wrap', 'hex', ':02000004FFFFFC' + #10 +
+    ':02FFFF001122CD' + #10 + ':00000001FF');
+  RejectFixture('HEX short base', 'hex', ':00000004FC' + #10 +
+    ':0100000011EE' + #10 + ':00000001FF');
+  RejectFixture('HEX trailing bytes', 'hex', ':0100000011EE00' + #10 + ':00000001FF');
+  RejectFixture('SREC outside chip', 'srec', 'S1040200AA4F');
+  RejectFixture('SREC address wrap', 'srec', 'S307FFFFFFFF1122C9');
+  RejectFixture('SREC short address', 'srec', 'S301FE' + #10 + 'S104000011EA');
+end;
+
+begin
+  InvalidRecordTests;
   WriteLn('fileformats round trip tests');
 
   RoundTrip('ihex 4K',   'rt4k.hex',  ffIntelHex, 4096);

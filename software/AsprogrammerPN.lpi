@@ -8,7 +8,7 @@
         <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="NVRAMancer"/>
+      <Title Value="Asprogrammer PN"/>
       <Scaled Value="True"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
@@ -25,11 +25,11 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="4"/>
-      <MinorVersionNr Value="44"/>
+      <MinorVersionNr Value="45"/>
       <RevisionNr Value="0"/>
       <BuildNr Value="0"/>
       <Language Value="0409"/>
-      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="NVRAMancer" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="NVRAMancer.exe" ProductName="NVRAMancer" ProductVersion="4.44.0.0"/>
+      <StringTable CompanyName="Patnawa" FileDescription="Serial flash and EEPROM programmer" InternalName="AsprogrammerPN" LegalCopyright="MIT. Copyright (c) 2026 Patnawa; portions (c) 2015 nofeletru and contributors" OriginalFilename="AsprogrammerPN.exe" ProductName="Asprogrammer PN" ProductVersion="4.45.0.0"/>
     </VersionInfo>
     <MacroValues Count="2">
       <Macro1 Name="LCLWidgetType" Value="win32"/>
@@ -42,7 +42,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="NVRAMancer"/>
+            <Filename Value="AsprogrammerPN"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);JediInc"/>
@@ -106,7 +106,7 @@
     </RequiredPackages>
     <Units Count="22">
       <Unit0>
-        <Filename Value="NVRAMancer.lpr"/>
+        <Filename Value="AsprogrammerPN.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
@@ -212,7 +212,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="NVRAMancer"/>
+      <Filename Value="AsprogrammerPN"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);JediInc"/>

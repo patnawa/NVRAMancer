@@ -21,7 +21,7 @@ const
   EXIT_OK = 0;
   EXIT_FAILED = 1;
   EXIT_USAGE = 2;
-  WRITE_GATE_ENV = 'NVRAMANCER_ENABLE_UNVALIDATED_CH347_WRITE';
+  WRITE_GATE_ENV = 'ASPROGRAMMER_PN_ENABLE_UNVALIDATED_CH347_WRITE';
   WRITE_GATE_VALUE = 'YES_I_HAVE_A_SACRIFICIAL_CHIP';
 
 type
@@ -43,22 +43,22 @@ procedure Usage;
 var
   I: integer;
 begin
-  Say('NVRAMancer headless CLI (no LCL)');
+  Say('Asprogrammer PN headless CLI (no LCL)');
   Say;
   Say('Read-only hardware commands (CH347 over libusb):');
-  Say('  NVRAMancerCLI --detect [--speed 2]');
-  Say('  NVRAMancerCLI --read dump.bin --size BYTES [--passes 2]');
-  Say('  NVRAMancerCLI --smart-preview patch.bin --size BYTES');
+  Say('  AsprogrammerPNCLI --detect [--speed 2]');
+  Say('  AsprogrammerPNCLI --read dump.bin --size BYTES [--passes 2]');
+  Say('  AsprogrammerPNCLI --smart-preview patch.bin --size BYTES');
   Say('      --address N --page-size N --erase-size N --erase-opcode 20');
   Say;
   Say('Destructive hardware command:');
-  Say('  NVRAMancerCLI --smart-write patch.bin ... --backup original.bin --yes');
+  Say('  AsprogrammerPNCLI --smart-write patch.bin ... --backup original.bin --yes');
   Say('  While the capability is gated, also set ' +
       WRITE_GATE_ENV + '=' + WRITE_GATE_VALUE);
   Say;
   Say('Offline commands:');
-  Say('  NVRAMancerCLI --scan image.bin');
-  Say('  NVRAMancerCLI --sfdp-decode table.bin');
+  Say('  AsprogrammerPNCLI --scan image.bin');
+  Say('  AsprogrammerPNCLI --sfdp-decode table.bin');
   Say;
   Say('Options: --hw ch347 --speed 0..7 --native-4byte | --enter-4byte');
   Say('         --replace (allow replacing read output; never backup output)');

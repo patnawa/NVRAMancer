@@ -65,14 +65,14 @@ var
   i, j, p: integer;
   S: string;
   Len, RecType, B, Sum: byte;
-  Offset, Base, Addr: cardinal;
-  Truncated, SawData: boolean;
+  Offset, Base: cardinal;
+  Addr: QWord;
+  SawData: boolean;
 begin
   Result := False;
   ErrMsg := '';
   HighAddr := 0;
   Base := 0;
-  Truncated := False;
   SawData := False;
 
   for i := 0 to Lines.Count - 1 do
@@ -93,9 +93,9 @@ begin
       Exit;
     end;
 
-    if Length(S) < 11 + Len * 2 then
+    if Length(S) <> 11 + Len * 2 then
     begin
-      ErrMsg := Format('Intel HEX: truncated record at line %d', [i + 1]);
+      ErrMsg := Format('Intel HEX: record length mismatch at line %d', [i + 1]);
       Exit;
     end;
 
@@ -123,6 +123,15 @@ begin
     HexByte(S, 6, B);  Offset := Offset or B;
     HexByte(S, 8, RecType);
 
+    if ((RecType = $01) and ((Len <> 0) or (Offset <> 0))) or
+       ((RecType in [$02, $04]) and ((Len <> 2) or (Offset <> 0))) or
+       ((RecType in [$03, $05]) and ((Len <> 4) or (Offset <> 0))) or
+       (RecType > $05) then
+    begin
+      ErrMsg := Format('Intel HEX: invalid record type or length at line %d', [i + 1]);
+      Exit;
+    end;
+
     case RecType of
       $00:  //ข้อมูล
         begin
@@ -130,12 +139,12 @@ begin
           for j := 0 to Len - 1 do
           begin
             HexByte(S, 10 + j * 2, B);
-            Addr := Base + Offset + cardinal(j);
+            Addr := QWord(Base) + Offset + QWord(j);
 
             if Addr >= MaxSize then
             begin
-              Truncated := True;
-              Continue;
+              ErrMsg := Format('Intel HEX: data outside the chip at line %d', [i + 1]);
+              Exit;
             end;
 
             Buf[Addr] := B;
@@ -171,9 +180,6 @@ begin
     Exit;
   end;
 
-  if Truncated then
-    ErrMsg := 'Some records were outside the chip size and were skipped';
-
   Result := True;
 end;
 
@@ -186,12 +192,11 @@ var
   S: string;
   Count, B, Sum: byte;
   Addr: cardinal;
-  Truncated, SawData: boolean;
+  SawData: boolean;
 begin
   Result := False;
   ErrMsg := '';
   HighAddr := 0;
-  Truncated := False;
   SawData := False;
 
   for i := 0 to Lines.Count - 1 do
@@ -216,9 +221,9 @@ begin
       Exit;
     end;
 
-    if Length(S) < 4 + Count * 2 then
+    if (Count < AddrLen + 1) or (Length(S) <> 4 + Count * 2) then
     begin
-      ErrMsg := Format('S-record: truncated record at line %d', [i + 1]);
+      ErrMsg := Format('S-record: invalid record length at line %d', [i + 1]);
       Exit;
     end;
 
@@ -257,10 +262,10 @@ begin
     begin
       HexByte(S, 5 + AddrLen * 2 + j * 2, B);
 
-      if (Addr + cardinal(j)) >= MaxSize then
+      if (QWord(Addr) + QWord(j)) >= MaxSize then
       begin
-        Truncated := True;
-        Continue;
+        ErrMsg := Format('S-record: data outside the chip at line %d', [i + 1]);
+        Exit;
       end;
 
       Buf[Addr + cardinal(j)] := B;
@@ -275,9 +280,6 @@ begin
     ErrMsg := 'S-record: the file contains no data records';
     Exit;
   end;
-
-  if Truncated then
-    ErrMsg := 'Some records were outside the chip size and were skipped';
 
   Result := True;
 end;

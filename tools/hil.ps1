@@ -43,19 +43,19 @@ if (Test-Path -LiteralPath $logPath) {
   Fail "refusing to replace an existing HIL log: $logPath"
 }
 
-# NVRAMancer.exe, not NVRAMancer.exe. This search has been looking for a name
+# AsprogrammerPN.exe, not AsprogrammerPN.exe. This search has been looking for a name
 # the release folder stopped containing some time ago, so it always fell through
 # to the source tree -- which meant a hardware-in-loop run could be exercising a
 # developer's last local build instead of the packaged release it reported on.
 if ([string]::IsNullOrWhiteSpace($ProgramPath)) {
   $candidate = Get-ChildItem -LiteralPath (Join-Path $root 'release') `
-    -Filter NVRAMancer.exe -File -Recurse -ErrorAction SilentlyContinue |
+    -Filter AsprogrammerPN.exe -File -Recurse -ErrorAction SilentlyContinue |
     Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
   if ($candidate) { $ProgramPath = $candidate.FullName }
-  else { $ProgramPath = Join-Path $root 'software\NVRAMancer.exe' }
+  else { $ProgramPath = Join-Path $root 'software\AsprogrammerPN.exe' }
 }
 if (-not (Test-Path -LiteralPath $ProgramPath -PathType Leaf)) {
-  Fail "NVRAMancer.exe was not found; run tools\build.ps1 -Release first"
+  Fail "AsprogrammerPN.exe was not found; run tools\build.ps1 -Release first"
 }
 $ProgramPath = (Resolve-Path -LiteralPath $ProgramPath).Path
 $runtimeDir = Split-Path -Parent $ProgramPath

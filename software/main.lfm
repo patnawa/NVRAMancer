@@ -4,7 +4,7 @@ object MainForm: TMainForm
   Top = 150
   Width = 1120
   ActiveControl = RadioSPI
-  Caption = 'NVRAMancer'
+  Caption = 'Asprogrammer PN'
   ClientHeight = 780
   ClientWidth = 1120
   Constraints.MinHeight = 640
@@ -821,7 +821,7 @@ object MainForm: TMainForm
     Width = 853
     Align = alBottom
     Lines.Strings = (
-      'NVRAMancer'
+      'Asprogrammer PN'
       'https://github.com/patnawa/NVRAMancer'
     )
     ParentFont = False
@@ -1495,7 +1495,7 @@ object MainForm: TMainForm
 	object CreditsMenuItem: TMenuItem
       Caption = 'Version'
       object MenuAbout: TMenuItem
-        Caption = 'About NVRAMancer...'
+        Caption = 'About Asprogrammer PN...'
         OnClick = MenuAboutClick
       end
       object MenuCredits: TMenuItem

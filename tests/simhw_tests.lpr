@@ -344,12 +344,12 @@ end;
 
 begin
   Sim := TSimulatedHardware.Create;
-  NVRAMancer := TNVRAMancer.Create;
+  AsprogrammerPN := TAsprogrammerPN.Create;
   try
-    NVRAMancer.AddHW(Sim);
-    NVRAMancer.Current_HW := CHW_SIM;
+    AsprogrammerPN.AddHW(Sim);
+    AsprogrammerPN.Current_HW := CHW_SIM;
     Check('the simulator is selectable',
-          NVRAMancer.Programmer = TBaseHardware(Sim));
+          AsprogrammerPN.Programmer = TBaseHardware(Sim));
     Check('and opens', Sim.DevOpen);
     Check('and initialises SPI', Sim.SPIInit(0));
 
@@ -365,8 +365,8 @@ begin
     TestStreamingReadBoundaries;
     TestItNeverPretendsToMeasureAnything;
   finally
-    //TNVRAMancer owns what it is given.
-    NVRAMancer.Free;
+    //TAsprogrammerPN owns what it is given.
+    AsprogrammerPN.Free;
   end;
 
   WriteLn(Assertions, ' assertions, ', Failures, ' failures');

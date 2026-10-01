@@ -5,7 +5,7 @@ program desktop_smoke;
 {$mode objfpc}{$H+}
 
 uses
-  Interfaces, Forms, Classes, SysUtils, StdCtrls, ExtCtrls, Menus, DOM,
+  Interfaces, Forms, Classes, SysUtils, Graphics, StdCtrls, ExtCtrls, Menus, DOM,
   main, search, sregedit, findchip, ScriptEdit, basehw, simhw, uilanguage,
   LCLTranslator, LResources, operationmodel, norplanner, writeworkflow,
   recoveryworkflow, prodevidence;
@@ -102,11 +102,14 @@ var
   Chip: TSimulatedHardware;
   I: integer;
   Language: string;
+  Screenshot: TBitmap;
+  PNG: TPortableNetworkGraphic;
 begin
   Timer.Enabled := False;
   try
     Check(MainForm.Visible and (Application.MainForm = MainForm),
       'startup opens the main work window');
+    Check(Pos('Asprogrammer PN ', MainForm.Caption) = 1, 'window uses the new product name');
     Check(Application.ModalLevel = 0, 'startup has no modal screen');
     Check(MainForm.MenuOptions.Caption = 'Options',
       'menu defaults to English without an external English catalog');
@@ -133,11 +136,11 @@ begin
     Check(Application.ModalLevel = 0, 'file errors do not open a modal');
 
     MainForm.MenuHWSIMClick(nil);
-    if NVRAMancer.Current_HW <> CHW_SIM then
+    if AsprogrammerPN.Current_HW <> CHW_SIM then
       raise Exception.Create('simulator was not selected; refusing all device operations');
     PollProgrammer(False);
-    Check(NVRAMancer.Current_HW = CHW_SIM, 'only the simulated programmer is selected');
-    Chip := TSimulatedHardware(NVRAMancer.Programmer);
+    Check(AsprogrammerPN.Current_HW = CHW_SIM, 'only the simulated programmer is selected');
+    Chip := TSimulatedHardware(AsprogrammerPN.Programmer);
     MainForm.ButtonReadIDClick(nil);
     Profiles := TComboBox(MainForm.FindComponent('MatchingChipProfiles'));
     Check((Profiles.Items.Count > 1) and not ChipSearchForm.Visible,
@@ -153,6 +156,19 @@ begin
     Commit := TButton(MainForm.FindComponent('CommitPreparedWrite'));
     Check(Commit.Enabled, 'preparation enables explicit Write');
     Check(Chip.PeekByte(0) = $FF, 'preparation does not program the chip');
+    if GetEnvironmentVariable('ASPROGRAMMER_PN_SCREENSHOT') <> '' then
+    begin
+      MainForm.Repaint;
+      Screenshot := MainForm.GetFormImage;
+      PNG := TPortableNetworkGraphic.Create;
+      try
+        PNG.Assign(Screenshot);
+        PNG.SaveToFile(GetEnvironmentVariable('ASPROGRAMMER_PN_SCREENSHOT'));
+      finally
+        PNG.Free;
+        Screenshot.Free;
+      end;
+    end;
     RecordLine('Prepared plan: ' + Summary.Text);
     Commit.Click;
     Check((Chip.PeekByte(0) = 1) and (Chip.PeekByte(7) = 8),

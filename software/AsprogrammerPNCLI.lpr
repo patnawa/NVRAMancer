@@ -1,4 +1,4 @@
-program NVRAMancerCLI;
+program AsprogrammerPNCLI;
 
 {$mode objfpc}{$H+}
 

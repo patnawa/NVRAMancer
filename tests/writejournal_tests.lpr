@@ -21,7 +21,7 @@ program writejournal_tests;
 {$mode objfpc}{$H+}
 
 uses
-  SysUtils, writejournal;
+  Classes, SysUtils, writejournal;
 
 var
   Failures, Assertions: integer;
@@ -399,7 +399,7 @@ var
   Reason: string;
 begin
   WriteLn('The same thing, through an actual file');
-  FileName := GetTempDir + 'nvramancer-journal-test.txt';
+  FileName := GetTempDir + 'asprogrammer-pn-journal-test.txt';
   DeleteFile(FileName);
 
   //A job that was never interrupted has no journal, and that is the ordinary
@@ -445,7 +445,44 @@ begin
   DeleteFile(FileName);
 end;
 
+procedure TestAppendAfterTornWrite;
+var
+  FileName, ErrMsg: string;
+  Stream: TFileStream;
+  Torn: RawByteString;
+  Journal: TWriteJournal;
+  Found: boolean;
 begin
+  FileName := GetTempDir + 'asprogrammer-pn-torn-append.txt';
+  try
+    Check('start torn-append fixture', BeginJournal(FileName, SampleHeader, ErrMsg));
+    Check('record completed unit before interruption',
+      AppendJournalMark(FileName, Unit_(juErase, 0, 4096), ErrMsg));
+    Stream := TFileStream.Create(FileName, fmOpenReadWrite);
+    try
+      Stream.Seek(0, soEnd);
+      Torn := 'program 0 2';
+      Stream.WriteBuffer(Torn[1], Length(Torn));
+    finally
+      Stream.Free;
+    end;
+    Check('append after interruption',
+      AppendJournalMark(FileName, Unit_(juProgram, 0, 256), ErrMsg));
+    Check('read progress after second session',
+      LoadJournal(FileName, Journal, Found, ErrMsg) and Found);
+    Check('torn tail does not swallow subsequent completed work',
+      Length(Journal.Marks) = 2);
+    if Length(Journal.Marks) = 2 then
+      Check('only exact complete units survive',
+        SameUnit(Journal.Marks[0], Unit_(juErase, 0, 4096)) and
+        SameUnit(Journal.Marks[1], Unit_(juProgram, 0, 256)));
+  finally
+    DeleteFile(FileName);
+  end;
+end;
+
+begin
+  TestAppendAfterTornWrite;
   TestATornLineIsWorkThatDidNotHappen;
   TestAMalformedLineStopsTheReplay;
   TestGarbageMarksAreRefusedIndividually;

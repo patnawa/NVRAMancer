@@ -3,15 +3,15 @@
 param([string]$Lazarus = 'C:\lazarus32')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$fixture = Join-Path ([IO.Path]::GetTempPath()) ('nvramancer-desktop-' + [guid]::NewGuid().ToString('N'))
+$fixture = Join-Path ([IO.Path]::GetTempPath()) ('asprogrammer-pn-desktop-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $fixture | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $fixture 'units'), (Join-Path $fixture 'lang'), (Join-Path $fixture 'backups') | Out-Null
 Write-Host "Desktop fixture: $fixture"
-& "$Lazarus\lazbuild.exe" --build-mode=Release "$root\software\NVRAMancer.lpi" *> (Join-Path $fixture 'build.log')
+& "$Lazarus\lazbuild.exe" --build-mode=Release "$root\software\AsprogrammerPN.lpi" *> (Join-Path $fixture 'build.log')
 if ($LASTEXITCODE -ne 0) { throw "Desktop build failed: $fixture\build.log" }
 
 # Reuse the package search paths resolved by Lazarus, without shell evaluation.
-[xml]$compiled = Get-Content -LiteralPath "$root\software\lib\i386-win32\NVRAMancer.compiled" -Raw
+[xml]$compiled = Get-Content -LiteralPath "$root\software\lib\i386-win32\AsprogrammerPN.compiled" -Raw
 $search = @("-Fu$root\software\lib\i386-win32")
 foreach ($token in [regex]::Matches($compiled.CONFIG.Params.Value, '(?:[^\s"]|"[^"]*")+')) {
   $arg = $token.Value.Replace('"', '')

@@ -140,7 +140,7 @@ public
 end;
 
 //คลาสสำหรับจัดการฮาร์ดแวร์
-TNVRAMancer = class
+TAsprogrammerPN = class
 private
   FCurrent_HW : THardwareList;
   FCurrent_prog: TBaseHardware;
@@ -164,7 +164,7 @@ var
   //ต้อง uses main ตามไปด้วย และ main ลาก LCL ทั้งกองมาด้วย
   //ผลคือชั้นโปรโตคอลอย่าง spi25 เอาไปทดสอบโดยไม่มีหน้าจอไม่ได้เลย
   //ที่นี่คือที่ที่มันควรอยู่ตั้งแต่แรก เพราะชนิดของมันก็ประกาศอยู่ตรงนี้
-  NVRAMancer: TNVRAMancer;
+  AsprogrammerPN: TAsprogrammerPN;
 
 implementation
 
@@ -301,13 +301,13 @@ begin
             (Protocol in Capabilities.Protocols);
 end;
 
-constructor TNVRAMancer.Create;
+constructor TAsprogrammerPN.Create;
 begin
   FCurrent_HW := CHW_NONE;
   FHwList := TList.Create;
 end;
 
-destructor TNVRAMancer.Destroy;
+destructor TAsprogrammerPN.Destroy;
 var
   i: integer;
 begin
@@ -317,12 +317,12 @@ begin
   inherited Destroy;
 end;
 
-procedure TNVRAMancer.AddHW(HW: pointer);
+procedure TAsprogrammerPN.AddHW(HW: pointer);
 begin
   FHwList.Add(HW);
 end;
 
-procedure TNVRAMancer.SetProgrammer(HW: THardwareList);
+procedure TAsprogrammerPN.SetProgrammer(HW: THardwareList);
 var
   i: integer;
 begin

@@ -610,7 +610,7 @@ var
   ScriptEngine: TPasCalc;
   RomF: TMemoryStream;
 
-  //NVRAMancer ย้ายไปอยู่ใน basehw ซึ่งเป็นที่ที่ชนิดของมันประกาศอยู่
+  //AsprogrammerPN ย้ายไปอยู่ใน basehw ซึ่งเป็นที่ที่ชนิดของมันประกาศอยู่
   //หน่วยที่คุยกับฮาร์ดแวร์จึงไม่ต้อง uses main อีกต่อไป
 
   Buzzpirat_ClocKhz: integer = 0;
@@ -1333,7 +1333,7 @@ end;
 //การชี้ไปยังไฟล์ที่ clone ใหม่ไม่มี คือคำแนะนำที่พาไปเจอทางตัน
 procedure LogDriverHint;
 begin
-  case NVRAMancer.Current_HW of
+  case AsprogrammerPN.Current_HW of
     CHW_CH341:
       LogPrint(STR_DRIVER_HINT + 'the WCH CH341PAR driver');
     CHW_CH347:
@@ -1345,7 +1345,7 @@ begin
     CHW_ARDUINO, CHW_BUZZPIRAT:
       LogPrint(STR_DRIVER_HINT_COM);
   end;
-  if NVRAMancer.Current_HW in [CHW_CH341, CHW_CH347, CHW_FT232H,
+  if AsprogrammerPN.Current_HW in [CHW_CH341, CHW_CH347, CHW_FT232H,
                                  CHW_USBASP, CHW_AVRISP] then
     LogPrint('see vendor-manifest.json for the vendor, version and SHA-256 ' +
              'of each driver package');
@@ -1363,7 +1363,7 @@ end;
 //สิ่งที่ทำได้และมีประโยชน์จริงคือบอกให้ผู้ใช้รู้ว่าต้องไปดูอะไร
 procedure LogBackendCaution;
 begin
-  if NVRAMancer.Current_HW <> CHW_CH341 then Exit;
+  if AsprogrammerPN.Current_HW <> CHW_CH341 then Exit;
   LogPrint('CH341A caution: this board family is widely reported to drive ' +
            '5 V on CS/CLK/MOSI while VCC reads 3.3 V. Whether yours does ' +
            'depends on a hardware modification, and software cannot see ' +
@@ -1375,9 +1375,9 @@ end;
 
 function OpenDevice: boolean;
 begin
-  if not NVRAMancer.Programmer.DevOpen then
+  if not AsprogrammerPN.Programmer.DevOpen then
   begin
-    LogPrint(NVRAMancer.Programmer.GetLastError);
+    LogPrint(AsprogrammerPN.Programmer.GetLastError);
     LogDriverHint;
     result := false;
     Exit;
@@ -1386,10 +1386,10 @@ begin
   //DevOpen ของ CH347 เพิ่งบังคับ 1.8V ไปแล้วถ้าบอร์ดสลับได้ จดไว้ตรงนี้
   //เพราะหลังปิดอุปกรณ์ SupportsTargetVoltage กลับเป็น False ทั้งที่ข้อเท็จจริง
   //ของบอร์ดไม่ได้หายไปไหน
-  if NVRAMancer.Current_HW = CHW_CH347 then
-    CH347VoltageControlSeen := NVRAMancer.Programmer.SupportsTargetVoltage;
+  if AsprogrammerPN.Current_HW = CHW_CH347 then
+    CH347VoltageControlSeen := AsprogrammerPN.Programmer.SupportsTargetVoltage;
 
-  LogPrint(STR_CURR_HW+NVRAMancer.Programmer.HardwareName);
+  LogPrint(STR_CURR_HW+AsprogrammerPN.Programmer.HardwareName);
   //สภาพรางไฟตอนนี้ ทันทีที่เปิดอุปกรณ์ได้ ก่อนงานใด ๆ จะเริ่ม
   //ที่สำคัญกว่าตัวเลขคือบรรทัดที่บอกว่าอะไรที่เครื่องนี้ "วัดไม่ได้"
   LogRailReport;
@@ -1634,8 +1634,13 @@ begin
   if BackupRoot <> '' then Exit(IncludeTrailingPathDelimiter(BackupRoot));
   Result := GetEnvironmentVariable('LOCALAPPDATA');
   if Result = '' then Result := GetAppConfigDir(False);
-  Result := IncludeTrailingPathDelimiter(Result) + 'NVRAMancer' +
-    DirectorySeparator + 'backups' + DirectorySeparator;
+  Result := IncludeTrailingPathDelimiter(Result);
+  // Preserve discovery of interrupted writes created before the product rename.
+  if DirectoryExists(Result + 'NVRAMancer' + DirectorySeparator + 'backups') then
+    Result := Result + 'NVRAMancer'
+  else
+    Result := Result + 'Asprogrammer PN';
+  Result := Result + DirectorySeparator + 'backups' + DirectorySeparator;
 end;
 
 procedure ShowInlineNotice(const Text: string);
@@ -1711,7 +1716,7 @@ begin
 
   FWorkspaceBrand := TLabel.Create(Self);
   FWorkspaceBrand.Parent := FWorkspaceBar;
-  FWorkspaceBrand.Caption := 'NVRAMancer';
+  FWorkspaceBrand.Caption := 'Asprogrammer PN';
   FWorkspaceBrand.AutoSize := False;
   FWorkspaceBrand.Layout := tlCenter;
   FWorkspaceBrand.Font.Size := 12;
@@ -1936,8 +1941,10 @@ begin
 
   Margin := Scale96ToForm(12);
   ButtonGap := Scale96ToForm(6);
+  Canvas.Font.Assign(FWorkspaceBrand.Font);
   FWorkspaceBrand.SetBounds(Margin, Scale96ToForm(8),
-    Scale96ToForm(132), Scale96ToForm(46));
+    Canvas.TextWidth(FWorkspaceBrand.Caption) + Scale96ToForm(8),
+    Scale96ToForm(46));
 
   ButtonWidths[wmRepair] := Scale96ToForm(96);
   ButtonWidths[wmBench] := Scale96ToForm(92);
@@ -1960,7 +1967,7 @@ begin
 
   NavWidth := ButtonWidths[wmRepair] + ButtonWidths[wmBench] +
     ButtonWidths[wmProduction] + (ButtonGap * 2);
-  NavStart := Scale96ToForm(150);
+  NavStart := FWorkspaceBrand.Left + FWorkspaceBrand.Width + ButtonGap;
   if NavStart + NavWidth + Margin >
      FWorkspaceBar.ClientWidth - SafeWidth - Margin then
   begin
@@ -2367,7 +2374,7 @@ begin
                              FWorkflowVerify.Enabled;
   RepairContext.SmartWritePreviewAvailable :=
     (FWorkflowSmart <> nil) and FWorkflowSmart.Enabled;
-  if (NVRAMancer.Current_HW = CHW_EZP) and RepairContext.IdentityProven and
+  if (AsprogrammerPN.Current_HW = CHW_EZP) and RepairContext.IdentityProven and
      RepairContext.HasBuffer and (CurrentICParam.Size > 0) and
      (MPHexEditorEx.DataSize <= CurrentICParam.Size) then
     RepairContext.SmartWritePreviewAvailable := True;
@@ -2379,8 +2386,8 @@ begin
     RepairContext.SmartWriteReason := FWorkflowSmart.Hint;
   if FWorkflowState <> nil then
     RepairContext.StateDetail := FWorkflowState.Caption;
-  if ProgrammerPresent and (NVRAMancer <> nil) and
-     (NVRAMancer.Current_HW in [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG]) then
+  if ProgrammerPresent and (AsprogrammerPN <> nil) and
+     (AsprogrammerPN.Current_HW in [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG]) then
   begin
     if RepairContext.StateDetail <> '' then
       RepairContext.StateDetail := RepairContext.StateDetail + LineEnding;
@@ -3202,7 +3209,7 @@ begin
 
   //Programmer เป็น nil ได้ตอน Current_HW = CHW_NONE แผงข้อมูลห้ามพาแอป
   //ล้มเพราะเรื่องแค่นี้ และห้ามทิ้งข้อเท็จจริงเก่าค้างอยู่บนหน้าจอ
-  if (NVRAMancer = nil) or (NVRAMancer.Programmer = nil) then
+  if (AsprogrammerPN = nil) or (AsprogrammerPN.Programmer = nil) then
   begin
     FTelemetryValues[0].Caption := STR_SHELL_TEL_NO_PROGRAMMER;
     FTelemetryValues[1].Caption := STR_SHELL_TEL_NO_PROTOCOL;
@@ -3218,7 +3225,7 @@ begin
     Exit;
   end;
 
-  case NVRAMancer.Current_HW of
+  case AsprogrammerPN.Current_HW of
     CHW_EZP:
       begin
         TransportText := STR_SHELL_TEL_EZP_TRANSPORT;
@@ -3238,10 +3245,10 @@ begin
     TransportText := STR_SHELL_TEL_USB_TRANSPORT;
   end;
 
-  if NVRAMancer.Current_HW <> CHW_EZP then
+  if AsprogrammerPN.Current_HW <> CHW_EZP then
   begin
     ClockMenu := nil;
-    case NVRAMancer.Current_HW of
+    case AsprogrammerPN.Current_HW of
       CHW_CH341, CHW_USBASP: ClockMenu := MenuSPIClock;
       CHW_CH347: ClockMenu := MenuCH347SPIClock;
       CHW_FT232H: ClockMenu := MenuFT232SPIClock;
@@ -3263,17 +3270,17 @@ begin
     end;
   end;
 
-  if ProgrammerPresent and (NVRAMancer.Current_HW in
+  if ProgrammerPresent and (AsprogrammerPN.Current_HW in
      [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG]) then
     ConnectionText := Format(STR_SHELL_TEL_CONNECTION_SELECTED,
-      [NVRAMancer.Programmer.HardwareName])
+      [AsprogrammerPN.Programmer.HardwareName])
   else if ProgrammerPresent then
     ConnectionText := Format(STR_SHELL_TEL_CONNECTION_AVAILABLE,
-      [NVRAMancer.Programmer.HardwareName])
+      [AsprogrammerPN.Programmer.HardwareName])
   else
     ConnectionText := Format(STR_SHELL_TEL_CONNECTION_DISCONNECTED,
-      [NVRAMancer.Programmer.HardwareName]);
-  if not (ProgrammerPresent and (NVRAMancer.Current_HW in
+      [AsprogrammerPN.Programmer.HardwareName]);
+  if not (ProgrammerPresent and (AsprogrammerPN.Current_HW in
      [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG])) then
     ConnectionText := ConnectionText + LineEnding + TransportText;
   FTelemetryValues[0].Caption := ConnectionText;
@@ -3282,14 +3289,14 @@ begin
 
   Caps := Default(TProgrammerElectricalCapabilities);
   Obs := Default(TElectricalObservation);
-  CapsValid := NVRAMancer.Programmer.GetElectricalCapabilities(Caps);
-  ObsValid := NVRAMancer.Programmer.GetElectricalObservation(Obs);
+  CapsValid := AsprogrammerPN.Programmer.GetElectricalCapabilities(Caps);
+  ObsValid := AsprogrammerPN.Programmer.GetElectricalObservation(Obs);
   Report := BuildRailReport(Caps, Obs, CapsValid, ObsValid);
   //A closed CH347 cannot return an observation, but the menu still records
   //the voltage the user asked for.  Fill only the requested side of the
   //report; the measured side must remain explicitly unmeasurable.
   if (not Report.RequestedKnown) and
-     (NVRAMancer.Current_HW = CHW_CH347) then
+     (AsprogrammerPN.Current_HW = CHW_CH347) then
   begin
     ConfiguredTargetMv := SelectedCH347Vcc;
     if ConfiguredTargetMv > 0 then
@@ -3301,7 +3308,7 @@ begin
   if Report.RequestedKnown then
     PowerText := Format(STR_SHELL_TEL_REQUESTED,
       [railreport.VoltageText(Report.RequestedMv)])
-  else if (NVRAMancer.Current_HW = CHW_CH347) and
+  else if (AsprogrammerPN.Current_HW = CHW_CH347) and
           MenuCH347VccAuto.Checked then
     PowerText := STR_SHELL_TEL_REQUESTED_AUTO
   else
@@ -3567,7 +3574,7 @@ begin
   try
     if F.Size < Length(ProjectMagic) + SizeOf(Len) then
     begin
-      ErrMsg := 'Not an NVRAMancer project file';
+      ErrMsg := 'Not an Asprogrammer PN project file';
       Exit;
     end;
 
@@ -3575,7 +3582,7 @@ begin
     F.ReadBuffer(Magic[1], Length(ProjectMagic));
     if Magic <> ProjectMagic then
     begin
-      ErrMsg := 'Not an NVRAMancer project file';
+      ErrMsg := 'Not an Asprogrammer PN project file';
       Exit;
     end;
 
@@ -4876,7 +4883,7 @@ var
 
 begin
   N := 0;
-  if NVRAMancer.Current_HW = CHW_CH347 then
+  if AsprogrammerPN.Current_HW = CHW_CH347 then
   begin
     Add(MainForm.MenuCH347SPIClock60MHz);
     Add(MainForm.MenuCH347SPIClock30MHz);
@@ -4887,12 +4894,12 @@ begin
     Add(MainForm.MenuCH347SPIClock937_5KHz);
     Add(MainForm.MenuCH347SPIClock468_75KHz);
   end
-  else if NVRAMancer.Current_HW = CHW_FT232H then
+  else if AsprogrammerPN.Current_HW = CHW_FT232H then
   begin
     Add(MainForm.MenuFT232SPI30Mhz);
     Add(MainForm.MenuFT232SPI6Mhz);
   end
-  else if NVRAMancer.Current_HW = CHW_USBASP then
+  else if AsprogrammerPN.Current_HW = CHW_USBASP then
   begin
     Add(MainForm.Menu3Mhz);
     Add(MainForm.Menu1_5Mhz);
@@ -4902,15 +4909,15 @@ begin
     Add(MainForm.Menu93_75Khz);
     Add(MainForm.Menu32Khz);
   end
-  else if (NVRAMancer.Current_HW = CHW_ARDUINO) or
-          (NVRAMancer.Current_HW = CHW_BUZZPIRAT) then
+  else if (AsprogrammerPN.Current_HW = CHW_ARDUINO) or
+          (AsprogrammerPN.Current_HW = CHW_BUZZPIRAT) then
   begin
     Add(MainForm.MenuArduinoISP8Mhz);
     Add(MainForm.MenuArduinoISP4Mhz);
     Add(MainForm.MenuArduinoISP2Mhz);
     Add(MainForm.MenuArduinoISP1Mhz);
   end
-  else if NVRAMancer.Current_HW = CHW_AVRISP then
+  else if AsprogrammerPN.Current_HW = CHW_AVRISP then
   begin
     Add(MainForm.MenuAVRISP8Mhz);
     Add(MainForm.MenuAVRISP4Mhz);
@@ -5114,8 +5121,8 @@ var
   OpenedHere: boolean;
 begin
   Result := True;
-  if NVRAMancer.Programmer = nil then Exit;
-  if NVRAMancer.Current_HW <> CHW_CH347 then Exit;
+  if AsprogrammerPN.Programmer = nil then Exit;
+  if AsprogrammerPN.Current_HW <> CHW_CH347 then Exit;
 
   //โปรแกรมนี้เปิดอุปกรณ์เฉพาะตอนทำงานแล้วปิดทันทีที่จบ ตอนผู้ใช้กดเลือก
   //แรงดันจากหน้าจอ อุปกรณ์จึงยังไม่ได้เปิด และ SupportsTargetVoltage คืน
@@ -5126,13 +5133,13 @@ begin
   //เปิดเองชั่วคราวแล้วปิดคืนจึงเป็นสิ่งที่ต้องทำ ระดับที่ตั้งไว้ค้างอยู่ใน
   //ฮาร์ดแวร์ต่อไปหลังปิด จึงยังมีผลตอนเริ่มงานจริง
   OpenedHere := False;
-  if not NVRAMancer.Programmer.SupportsTargetVoltage then
+  if not AsprogrammerPN.Programmer.SupportsTargetVoltage then
   begin
-    if not NVRAMancer.Programmer.DevOpen then Exit;
+    if not AsprogrammerPN.Programmer.DevOpen then Exit;
     OpenedHere := True;
-    if not NVRAMancer.Programmer.SupportsTargetVoltage then
+    if not AsprogrammerPN.Programmer.SupportsTargetVoltage then
     begin
-      NVRAMancer.Programmer.DevClose;
+      AsprogrammerPN.Programmer.DevClose;
       Exit;
     end;
   end;
@@ -5160,9 +5167,9 @@ begin
   end;
 
   //ระดับตรงตามที่ขออยู่แล้ว ไม่มีอะไรขยับ
-  if NVRAMancer.Programmer.GetTargetVoltageMv = Want then Exit;
+  if AsprogrammerPN.Programmer.GetTargetVoltageMv = Want then Exit;
 
-  if not NVRAMancer.Programmer.SetTargetVoltageMv(Want) then
+  if not AsprogrammerPN.Programmer.SetTargetVoltageMv(Want) then
   begin
     LogPrint(Format(STR_CH347_VCC_FAILED, [Want]));
     Exit(False);
@@ -5174,7 +5181,7 @@ begin
   NoteSession(seRailChanged);
   finally
     //ปิดคืนเฉพาะตัวที่เราเปิดเอง ห้ามไปปิดของงานที่กำลังเดินอยู่
-    if OpenedHere then NVRAMancer.Programmer.DevClose;
+    if OpenedHere then AsprogrammerPN.Programmer.DevClose;
   end;
 end;
 
@@ -5192,7 +5199,7 @@ begin
   WasVisible := MainForm.GroupCH347Vcc.Visible;
   CH347VccPanelUpdating := True;
   try
-    MainForm.GroupCH347Vcc.Visible := NVRAMancer.Current_HW = CHW_CH347;
+    MainForm.GroupCH347Vcc.Visible := AsprogrammerPN.Current_HW = CHW_CH347;
     MainForm.RadioCH347VccAuto.Checked := MainForm.MenuCH347VccAuto.Checked;
     MainForm.RadioCH347Vcc3V3.Checked := MainForm.MenuCH347Vcc3V3.Checked;
     MainForm.RadioCH347Vcc1V8.Checked := MainForm.MenuCH347Vcc1V8.Checked;
@@ -5201,7 +5208,7 @@ begin
     //แบบเดียวกับช่อง "芯片电压" ของโปรแกรมผู้ผลิต
     //ปุ่มลองรางอีกระดับเป็นของชั่วคราวของรอบตรวจที่เพิ่งล้ม
     //พอมีอะไรเปลี่ยน มันหมดความหมายทันที
-    if NVRAMancer.Current_HW <> CHW_CH347 then
+    if AsprogrammerPN.Current_HW <> CHW_CH347 then
       MainForm.ButtonTryOtherRail.Visible := False;
 
     ChipVcc := CatalogVccDisplay(CurrentChipVccText);
@@ -5315,7 +5322,7 @@ var
   Mismatch: string;
   Advice: TCH347VccAdvice;
 begin
-  if NVRAMancer.Current_HW <> CHW_CH347 then Exit;
+  if AsprogrammerPN.Current_HW <> CHW_CH347 then Exit;
   if not CH347VoltageControlSeen then Exit;
 
   //ผ่านตัวหาสามชั้น ไม่ใช่ช่อง vcc ดิบ ไม่งั้นคำเตือน "ปักไว้สูงเกิน" จะไม่
@@ -5412,7 +5419,7 @@ var
   Index: integer;
 begin
   Result := 0;
-  case NVRAMancer.Current_HW of
+  case AsprogrammerPN.Current_HW of
     CHW_CH347:
       begin
         //ตารางตัวหารของ CH347: ดัชนี 0 คือ 60MHz แล้วหารสองไปเรื่อย ๆ
@@ -5477,11 +5484,11 @@ begin
   FillChar(Obs, SizeOf(Obs), 0);
   CapsValid := False;
   ObsValid := False;
-  Result := NVRAMancer.Programmer <> nil;
+  Result := AsprogrammerPN.Programmer <> nil;
   if not Result then Exit;
 
-  CapsValid := NVRAMancer.Programmer.GetElectricalCapabilities(Caps);
-  ObsValid := NVRAMancer.Programmer.GetElectricalObservation(Obs);
+  CapsValid := AsprogrammerPN.Programmer.GetElectricalCapabilities(Caps);
+  ObsValid := AsprogrammerPN.Programmer.GetElectricalObservation(Obs);
   //ความเร็วบัสไม่ใช่ของที่ backend รู้ มันมาจากเมนูบนหน้าจอหรือจากสวิตช์
   //ของบรรทัดคำสั่ง เติมตรงนี้ที่เดียว ผู้เรียกจะได้ไม่ลืมทีละที่
   if ObsValid then Obs.RequestedBusHz := CurrentBusHz;
@@ -5594,8 +5601,8 @@ var
 begin
   SetLength(TuneRungs, 0);
   Result := 0;
-  if (NVRAMancer.Current_HW <> CHW_CH347) and
-     (NVRAMancer.Current_HW <> CHW_FT232H) then Exit;
+  if (AsprogrammerPN.Current_HW <> CHW_CH347) and
+     (AsprogrammerPN.Current_HW <> CHW_FT232H) then Exit;
 
   for i := 0 to High(Items) do Items[i] := nil;
   Count := SPISpeedMenuLadder(Items);
@@ -5606,7 +5613,7 @@ begin
   for i := Count - 1 downto 0 do
   begin
     Hz := 0;
-    case NVRAMancer.Current_HW of
+    case AsprogrammerPN.Current_HW of
       CHW_CH347:
         //ตารางตัวหารของ CH347: Tag คือจำนวนครั้งที่หาร 60MHz ด้วยสอง
         if (Items[i].Tag >= 0) and (Items[i].Tag <= 7) then
@@ -5902,18 +5909,18 @@ procedure VerifyFlash25(var RomStream: TMemoryStream;
 function ReVerifyInFreshSession(StartAddr, Len: cardinal): boolean;
 begin
   Result := True;
-  if NVRAMancer.Programmer = nil then Exit;
+  if AsprogrammerPN.Programmer = nil then Exit;
   if RomF = nil then Exit;
 
   LogPrint('re-verifying in a fresh device session');
 
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   //ให้ไดรเวอร์ปล่อยหมายเลขอุปกรณ์คืนก่อน เปิดซ้ำเร็วเกินไปบางครั้งได้
   //แฮนเดิลเดิมกลับมาโดยที่สถานะยังไม่ถูกล้าง ซึ่งทำให้รอบนี้ไม่มีความหมาย
   Sleep(250);
 
-  if not NVRAMancer.Programmer.DevOpen then
+  if not AsprogrammerPN.Programmer.DevOpen then
   begin
     //เปิดไม่ได้แปลว่าตรวจไม่ได้ ไม่ใช่ตรวจแล้วผ่าน
     OpFail('the device could not be reopened for the second verify pass');
@@ -6069,7 +6076,7 @@ begin
   Off := 0;
   while Off < Len do
   begin
-    Chunk := NVRAMancer.Programmer.SPIMaxTransfer;
+    Chunk := AsprogrammerPN.Programmer.SPIMaxTransfer;
     if cardinal(Chunk) > Len - Off then Chunk := integer(Len - Off);
     //หน้า EAR: ก้อนห้ามข้ามขอบ 16MB และหน้าต้องตรงก่อนทุกคำสั่ง
     if CapUseEAR then
@@ -6273,7 +6280,7 @@ begin
   finally
     ChipTestEnd4B;
     ExitProgMode25;
-    NVRAMancer.Programmer.DevClose;
+    AsprogrammerPN.Programmer.DevClose;
     LogPrint(STR_OP_RESULT + OpSummary);
     UnlockControl;
   end;
@@ -6359,7 +6366,7 @@ begin
   finally
     ChipTestEnd4B;
     ExitProgMode25;
-    NVRAMancer.Programmer.DevClose;
+    AsprogrammerPN.Programmer.DevClose;
     SetProgressPos(0);
     LogPrint(STR_OP_RESULT + OpSummary);
     UnlockControl;
@@ -6526,7 +6533,7 @@ begin
   ForgetChipContent;
   ControlsLocked := False;
 try
-  if NVRAMancer.Current_HW <> CHW_EZP then
+  if AsprogrammerPN.Current_HW <> CHW_EZP then
   begin
     OpFail('this path is only for the EZP2023+');
     Exit;
@@ -6589,7 +6596,7 @@ try
   end;
     LockControl;
     ControlsLocked := True;
-    Dev := TEZPHardware(NVRAMancer.Programmer);
+    Dev := TEZPHardware(AsprogrammerPN.Programmer);
     if not BackupPhysicalImage then
     begin
       LogPrint(STR_BACKUP_FAILED);
@@ -6639,7 +6646,7 @@ try
     end;
     OpProgress(Size, Size);
   finally
-    NVRAMancer.Programmer.DevClose;
+    AsprogrammerPN.Programmer.DevClose;
     SetProgressPos(0);
     LogPrint(STR_OP_RESULT + OpSummary);
     if ControlsLocked then UnlockControl;
@@ -6797,7 +6804,7 @@ begin
                'test, run Chip -> True capacity test');
   finally
     ExitProgMode25;
-    NVRAMancer.Programmer.DevClose;
+    AsprogrammerPN.Programmer.DevClose;
     LogPrint(STR_OP_RESULT + OpSummary);
     UnlockControl;
   end;
@@ -7001,10 +7008,10 @@ begin
                                  CurrentICParam.ID);
 
   //Bus Pirate ตั้งขาเป็น open-drain แล้วจ่ายไฟจากภายนอกได้
-  Ctx.ExternallyPowered := NVRAMancer.Current_HW in
+  Ctx.ExternallyPowered := AsprogrammerPN.Current_HW in
                            [CHW_BUZZPIRAT, CHW_ARDUINO];
 
-  Ctx.RailSelectable := (NVRAMancer.Current_HW = CHW_CH347) and
+  Ctx.RailSelectable := (AsprogrammerPN.Current_HW = CHW_CH347) and
                         CH347VoltageControlSeen;
   Ctx.SelectedRailMv := SelectedCH347Vcc;
   Ctx.LowRailMv := CH347_VCC_1V8_MV;
@@ -8041,8 +8048,8 @@ begin
   J.AddString('chip', CurrentICParam.Name);
   J.AddString('jedec_id', UpperCase(CurrentICParam.ID));
 
-  if NVRAMancer.Programmer <> nil then
-    J.AddString('programmer', NVRAMancer.Programmer.HardwareName)
+  if AsprogrammerPN.Programmer <> nil then
+    J.AddString('programmer', AsprogrammerPN.Programmer.HardwareName)
   else
     J.AddNull('programmer');
 
@@ -8052,10 +8059,10 @@ begin
   FillChar(Obs, SizeOf(Obs), 0);
   CapsValid := False;
   ObsValid := False;
-  if NVRAMancer.Programmer <> nil then
+  if AsprogrammerPN.Programmer <> nil then
   begin
-    CapsValid := NVRAMancer.Programmer.GetElectricalCapabilities(Caps);
-    ObsValid := NVRAMancer.Programmer.GetElectricalObservation(Obs);
+    CapsValid := AsprogrammerPN.Programmer.GetElectricalCapabilities(Caps);
+    ObsValid := AsprogrammerPN.Programmer.GetElectricalObservation(Obs);
   end;
   Report := BuildRailReport(Caps, Obs, CapsValid, ObsValid);
   if Report.RequestedKnown then
@@ -8563,8 +8570,8 @@ begin
   //บิต QE ไม่ได้อ่านตรงนี้ เพราะการอ่านต้องยิง opcode ที่ SFDP เพิ่งบอกมา
   //และเรายังไม่รู้ว่ามันคุ้มจะยิงไหม ส่ง "ยังไม่ได้อ่าน" ไป ซึ่งต่างจาก
   //"อ่านแล้วเป็นศูนย์" อย่างชัดเจนในคำตอบที่ได้กลับมา
-  if NVRAMancer.Programmer <> nil then
-    NVRAMancer.Programmer.GetMemoryCapabilities(MemCaps)
+  if AsprogrammerPN.Programmer <> nil then
+    AsprogrammerPN.Programmer.GetMemoryCapabilities(MemCaps)
   else
     FillChar(MemCaps, SizeOf(MemCaps), 0);
   Quad := PlanQuadRead(Info.Valid, Info, False, 0, MemCaps.SupportsQuadSPI);
@@ -8631,8 +8638,8 @@ begin
   //แต่สำหรับ CH347 เลข 0 ไม่ใช่ค่ากลาง ๆ มันคือ 60MHz ซึ่งเร็วที่สุดที่ตั้งได้
   //"ยังไม่ได้เลือก" จึงห้ามแปลว่า "เร็วสุด" ตั้งพื้นไว้ที่ 15MHz เท่าค่าปริยาย
   //ของเมนู ถ้ามีรายการไหนติ๊กอยู่ โค้ดข้างล่างจะทับค่านี้เองอยู่แล้ว
-  if NVRAMancer.Current_HW = CHW_CH347 then Speed := 2;
-  if NVRAMancer.Current_HW = CHW_ARDUINO then
+  if AsprogrammerPN.Current_HW = CHW_CH347 then Speed := 2;
+  if AsprogrammerPN.Current_HW = CHW_ARDUINO then
   begin
     if MainForm.MenuArduinoISP8Mhz.Checked then Speed := MainForm.MenuArduinoISP8Mhz.Tag;
     if MainForm.MenuArduinoISP4Mhz.Checked then Speed := MainForm.MenuArduinoISP4Mhz.Tag;
@@ -8640,7 +8647,7 @@ begin
     if MainForm.MenuArduinoISP1Mhz.Checked then Speed := MainForm.MenuArduinoISP1Mhz.Tag;
   end;
 
-  if NVRAMancer.Current_HW = CHW_BUZZPIRAT then
+  if AsprogrammerPN.Current_HW = CHW_BUZZPIRAT then
   begin
     if MainForm.MenuArduinoISP8Mhz.Checked then Speed := MainForm.MenuArduinoISP8Mhz.Tag;
     if MainForm.MenuArduinoISP4Mhz.Checked then Speed := MainForm.MenuArduinoISP4Mhz.Tag;
@@ -8648,7 +8655,7 @@ begin
     if MainForm.MenuArduinoISP1Mhz.Checked then Speed := MainForm.MenuArduinoISP1Mhz.Tag;
   end;
 
-  if NVRAMancer.Current_HW = CHW_AVRISP then
+  if AsprogrammerPN.Current_HW = CHW_AVRISP then
   begin
     if MainForm.MenuAVRISP8Mhz.Checked then Speed := MainForm.MenuAVRISP8Mhz.Tag;
     if MainForm.MenuAVRISP4Mhz.Checked then Speed := MainForm.MenuAVRISP4Mhz.Tag;
@@ -8659,7 +8666,7 @@ begin
     if MainForm.MenuAVRISP125Khz.Checked then Speed := MainForm.MenuAVRISP125Khz.Tag;
   end;
 
-  if (MainForm.RadioSPI.Checked) and (NVRAMancer.Current_HW = CHW_USBASP) then
+  if (MainForm.RadioSPI.Checked) and (AsprogrammerPN.Current_HW = CHW_USBASP) then
   begin
     if MainForm.Menu3Mhz.Checked then Speed := MainForm.Menu3Mhz.Tag;
     if MainForm.Menu1_5Mhz.Checked then Speed := MainForm.Menu1_5Mhz.Tag;
@@ -8670,20 +8677,20 @@ begin
     if MainForm.Menu32Khz.Checked then Speed := MainForm.Menu32Khz.Tag;
   end;
 
-  if (MainForm.RadioMw.Checked) and (NVRAMancer.Current_HW = CHW_USBASP) then
+  if (MainForm.RadioMw.Checked) and (AsprogrammerPN.Current_HW = CHW_USBASP) then
   begin
     if MainForm.MenuMW32Khz.Checked then Speed := MainForm.MenuMW32Khz.Tag;
     if MainForm.MenuMW16Khz.Checked then Speed := MainForm.MenuMW16Khz.Tag;
     if MainForm.MenuMW8Khz.Checked then Speed := MainForm.MenuMW8Khz.Tag;
   end;
 
-  if (MainForm.RadioSPI.Checked) and (NVRAMancer.Current_HW = CHW_FT232H) then
+  if (MainForm.RadioSPI.Checked) and (AsprogrammerPN.Current_HW = CHW_FT232H) then
   begin
     if MainForm.MenuFT232SPI30Mhz.Checked then Speed := MainForm.MenuFT232SPI30Mhz.Tag;
     if MainForm.MenuFT232SPI6Mhz.Checked then Speed := MainForm.MenuFT232SPI6Mhz.Tag;
   end;
 
-  if (MainForm.RadioSPI.Checked) and (NVRAMancer.Current_HW = CHW_CH347) then
+  if (MainForm.RadioSPI.Checked) and (AsprogrammerPN.Current_HW = CHW_CH347) then
   begin
     if MainForm.MenuCH347SPIClock60MHz.Checked then Speed := MainForm.MenuCH347SPIClock60MHz.Tag;
     if MainForm.MenuCH347SPIClock30MHz.Checked then Speed := MainForm.MenuCH347SPIClock30MHz.Tag;
@@ -8708,7 +8715,7 @@ end;
 function FastSPIClockWarning: string;
 begin
   Result := '';
-  if NVRAMancer.Current_HW <> CHW_CH347 then Exit;
+  if AsprogrammerPN.Current_HW <> CHW_CH347 then Exit;
   if MainForm.MenuCH347SPIClock60MHz.Checked then Result := '60 MHz';
   if MainForm.MenuCH347SPIClock30MHz.Checked then Result := '30 MHz';
 end;
@@ -9622,9 +9629,9 @@ var
     exit;
   end;
 
-  if NVRAMancer.Current_HW = CHW_FT232H then
+  if AsprogrammerPN.Current_HW = CHW_FT232H then
     ChunkSize := 16787 else
-  if NVRAMancer.Current_HW = CHW_CH347 then
+  if AsprogrammerPN.Current_HW = CHW_CH347 then
     ChunkSize := SizeOf(DataChunk)
   else
     ChunkSize := 2048;
@@ -9692,7 +9699,7 @@ var
         OpFail(Format('the %s did not complete a read transfer at 0x%.8x ' +
           'after %d attempts. Nothing was read; this is the cable, the ' +
           'supply or the programmer, not the chip',
-          [NVRAMancer.Programmer.HardwareName, Address, READ_MAX_ATTEMPTS]),
+          [AsprogrammerPN.Programmer.HardwareName, Address, READ_MAX_ATTEMPTS]),
           Address)
       else
         OpFail(Format('SPI flash short read: received %d of %d bytes',
@@ -9977,7 +9984,7 @@ var
     exit;
   end;
 
-  if NVRAMancer.Current_HW = CHW_FT232H then
+  if AsprogrammerPN.Current_HW = CHW_FT232H then
     ChunkSize := SizeOf(DataChunk)
   else
     ChunkSize := 2048;
@@ -10733,7 +10740,7 @@ begin
   //still on the stack.  This is the authoritative mutation boundary; disabled
   //menus are only the visible UX layer.
   if OperationRunning then Exit;
-  if (NVRAMancer <> nil) and (NVRAMancer.Current_HW <> programmer) then
+  if (AsprogrammerPN <> nil) and (AsprogrammerPN.Current_HW <> programmer) then
   begin
     //A different programmer means a different socket/clip observation.  Never
     //carry a live ID or chip-content owner across that physical boundary,
@@ -10757,7 +10764,7 @@ begin
     MainForm.MenuArduinoSPIClock.Visible:= false;
     MainForm.MenuFT232SPIClock.Visible:= false;
     MainForm.MenuMicrowire.Enabled:= true;
-    NVRAMancer.Current_HW := CHW_USBASP;
+    AsprogrammerPN.Current_HW := CHW_USBASP;
   end;
 
   if programmer = CHW_CH341 then
@@ -10768,7 +10775,7 @@ begin
     MainForm.MenuArduinoSPIClock.Visible:= false;
     MainForm.MenuFT232SPIClock.Visible:= false;
     MainForm.MenuMicrowire.Enabled:= false;
-    NVRAMancer.Current_HW := CHW_CH341;
+    AsprogrammerPN.Current_HW := CHW_CH341;
   end;
 
   if programmer = CHW_CH347 then
@@ -10779,7 +10786,7 @@ begin
     MainForm.MenuArduinoSPIClock.Visible:= false;
     MainForm.MenuFT232SPIClock.Visible:= false;
     MainForm.MenuMicrowire.Enabled:= false;
-    NVRAMancer.Current_HW := CHW_CH347;
+    AsprogrammerPN.Current_HW := CHW_CH347;
   end;
 
   if programmer = CHW_AVRISP then
@@ -10790,7 +10797,7 @@ begin
     MainForm.MenuArduinoSPIClock.Visible:= false;
     MainForm.MenuFT232SPIClock.Visible:= false;
     MainForm.MenuMicrowire.Enabled:= false;
-    NVRAMancer.Current_HW := CHW_AVRISP;
+    AsprogrammerPN.Current_HW := CHW_AVRISP;
   end;
 
   if programmer = CHW_ARDUINO then
@@ -10801,7 +10808,7 @@ begin
     MainForm.MenuArduinoSPIClock.Visible:= true;
     MainForm.MenuFT232SPIClock.Visible:= false;
     MainForm.MenuMicrowire.Enabled:= false;
-    NVRAMancer.Current_HW := CHW_ARDUINO;
+    AsprogrammerPN.Current_HW := CHW_ARDUINO;
   end;
 
   if programmer = CHW_SIM then
@@ -10812,7 +10819,7 @@ begin
     MainForm.MenuArduinoSPIClock.Visible := False;
     MainForm.MenuFT232SPIClock.Visible := False;
     MainForm.MenuMicrowire.Enabled := False;
-    NVRAMancer.Current_HW := CHW_SIM;
+    AsprogrammerPN.Current_HW := CHW_SIM;
     SetHardwareMenuCheck(CHW_SIM);
   end;
 
@@ -10826,7 +10833,7 @@ begin
     MainForm.MenuArduinoSPIClock.Visible:= false;
     MainForm.MenuFT232SPIClock.Visible:= false;
     MainForm.MenuMicrowire.Enabled:= false;
-    NVRAMancer.Current_HW := CHW_EZP;
+    AsprogrammerPN.Current_HW := CHW_EZP;
   end;
 
   if programmer = CHW_SERPROG then
@@ -10838,7 +10845,7 @@ begin
     MainForm.MenuArduinoSPIClock.Visible:= false;
     MainForm.MenuFT232SPIClock.Visible:= false;
     MainForm.MenuMicrowire.Enabled:= false;
-    NVRAMancer.Current_HW := CHW_SERPROG;
+    AsprogrammerPN.Current_HW := CHW_SERPROG;
   end;
 
   if programmer = CHW_BUZZPIRAT then
@@ -10848,7 +10855,7 @@ begin
     MainForm.MenuArduinoSPIClock.Visible:= false;
     MainForm.MenuFT232SPIClock.Visible:= false;
     MainForm.MenuMicrowire.Enabled:= false;
-    NVRAMancer.Current_HW := CHW_BUZZPIRAT;
+    AsprogrammerPN.Current_HW := CHW_BUZZPIRAT;
   end;
 
   if programmer = CHW_FT232H then
@@ -10859,7 +10866,7 @@ begin
     MainForm.MenuAVRISPSPIClock.Visible:= false;
     MainForm.MenuArduinoSPIClock.Visible:= false;
     MainForm.MenuMicrowire.Enabled:= false;
-    NVRAMancer.Current_HW := CHW_FT232H;
+    AsprogrammerPN.Current_HW := CHW_FT232H;
   end;
 
   //กล่องเลือกแรงดันบนหน้าหลักผูกกับ CH347 เท่านั้น โผล่และหุบตามเครื่องที่เลือก
@@ -10880,28 +10887,28 @@ var
 begin
   Result := False;
   Found := CHW_NONE;
-  Saved := NVRAMancer.Current_HW;
+  Saved := AsprogrammerPN.Current_HW;
 
   for i := Low(Candidates) to High(Candidates) do
   begin
-    NVRAMancer.Current_HW := Candidates[i];
+    AsprogrammerPN.Current_HW := Candidates[i];
     if (Candidates[i] = CHW_EZP) and EZPDevicePresent then
     begin
       Found := Candidates[i];
-      NVRAMancer.Current_HW := Saved;
+      AsprogrammerPN.Current_HW := Saved;
       Exit(True);
     end
     else if (Candidates[i] <> CHW_EZP) and
-            NVRAMancer.Programmer.DevOpen then
+            AsprogrammerPN.Programmer.DevOpen then
     begin
-      NVRAMancer.Programmer.DevClose;
+      AsprogrammerPN.Programmer.DevClose;
       Found := Candidates[i];
-      NVRAMancer.Current_HW := Saved;
+      AsprogrammerPN.Current_HW := Saved;
       Exit(True);
     end;
   end;
 
-  NVRAMancer.Current_HW := Saved;
+  AsprogrammerPN.Current_HW := Saved;
 end;
 
 //ติ๊กเมนู Hardware ให้ตรงกับอุปกรณ์ที่ใช้งานอยู่จริง
@@ -10941,19 +10948,19 @@ begin
     SelectHW(Found);
     SetHardwareMenuCheck(Found);
     Present := True;
-    LogPrint(STR_HW_SWITCHED + NVRAMancer.Programmer.HardwareName);
+    LogPrint(STR_HW_SWITCHED + AsprogrammerPN.Programmer.HardwareName);
   end
   //อุปกรณ์ serial ไม่เอามาวนเช็ค เพราะจะไปจับพอร์ตทิ้งขว้างตลอดเวลา
-  else if NVRAMancer.Current_HW in
+  else if AsprogrammerPN.Current_HW in
           [CHW_ARDUINO, CHW_BUZZPIRAT, CHW_SERPROG] then
     Present := True
   //EZP ตรวจ presence จากรายการ USB เท่านั้น ไม่เปิดหรือ claim ตัวเครื่อง
-  else if NVRAMancer.Current_HW = CHW_EZP then
+  else if AsprogrammerPN.Current_HW = CHW_EZP then
     Present := EZPDevicePresent
   else
   begin
-    Present := NVRAMancer.Programmer.DevOpen;
-    if Present then NVRAMancer.Programmer.DevClose;
+    Present := AsprogrammerPN.Programmer.DevOpen;
+    if Present then AsprogrammerPN.Programmer.DevClose;
   end;
 
   if (not Present) and MainForm.MenuAutoDetectHW.Checked then
@@ -10962,7 +10969,7 @@ begin
       SelectHW(Found);
       SetHardwareMenuCheck(Found);
       Present := True;
-      LogPrint(STR_HW_SWITCHED + NVRAMancer.Programmer.HardwareName);
+      LogPrint(STR_HW_SWITCHED + AsprogrammerPN.Programmer.HardwareName);
     end;
 
   ProgrammerPresent := Present;
@@ -10983,7 +10990,7 @@ begin
   if Announce or (Was <> ProgrammerPresent) then
   begin
     if ProgrammerPresent then
-      LogPrint(STR_HW_CONNECTED + NVRAMancer.Programmer.HardwareName)
+      LogPrint(STR_HW_CONNECTED + AsprogrammerPN.Programmer.HardwareName)
     else
       LogPrint(STR_HW_DISCONNECTED);
   end;
@@ -11143,7 +11150,7 @@ begin
     Exit;
   end;
 
-  if MessageDlg('NVRAMancer', STR_COMBO_WARN, mtConfirmation,
+  if MessageDlg('Asprogrammer PN', STR_COMBO_WARN, mtConfirmation,
                 [mbYes, mbNo], 0) <> mrYes then Exit;
 
   if ButtonBlock.Enabled then
@@ -11334,7 +11341,7 @@ end;
 procedure TMainForm.MenuAutoTuneClockClick(Sender: TObject);
 begin
   if OperationRunning then Exit;
-  if NVRAMancer.Programmer = nil then Exit;
+  if AsprogrammerPN.Programmer = nil then Exit;
 
   LockControl;
   try
@@ -11346,7 +11353,7 @@ begin
       AutoTuneSPIClock;
     finally
       ExitProgMode25;
-      NVRAMancer.Programmer.DevClose;
+      AsprogrammerPN.Programmer.DevClose;
     end;
   finally
     UnlockControl;
@@ -11370,7 +11377,7 @@ var
 
   function DriverGuidance: string;
   begin
-    case NVRAMancer.Current_HW of
+    case AsprogrammerPN.Current_HW of
       //ชื่อไดรเวอร์ ไม่ใช่พาธ: ตัวติดตั้งของผู้ผลิตไม่ได้อยู่ใน source tree
       //แล้ว รายละเอียดว่าเอามาจากไหนอยู่ใน vendor-manifest.json
       CHW_CH341:
@@ -11439,7 +11446,7 @@ begin
               'register, program, or erase command is sent.');
     Lines.Add('');
 
-    if (NVRAMancer = nil) or (NVRAMancer.Programmer = nil) then
+    if (AsprogrammerPN = nil) or (AsprogrammerPN.Programmer = nil) then
     begin
       Lines.Add('[FAIL] No programmer is selected. Choose one from the ' +
                 'Programmer menu.');
@@ -11449,8 +11456,8 @@ begin
     else
     begin
       Lines.Add('[INFO] Selected programmer: ' +
-                NVRAMancer.Programmer.HardwareName);
-      CapsKnown := NVRAMancer.Programmer.GetMemoryCapabilities(Caps);
+                AsprogrammerPN.Programmer.HardwareName);
+      CapsKnown := AsprogrammerPN.Programmer.GetMemoryCapabilities(Caps);
 
       if RadioI2C.Checked then
       begin
@@ -11469,7 +11476,7 @@ begin
       end;
 
       ProtocolSupported := CapsKnown and
-        NVRAMancer.Programmer.SupportsProtocol(Protocol);
+        AsprogrammerPN.Programmer.SupportsProtocol(Protocol);
       if ProtocolSupported and RadioSPI.Checked and
          (not Caps.RawSPICommands) and
          ((ComboSPICMD.ItemIndex <> SPI_CMD_25) or
@@ -11487,7 +11494,7 @@ begin
                   'protocol support cannot be trusted.');
 
       try
-        Opened := NVRAMancer.Programmer.DevOpen;
+        Opened := AsprogrammerPN.Programmer.DevOpen;
       except
         on E: Exception do
         begin
@@ -11499,7 +11506,7 @@ begin
         Lines.Add('[PASS] Programmer opened; its driver/transport is available.')
       else
       begin
-        if ErrorText = '' then ErrorText := NVRAMancer.Programmer.GetLastError;
+        if ErrorText = '' then ErrorText := AsprogrammerPN.Programmer.GetLastError;
         Lines.Add('[FAIL] Programmer could not be opened: ' + ErrorText);
         Lines.Add('       ' + DriverGuidance);
       end;
@@ -11545,10 +11552,10 @@ begin
         else if RadioSPI.Checked and (ComboSPICMD.ItemIndex <> SPI_CMD_KB) then
         begin
           BusTouched := True;
-          BusInitialized := NVRAMancer.Programmer.SPIInit(SetSPISpeed(0));
+          BusInitialized := AsprogrammerPN.Programmer.SPIInit(SetSPISpeed(0));
           if not BusInitialized then
             Lines.Add('[FAIL] Programmer opened but SPI initialization failed: ' +
-                      NVRAMancer.Programmer.GetLastError)
+                      AsprogrammerPN.Programmer.GetLastError)
           else
           begin
             FillChar(ID, SizeOf(ID), 0);
@@ -11576,7 +11583,7 @@ begin
         else if RadioI2C.Checked then
         begin
           BusTouched := True;
-          NVRAMancer.Programmer.I2CInit;
+          AsprogrammerPN.Programmer.I2CInit;
           BusInitialized := True;
           if ComboAddrType.ItemIndex < 0 then
             Lines.Add('[WARN] Select an I2C address type before testing the chip.')
@@ -11589,13 +11596,13 @@ begin
         else if RadioMW.Checked then
         begin
           BusTouched := True;
-          BusInitialized := NVRAMancer.Programmer.MWInit(SetSPISpeed(0));
+          BusInitialized := AsprogrammerPN.Programmer.MWInit(SetSPISpeed(0));
           if BusInitialized then
             Lines.Add('[PASS] MicroWire bus initialization succeeded. This ' +
                       'protocol has no standard read-only device identity.')
           else
             Lines.Add('[FAIL] MicroWire initialization failed: ' +
-                      NVRAMancer.Programmer.GetLastError);
+                      AsprogrammerPN.Programmer.GetLastError);
         end
         else
           Lines.Add('[INFO] Use Read ID for the selected EC protocol; it has ' +
@@ -11613,20 +11620,20 @@ begin
               'does not prove voltage or clip contact.');
   finally
     try
-      if BusTouched and (NVRAMancer <> nil) and
-         (NVRAMancer.Programmer <> nil) then
+      if BusTouched and (AsprogrammerPN <> nil) and
+         (AsprogrammerPN.Programmer <> nil) then
       begin
-        if RadioI2C.Checked then NVRAMancer.Programmer.I2CDeinit
-        else if RadioMW.Checked then NVRAMancer.Programmer.MWDeinit
-        else NVRAMancer.Programmer.SPIDeinit;
+        if RadioI2C.Checked then AsprogrammerPN.Programmer.I2CDeinit
+        else if RadioMW.Checked then AsprogrammerPN.Programmer.MWDeinit
+        else AsprogrammerPN.Programmer.SPIDeinit;
       end;
     except
       on E: Exception do Lines.Add('[WARN] Bus cleanup reported: ' + E.Message);
     end;
     try
-      if Opened and (NVRAMancer <> nil) and
-         (NVRAMancer.Programmer <> nil) then
-        NVRAMancer.Programmer.DevClose;
+      if Opened and (AsprogrammerPN <> nil) and
+         (AsprogrammerPN.Programmer <> nil) then
+        AsprogrammerPN.Programmer.DevClose;
     except
       on E: Exception do Lines.Add('[WARN] Device close reported: ' + E.Message);
     end;
@@ -11714,8 +11721,8 @@ begin
   EnterProgMode25(SetSPISpeed(0), MainForm.MenuSendAB.Checked);
   LockControl();
 try
-  if (NVRAMancer.Current_HW = CHW_CH341) or (NVRAMancer.Current_HW = CHW_AVRISP) or (NVRAMancer.Current_HW = CHW_CH347)
-    or (NVRAMancer.Current_HW = CHW_FT232H) then
+  if (AsprogrammerPN.Current_HW = CHW_CH341) or (AsprogrammerPN.Current_HW = CHW_AVRISP) or (AsprogrammerPN.Current_HW = CHW_CH347)
+    or (AsprogrammerPN.Current_HW = CHW_FT232H) then
     cycles := 256
   else
     cycles := 32;
@@ -11766,7 +11773,7 @@ finally
   //ข้อยกเว้นระหว่างวัด (ไดรเวอร์อนุกรมโยนได้จริง) ต้องไม่ทิ้ง
   //OperationRunning ค้าง True: ปุ่มทุกปุ่มจะตายและหน้าต่างปิดไม่ได้อีกเลย
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;
@@ -11823,7 +11830,7 @@ begin
 
 finally
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 
@@ -11866,7 +11873,7 @@ begin
 
 finally
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 
@@ -11980,7 +11987,7 @@ begin
   //EZP2023+ ไม่มีคำสั่ง SPI ดิบให้ตัววางแผนใช้ แต่เขียนทั้งชิปได้เอง
   //ปุ่มเดิมจึงพาไปเส้นทางนั้น ผู้ใช้ไม่ต้องรู้ว่าข้างในต่างกัน
   if RadioSPI.Checked and (ComboSPICMD.ItemIndex = SPI_CMD_25) and
-     (NVRAMancer.Current_HW = CHW_EZP) then
+     (AsprogrammerPN.Current_HW = CHW_EZP) then
   begin
     if (not CLIMode) and (Sender <> ComboItem1) then
       if not PresentDirectWrite('Replace the whole chip from the image. Bytes ' +
@@ -12284,7 +12291,7 @@ try
       exit;
     end;
 
-    if not NVRAMancer.Programmer.MWInit(SetSPISpeed(0)) then
+    if not AsprogrammerPN.Programmer.MWInit(SetSPISpeed(0)) then
     begin
       OpFail('the programmer could not initialize the MicroWire bus');
       Exit;
@@ -12326,7 +12333,7 @@ finally
   LogPrint(STR_OP_RESULT + OpSummary);
 
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;
@@ -12476,7 +12483,7 @@ try
       exit;
     end;
 
-    if not NVRAMancer.Programmer.MWInit(SetSPISpeed(0)) then
+    if not AsprogrammerPN.Programmer.MWInit(SetSPISpeed(0)) then
     begin
       OpFail('the programmer could not initialize the MicroWire bus');
       Exit;
@@ -12501,7 +12508,7 @@ try
 finally
   LogPrint(STR_OP_RESULT + OpSummary);
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;
@@ -12803,7 +12810,7 @@ try
 
 finally
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 
@@ -12854,19 +12861,19 @@ begin
     //1.8V จะยอมคุยด้วย) ศูนย์ = เครื่องนี้คุมแรงดันไม่ได้
     ProbeMv := 0;
     ClockRuledOut := False;
-    if (NVRAMancer.Current_HW = CHW_CH347) and
-       NVRAMancer.Programmer.SupportsTargetVoltage then
+    if (AsprogrammerPN.Current_HW = CHW_CH347) and
+       AsprogrammerPN.Programmer.SupportsTargetVoltage then
     begin
       ProbeMv := SelectedCH347Vcc;
       if ProbeMv = 0 then ProbeMv := CH347_VCC_1V8_MV;
-      if NVRAMancer.Programmer.GetTargetVoltageMv <> ProbeMv then
+      if AsprogrammerPN.Programmer.GetTargetVoltageMv <> ProbeMv then
       begin
-        if NVRAMancer.Programmer.SetTargetVoltageMv(ProbeMv) then
+        if AsprogrammerPN.Programmer.SetTargetVoltageMv(ProbeMv) then
           LogPrint(Format(STR_CH347_VCC_SET, [ProbeMv]))
         else
         begin
           LogPrint(Format(STR_CH347_VCC_FAILED, [ProbeMv]));
-          ProbeMv := NVRAMancer.Programmer.GetTargetVoltageMv;
+          ProbeMv := AsprogrammerPN.Programmer.GetTargetVoltageMv;
         end;
       end;
       if ProbeMv = CH347_VCC_3V3_MV then LogPrint(STR_CH347_PROBE_3V3);
@@ -12912,7 +12919,7 @@ begin
     ManufSaved := Chip25ManufID;
 
     ExitProgMode25;
-    NVRAMancer.Programmer.DevClose;
+    AsprogrammerPN.Programmer.DevClose;
 
     //คำสั่งที่ไม่ได้คำตอบต้องขึ้นว่า -- ไม่ใช่ค่าที่ค้างอยู่ในบัฟเฟอร์
     //และต้องไม่เอาไปค้นในตารางชิปด้วย เพราะมันไม่ใช่รหัสที่ชิปบอกมา
@@ -13127,7 +13134,7 @@ begin
         //known.  Prefer an entry in the JEDEC manufacturer group, apply its
         //compatible geometry, and label it honestly as a family—not an exact
         //suffix.  A manual Read ID still shows every candidate.
-        if (NVRAMancer.Current_HW = CHW_EZP) and
+        if (AsprogrammerPN.Current_HW = CHW_EZP) and
            (AutomaticChipDetection or CLIMode) then
         begin
           VendorMatchCount := 0;
@@ -13245,7 +13252,7 @@ begin
   finally
     //ทางออกกลางคัน (KB9012, ไม่มีชิปตอบ) เคยทิ้งอุปกรณ์เปิดค้างไว้จนงาน
     //ถัดไปมาเปิดทับ DevClose ซ้ำบนอุปกรณ์ที่ปิดแล้วไม่มีผลข้างเคียง
-    NVRAMancer.Programmer.DevClose;
+    AsprogrammerPN.Programmer.DevClose;
     UnlockControl();
   end;
 
@@ -13310,7 +13317,7 @@ begin
   try
     Dlg.Filter := 'Text file|*.txt|All files|*.*';
     Dlg.DefaultExt := 'txt';
-    Dlg.FileName := 'nvramancer-log.txt';
+    Dlg.FileName := 'asprogrammer-pn-log.txt';
     if Dlg.Execute then Log.Lines.SaveToFile(Dlg.FileName);
   finally
     Dlg.Free;
@@ -13395,7 +13402,7 @@ begin
     try
       Dlg.Filter := 'Markdown|*.md|Text file|*.txt|All files|*.*';
       Dlg.DefaultExt := 'md';
-      Dlg.FileName := 'nvramancer-session.md';
+      Dlg.FileName := 'asprogrammer-pn-session.md';
       if not Dlg.Execute then Exit;
 
       Lines := Report.Render;
@@ -13472,7 +13479,7 @@ begin
 
   Dlg := TSaveDialog.Create(nil);
   try
-    Dlg.Filter := 'NVRAMancer project|*.apxproj|All files|*.*';
+    Dlg.Filter := 'Asprogrammer PN project|*.apxproj|All files|*.*';
     Dlg.DefaultExt := 'apxproj';
     Dlg.Options := Dlg.Options + [ofOverwritePrompt];
     if CurrentICParam.Name <> '' then Dlg.FileName := CurrentICParam.Name + '.apxproj';
@@ -13597,9 +13604,9 @@ try
   if not ReadCurrentChip(S1, cardinal(Size)) then Exit;
 
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
 
-  if MessageDlg('NVRAMancer', STR_CMP_SWAP, mtConfirmation, [mbOk, mbCancel], 0) <> mrOk then
+  if MessageDlg('Asprogrammer PN', STR_CMP_SWAP, mtConfirmation, [mbOk, mbCancel], 0) <> mrOk then
   begin
     LogPrint(STR_USER_CANCEL);
     Exit;
@@ -13627,7 +13634,7 @@ try
 
 finally
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
   S1.Free;
   S2.Free;
@@ -13643,7 +13650,7 @@ begin
 
   Dlg := TOpenDialog.Create(nil);
   try
-    Dlg.Filter := 'NVRAMancer project|*.apxproj|All files|*.*';
+    Dlg.Filter := 'Asprogrammer PN project|*.apxproj|All files|*.*';
     Dlg.Options := Dlg.Options + [ofFileMustExist];
 
     if not Dlg.Execute then Exit;
@@ -13739,7 +13746,7 @@ begin
 
   while Done < ProdSettings.BatchTarget do
   begin
-    Reply := MessageDlg('NVRAMancer',
+    Reply := MessageDlg('Asprogrammer PN',
       Format(STR_BATCH_INSERT, [Done + 1, ProdSettings.BatchTarget]),
       mtConfirmation, [mbOk, mbCancel], 0);
 
@@ -13883,7 +13890,7 @@ begin
   C.Font.Size := 8;
 
   if ProgrammerPresent then
-    s := NVRAMancer.Programmer.HardwareName
+    s := AsprogrammerPN.Programmer.HardwareName
   else
     s := '';
   Led(ledY, STR_LED_PROGRAMMER, s, ProgrammerPresent);
@@ -14010,7 +14017,7 @@ try
 
 finally
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;
@@ -14091,7 +14098,7 @@ try
 
 finally
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;
@@ -14190,7 +14197,7 @@ try
 
 finally
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;
@@ -14372,7 +14379,7 @@ begin
       exit;
     end;
 
-    NVRAMancer.Programmer.MWInit(SetSPISpeed(0));
+    AsprogrammerPN.Programmer.MWInit(SetSPISpeed(0));
     ReadFlashMW(Stream, StrToInt(MainForm.ComboMWBitLen.Text), 0, Size);
   end
   else
@@ -14459,7 +14466,7 @@ try
 
 finally
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
   ChipData.Free;
   BufStream.Free;
@@ -14543,7 +14550,7 @@ begin
 
     if ShowCredits then
     begin
-      s.Add('NVRAMancer ' + PROX_VERSION);
+      s.Add('Asprogrammer PN ' + PROX_VERSION);
       s.Add('https://github.com/patnawa/NVRAMancer');
       s.Add('');
       s.Add('Written by Patnawa.');
@@ -14557,7 +14564,7 @@ begin
       s.Add('');
       s.Add('--- Prior work this began from ---');
       s.Add('');
-      s.Add('NVRAMancer started as a fork of AsProgrammer by nofeletru, later');
+      s.Add('Asprogrammer PN started as a fork of AsProgrammer by nofeletru, later');
       s.Add('by way of the dregmod fork. The SPI, I2C and MicroWire protocol');
       s.Add('units, several hardware backends, the script engine and the chip');
       s.Add('catalogue descend from that work and are used under its MIT');
@@ -14581,7 +14588,7 @@ begin
     end
     else
     begin
-      s.Add('NVRAMancer');
+      s.Add('Asprogrammer PN');
       s.Add('Version ' + PROX_VERSION);
       s.Add('');
       s.Add('Serial flash and EEPROM programmer for SPI, I2C and MicroWire.');
@@ -14624,7 +14631,7 @@ begin
       s.Add('');
       s.Add('--- This session ---');
       if ProgrammerPresent then
-        s.Add('Programmer   ' + NVRAMancer.Programmer.HardwareName + ' connected')
+        s.Add('Programmer   ' + AsprogrammerPN.Programmer.HardwareName + ' connected')
       else
         s.Add('Programmer   none detected');
       if CurrentICParam.Name <> '' then
@@ -14718,7 +14725,7 @@ var
 begin
   //เครดิตย้ายมาอยู่ที่นี่ที่เดียว แถบ log ตอนเปิดโปรแกรมไม่ต้องแสดงแล้ว
   credits :=
-    'NVRAMancer ' + PROX_VERSION + LineEnding +
+    'Asprogrammer PN ' + PROX_VERSION + LineEnding +
     'https://github.com/patnawa/NVRAMancer' + LineEnding + LineEnding +
     'Written by Patnawa.' + LineEnding + LineEnding +
     'Forked from AsProgrammer by nofeletru; the protocol units, several' +
@@ -14752,7 +14759,7 @@ begin
   finally
     //ปุ่มนี้เป็นเจ้าของการเปิดอุปกรณ์ ต้องปิดเองทุกทางออก ไม่งั้น handle ค้าง
     //จนกว่างานอื่นจะมาเปิดใหม่ (CH341/FT232H จะเปิดซ้ำไม่ได้)
-    NVRAMancer.Programmer.DevClose;
+    AsprogrammerPN.Programmer.DevClose;
   end;
 end;
 
@@ -14853,19 +14860,19 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  NVRAMancer := TNVRAMancer.Create;
-  NVRAMancer.AddHW(TUsbAspHardware.Create);
-  NVRAMancer.AddHW(TCH341Hardware.Create);
-  NVRAMancer.AddHW(TAvrispHardware.Create);
-  NVRAMancer.AddHW(TArduinoHardware.Create);
-  NVRAMancer.AddHW(TBuzzpiratHardware.Create);
-  NVRAMancer.AddHW(TFT232HHardware.Create);
-  NVRAMancer.AddHW(TCH347Hardware.Create);
-  NVRAMancer.AddHW(TSerprogHardware.Create);
-  NVRAMancer.AddHW(TEZPHardware.Create);
+  AsprogrammerPN := TAsprogrammerPN.Create;
+  AsprogrammerPN.AddHW(TUsbAspHardware.Create);
+  AsprogrammerPN.AddHW(TCH341Hardware.Create);
+  AsprogrammerPN.AddHW(TAvrispHardware.Create);
+  AsprogrammerPN.AddHW(TArduinoHardware.Create);
+  AsprogrammerPN.AddHW(TBuzzpiratHardware.Create);
+  AsprogrammerPN.AddHW(TFT232HHardware.Create);
+  AsprogrammerPN.AddHW(TCH347Hardware.Create);
+  AsprogrammerPN.AddHW(TSerprogHardware.Create);
+  AsprogrammerPN.AddHW(TEZPHardware.Create);
   //ต่อท้ายสุด และ ProbeProgrammer ไม่แตะมันเลย เครื่องจำลองที่ถูกเลือก
   //อัตโนมัติได้จะกลายเป็นตัวที่ตอบแทนฮาร์ดแวร์ที่ไม่ได้เสียบอยู่
-  NVRAMancer.AddHW(TSimulatedHardware.Create);
+  AsprogrammerPN.AddHW(TSimulatedHardware.Create);
 
   SelectHW(CHW_BUZZPIRAT); // ทางลัดแบบหยาบ ๆ ของ dreg
 
@@ -14886,9 +14893,9 @@ begin
   LoadLangList();
 
   //เลขเวอร์ชันมาจาก appver ที่เดียว แถบชื่อหน้าต่างกับ log จึงไม่มีวันค้างเลขเก่า
-  Caption := 'NVRAMancer ' + PROX_VERSION;
+  Caption := 'Asprogrammer PN ' + PROX_VERSION;
   if Log.Lines.Count > 0 then
-    Log.Lines[0] := 'NVRAMancer ' + PROX_VERSION;
+    Log.Lines[0] := 'Asprogrammer PN ' + PROX_VERSION;
 
   LoadModernIcons;
   CreateWorkspaceShell;
@@ -14907,7 +14914,7 @@ begin
   //CLI admission runs after FormCreate, so it must not inherit an earlier
   //startup probe.  A rejected request must launch zero hardware helpers
   //before RunCLI has a chance to refuse it.
-  SetHardwareMenuCheck(NVRAMancer.Current_HW);
+  SetHardwareMenuCheck(AsprogrammerPN.Current_HW);
   if CLIMode then
     HwTimer.Enabled := False
   else
@@ -15089,7 +15096,7 @@ begin
   HwTimer.Enabled := False;
   SaveOptions(SettingsFile);
   FreeAndNil(WriteGate);
-  NVRAMancer.Free;
+  AsprogrammerPN.Free;
   MainForm.MPHexEditorEx.Free;
   RomF.Free;
   ChipListFile.Free;
@@ -15232,7 +15239,7 @@ try
       exit;
     end;
 
-    if not NVRAMancer.Programmer.MWInit(SetSPISpeed(0)) then
+    if not AsprogrammerPN.Programmer.MWInit(SetSPISpeed(0)) then
     begin
       OpFail('the programmer could not initialize the MicroWire bus');
       Exit;
@@ -15268,7 +15275,7 @@ try
 finally
   LogPrint(STR_OP_RESULT + OpSummary);
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;
@@ -15322,10 +15329,10 @@ begin
   //EZP2023+ มีคำสั่ง native erase ของเฟิร์มแวร์เอง แล้วอ่านกลับตรวจ FF
   //ทุกไบต์ การเขียนภาพ FF ใช้แทนไม่ได้เพราะเฟิร์มแวร์ข้ามเพจ FF
   if RadioSPI.Checked and (ComboSPICMD.ItemIndex = SPI_CMD_25) and
-     (NVRAMancer.Current_HW = CHW_EZP) then
+     (AsprogrammerPN.Current_HW = CHW_EZP) then
   begin
     if Sender <> ComboItem1 then
-      if MessageDlg('NVRAMancer', STR_START_ERASE, mtConfirmation,
+      if MessageDlg('Asprogrammer PN', STR_START_ERASE, mtConfirmation,
            [mbYes, mbNo], 0) <> mrYes then
       begin
         OpBegin(opkErase);
@@ -15348,7 +15355,7 @@ try
     exit;
   end;
   if Sender <> ComboItem1 then
-    if MessageDlg('NVRAMancer', STR_START_ERASE, mtConfirmation, [mbYes, mbNo], 0)
+    if MessageDlg('Asprogrammer PN', STR_START_ERASE, mtConfirmation, [mbYes, mbNo], 0)
       <> mrYes then
     begin
       OpCancel;
@@ -15527,7 +15534,7 @@ try
       exit;
     end;
 
-    if not NVRAMancer.Programmer.MWInit(SetSPISpeed(0)) then
+    if not AsprogrammerPN.Programmer.MWInit(SetSPISpeed(0)) then
     begin
       OpFail('the programmer could not initialize the MicroWire bus');
       Exit;
@@ -15569,7 +15576,7 @@ try
 finally
   LogPrint(STR_OP_RESULT + OpSummary);
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;
@@ -15618,7 +15625,7 @@ try
 
   //ถ้าเรียกมาจาก smart write ผู้ใช้ยืนยันไปแล้ว ไม่ต้องถามซ้ำ
   if Sender <> MenuSmartWrite then
-    if MessageDlg('NVRAMancer', STR_ERASE_RANGE_Q + LineEnding +
+    if MessageDlg('Asprogrammer PN', STR_ERASE_RANGE_Q + LineEnding +
        '0x' + IntToHex(StartAddr, 8) + ' + ' + IntToStr(RangeLen) + ' bytes',
        mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
     begin
@@ -15665,7 +15672,7 @@ try
 finally
   LogPrint(STR_OP_RESULT + OpSummary);
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;
@@ -15967,7 +15974,7 @@ var
     begin
       PreflightOpen := False;
       try
-        NVRAMancer.Programmer.DevClose;
+        AsprogrammerPN.Programmer.DevClose;
       except
         on E: Exception do
           if not LastOp.Failed then
@@ -16012,7 +16019,7 @@ begin
   //EZP2023+ ไม่มีคำสั่ง SPI ดิบให้ตัววางแผนอ่าน sector ข้างเคียง ลบเป็น
   //ช่วง หรือโปรแกรมเฉพาะเพจที่เปลี่ยน มันรับได้แต่ภาพทั้งชิปผ่านคำสั่งของ
   //เฟิร์มแวร์ ปุ่ม Write ปกติคือเส้นทางที่ถูกต้องและตรวจกลับทุกไบต์ให้เอง
-  if NVRAMancer.Current_HW = CHW_EZP then
+  if AsprogrammerPN.Current_HW = CHW_EZP then
   begin
     ButtonWriteClick(Sender);
     Exit;
@@ -16160,7 +16167,7 @@ begin
     if StrictProductionMode then
       Bridge.ProgrammerID := StrictAdmittedProgrammerID
     else
-      Bridge.ProgrammerID := NVRAMancer.Programmer.HardwareName;
+      Bridge.ProgrammerID := AsprogrammerPN.Programmer.HardwareName;
 
     if not VoltageWarningOK then
     begin
@@ -16457,7 +16464,7 @@ begin
     InitSPI25NORConfig(Config);
     Config.SPISpeed := Speed;
     Config.SendAB := MenuSendAB.Checked;
-    if NVRAMancer.Current_HW = CHW_BUZZPIRAT then
+    if AsprogrammerPN.Current_HW = CHW_BUZZPIRAT then
       Config.ReadTransport := srtCombinedWriteRead
     else
       Config.ReadTransport := srtSplitWriteRead;
@@ -16548,7 +16555,7 @@ begin
     Token := TCancellationToken.Create;
     ActiveNORCancellation := Token;
     try
-      Adapter := TSPI25NORAdapter.Create(NVRAMancer.Programmer, Config);
+      Adapter := TSPI25NORAdapter.Create(AsprogrammerPN.Programmer, Config);
       ExecutorOptions := DefaultNORExecutorOptions;
       ExecutorOptions.ProgramTimeoutMs := PageProgTimeout;
       ExecutorOptions.EraseTimeoutMs := 1;
@@ -16880,7 +16887,7 @@ begin
     end
     else if RadioMW.Checked then
     begin
-      if not NVRAMancer.Programmer.MWInit(SetSPISpeed(0)) then
+      if not AsprogrammerPN.Programmer.MWInit(SetSPISpeed(0)) then
       begin
         OpFail('the programmer could not initialize the MicroWire bus');
         Exit;
@@ -17009,12 +17016,12 @@ begin
     if RadioI2C.Checked then
     begin
       SessionBus := ebI2C;
-      NVRAMancer.Programmer.I2CDeinit;
+      AsprogrammerPN.Programmer.I2CDeinit;
     end
     else if RadioMW.Checked then
     begin
       SessionBus := ebMicroWire;
-      NVRAMancer.Programmer.MWDeinit;
+      AsprogrammerPN.Programmer.MWDeinit;
     end
     else
     begin
@@ -17023,11 +17030,11 @@ begin
     end;
     BusEntered := False;
     SessionVoltage := 0;
-    if NVRAMancer.Programmer.SupportsTargetVoltage then
-      SessionVoltage := NVRAMancer.Programmer.GetTargetVoltageMv;
-    NVRAMancer.Programmer.DevClose;
+    if AsprogrammerPN.Programmer.SupportsTargetVoltage then
+      SessionVoltage := AsprogrammerPN.Programmer.GetTargetVoltageMv;
+    AsprogrammerPN.Programmer.DevClose;
     Opened := False;
-    Device := TEEPROMSession.Create(Device, NVRAMancer.Programmer,
+    Device := TEEPROMSession.Create(Device, AsprogrammerPN.Programmer,
       SessionBus, SetSPISpeed(0), SessionVoltage,
       PageSize, Current);
     Token := TCancellationToken.Create;
@@ -17083,9 +17090,9 @@ begin
     if BusEntered then
       try
         if RadioI2C.Checked then
-          NVRAMancer.Programmer.I2CDeinit
+          AsprogrammerPN.Programmer.I2CDeinit
         else if RadioMW.Checked then
-          NVRAMancer.Programmer.MWDeinit
+          AsprogrammerPN.Programmer.MWDeinit
         else
           ExitProgMode25;
       except
@@ -17093,7 +17100,7 @@ begin
           if not LastOp.Failed then
             OpFail('bus cleanup raised ' + E.ClassName + ': ' + E.Message);
       end;
-    if Opened then NVRAMancer.Programmer.DevClose;
+    if Opened then AsprogrammerPN.Programmer.DevClose;
 
     if (not WasPreparedOnly) and (not SmartWritePlanOnly) and (ProdSettings.ProdLogFile <> '') and
        (MPHexEditorEx.DataSize > 0) then
@@ -17203,7 +17210,7 @@ try
 finally
   LogPrint(STR_OP_RESULT + OpSummary);
   ExitProgMode25;
-  NVRAMancer.Programmer.DevClose;
+  AsprogrammerPN.Programmer.DevClose;
   UnlockControl();
 end;
 end;

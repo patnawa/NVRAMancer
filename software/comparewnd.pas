@@ -405,7 +405,7 @@ begin
     Dlg.Options := Dlg.Options + [ofOverwritePrompt];
     if not Dlg.Execute then Exit;
 
-    L.Add('NVRAMancer, compare report');
+    L.Add('Asprogrammer PN, compare report');
     L.Add('A: ' + NameA);
     L.Add('B: ' + NameB);
     L.Add(Trim(LblSummary.Caption));

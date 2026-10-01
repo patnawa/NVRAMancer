@@ -125,7 +125,7 @@ begin
   Token := StringReplace(StringReplace(GUIDToString(G), '{', '',
                          [rfReplaceAll]), '}', '', [rfReplaceAll]);
   Result := IncludeTrailingPathDelimiter(GetTempDir(False)) +
-            'nvramancer-stage9-' + Token;
+            'asprogrammer-pn-stage9-' + Token;
   if not CreateDir(Result) then
     raise Exception.Create('cannot create test directory: ' + Result);
 end;

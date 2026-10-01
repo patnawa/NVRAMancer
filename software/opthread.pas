@@ -69,9 +69,9 @@ var
 //เครื่องที่ไม่มีไฟดวงนี้ SetActivityLED เป็นตัวเปล่า เรียกไปก็ไม่เสียอะไร
 procedure QuiesceActivityLED;
 begin
-  if NVRAMancer = nil then Exit;
-  if NVRAMancer.Programmer = nil then Exit;
-  NVRAMancer.Programmer.SetActivityLED(False);
+  if AsprogrammerPN = nil then Exit;
+  if AsprogrammerPN.Programmer = nil then Exit;
+  AsprogrammerPN.Programmer.SetActivityLED(False);
 end;
 
 constructor TOpThread.CreateOp(AProc: TNestedOp);

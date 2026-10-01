@@ -43,7 +43,7 @@ begin
 
   Buff[4] := $08;
 
-  result := NVRAMancer.Programmer.SPIWrite(1, 5, Buff);
+  result := AsprogrammerPN.Programmer.SPIWrite(1, 5, Buff);
 end;
 
 function UsbAspMulti_WriteReg(RegAddr: Word; RegData: byte): integer;
@@ -58,7 +58,7 @@ begin
 
   Buff[4] := RegData;
 
-  result := NVRAMancer.Programmer.SPIWrite(1, 5, Buff);
+  result := AsprogrammerPN.Programmer.SPIWrite(1, 5, Buff);
 end;
 
 
@@ -78,7 +78,7 @@ begin
   Buff[2] := hi(RegAddr);
   Buff[3] := lo(RegAddr);
 
-  if NVRAMancer.Programmer.SPIWrite(0, 4, Buff) <> 4 then Exit;
+  if AsprogrammerPN.Programmer.SPIWrite(0, 4, Buff) <> 4 then Exit;
 
   //รอสถานะพร้อม มีเพดานเวลา: ชิปหาย/คลิปหลุดต้องจบด้วย -1 ไม่ใช่ค้างตลอดกาล
   Started := GetTickCount64;
@@ -87,10 +87,10 @@ begin
     if UserCancel then Exit;
     if GetTickCount64 - Started >= MULTI_READY_TIMEOUT_MS then Exit;
 
-    NVRAMancer.Programmer.SPIRead(0, 1, ReadyStat);
+    AsprogrammerPN.Programmer.SPIRead(0, 1, ReadyStat);
   until (ReadyStat = $50);
 
-  result := NVRAMancer.Programmer.SPIRead(1, 1, regdata);
+  result := AsprogrammerPN.Programmer.SPIRead(1, 1, regdata);
 end;
 
 function UsbAspMulti_Read(Addr: longword; var Data: byte): integer;

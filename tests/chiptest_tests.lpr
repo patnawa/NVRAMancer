@@ -380,7 +380,7 @@ begin
 end;
 
 begin
-  WriteLn('NVRAMancer chip capacity and identity tests');
+  WriteLn('Asprogrammer PN chip capacity and identity tests');
   WriteLn;
 
   TestMarkers;

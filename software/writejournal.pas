@@ -630,6 +630,8 @@ function AppendJournalMark(const FileName: string;
 var
   Stream: TFileStream;
   Line: RawByteString;
+  EndOfCompleteLines: Int64;
+  LastByte: byte;
 begin
   ErrMsg := '';
   Result := False;
@@ -641,7 +643,22 @@ begin
   try
     Stream := TFileStream.Create(FileName, fmOpenReadWrite or fmShareDenyWrite);
     try
-      Stream.Seek(0, soEnd);
+      // A crash may have left an incomplete tail. Appending directly would
+      // join two records and make replay discard every subsequent mark.
+      // Keep every newline-terminated byte; only the uncommitted tail is lost.
+      EndOfCompleteLines := Stream.Size;
+      while EndOfCompleteLines > 0 do
+      begin
+        Stream.Position := EndOfCompleteLines - 1;
+        Stream.ReadBuffer(LastByte, 1);
+        if LastByte = 10 then Break;
+        Dec(EndOfCompleteLines);
+      end;
+      if EndOfCompleteLines = 0 then
+        raise EWriteError.Create('the write journal has no complete header');
+      if EndOfCompleteLines <> Stream.Size then
+        Stream.Size := EndOfCompleteLines;
+      Stream.Position := EndOfCompleteLines;
       //The newline is written in the same call as the text, so the two cannot
       //be separated by a crash: a torn write loses the whole line, which
       //SplitCompleteLines then discards, which costs one repeated block.

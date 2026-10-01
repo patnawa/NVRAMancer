@@ -1,9 +1,9 @@
-﻿# Builds NVRAMancer, runs the tests, and assembles a release folder.
+﻿# Builds AsprogrammerPN, runs the tests, and assembles a release folder.
 #
 #   powershell -ExecutionPolicy Bypass -File tools\build.ps1
 #   powershell -ExecutionPolicy Bypass -File tools\build.ps1 -Release
 #
-# -Release also zips the result into release\NVRAMancer-<version>.zip,
+# -Release also zips the result into release\AsprogrammerPN-<version>.zip,
 # with the runtime DLLs and data files already in place, so the zip is what
 # someone can actually run. The DLLs are fetched from the upstream release the
 # first time, because they are not kept in the repository.
@@ -48,8 +48,8 @@ $verSrc = Get-Content "$root\software\appver.pas" -Raw
 if ($verSrc -notmatch "PROX_VERSION\s*=\s*'([0-9.]+)'") { Die "no PROX_VERSION in software\appver.pas" }
 $proxVersion = $Matches[1]
 
-$lpiSrc = Get-Content "$root\software\NVRAMancer.lpi" -Raw
-if ($lpiSrc -notmatch 'ProductVersion="([0-9.]+)"') { Die "no ProductVersion in NVRAMancer.lpi" }
+$lpiSrc = Get-Content "$root\software\AsprogrammerPN.lpi" -Raw
+if ($lpiSrc -notmatch 'ProductVersion="([0-9.]+)"') { Die "no ProductVersion in AsprogrammerPN.lpi" }
 $lpiProductVersion = $Matches[1]
 $lpiParts = @(
   @('MajorVersionNr', '<MajorVersionNr Value="([0-9]+)"'),
@@ -58,12 +58,12 @@ $lpiParts = @(
   @('BuildNr', '<BuildNr Value="([0-9]+)"')
 )
 $lpiFileVersionParts = foreach ($part in $lpiParts) {
-  if ($lpiSrc -notmatch $part[1]) { Die "no $($part[0]) in NVRAMancer.lpi" }
+  if ($lpiSrc -notmatch $part[1]) { Die "no $($part[0]) in AsprogrammerPN.lpi" }
   $Matches[1]
 }
 $lpiFileVersion = $lpiFileVersionParts -join '.'
 if (($lpiProductVersion -ne $proxVersion) -or ($lpiFileVersion -ne $proxVersion)) {
-  Die "version mismatch: appver.pas says $proxVersion, NVRAMancer.lpi ProductVersion says $lpiProductVersion and FileVersion says $lpiFileVersion. Bump all fields."
+  Die "version mismatch: appver.pas says $proxVersion, AsprogrammerPN.lpi ProductVersion says $lpiProductVersion and FileVersion says $lpiFileVersion. Bump all fields."
 }
 Step "version $proxVersion"
 
@@ -447,17 +447,17 @@ Step "building the headless CLI"
 $headlessDir = Join-Path $env:TEMP "aspx-headless-cli-win32"
 Remove-Item -LiteralPath $headlessDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path (Join-Path $headlessDir "units") -Force | Out-Null
-# -o names the binary NVRAMancer CLI, not the .lpr it was built from. The
-# project file is still NVRAMancerCLI.lpr; the thing a user runs is not.
+# -o names the binary AsprogrammerPN CLI, not the .lpr it was built from. The
+# project file is still AsprogrammerPNCLI.lpr; the thing a user runs is not.
 & "$fpcBin\fpc.exe" -Twin32 -Pi386 -Mobjfpc -Sh `
   "-Fu$root\software" "-FU$headlessDir\units" "-FE$headlessDir" `
-  "-oNVRAMancerCLI.exe" `
-  "$root\software\NVRAMancerCLI.lpr" | Out-Null
-$headlessExe = Join-Path $headlessDir "NVRAMancerCLI.exe"
+  "-oAsprogrammerPNCLI.exe" `
+  "$root\software\AsprogrammerPNCLI.lpr" | Out-Null
+$headlessExe = Join-Path $headlessDir "AsprogrammerPNCLI.exe"
 if (($LASTEXITCODE -ne 0) -or -not (Test-Path -LiteralPath $headlessExe)) {
   Die "the headless Windows CLI did not compile"
 }
-Write-Host "    NVRAMancerCLI.exe"
+Write-Host "    AsprogrammerPNCLI.exe"
 
 # Parser boundary checks run without opening USB. These values wrap to 256
 # and 4096 if a QWord is truncated before the geometry builder sees it.
@@ -481,14 +481,14 @@ if ($LASTEXITCODE -ne 2) { Die "headless CLI accepted a duplicate option" }
 Write-Host "    unknown and duplicate options refused before USB open"
 
 # --- the program ---
-Step "building NVRAMancer.exe"
-& $lazbuild --build-mode=Release "$root\software\NVRAMancer.lpi" | Out-Null
+Step "building AsprogrammerPN.exe"
+& $lazbuild --build-mode=Release "$root\software\AsprogrammerPN.lpi" | Out-Null
 if ($LASTEXITCODE -ne 0) { Die "the build failed" }
-# The Lazarus project file is still NVRAMancer.lpi, but its target filename
-# is NVRAMancer, so this is what an ordinary build produces -- not only what a
+# The Lazarus project file is still AsprogrammerPN.lpi, but its target filename
+# is AsprogrammerPN, so this is what an ordinary build produces -- not only what a
 # -Release package renames it to. Somebody who runs the build script and then
 # double-clicks the result should get the program this project ships.
-$exe = "$root\software\NVRAMancer.exe"
+$exe = "$root\software\AsprogrammerPN.exe"
 if (-not (Test-Path $exe)) { Die "no executable was produced" }
 Write-Host ("    {0:N0} bytes" -f (Get-Item $exe).Length)
 
@@ -505,18 +505,18 @@ if (-not $Release) {
 }
 
 # --- release folder ---
-$out = Join-Path $root "release\NVRAMancer-$Version"
+$out = Join-Path $root "release\AsprogrammerPN-$Version"
 Step "assembling $out"
 Remove-Item -Recurse -Force $out -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $out | Out-Null
 
 # Both binaries are already named for the program rather than for the project
 # files they were built from, so this is a copy and not a rename. It used to be
-# a rename, which meant an ordinary build left NVRAMancer.exe sitting in
+# a rename, which meant an ordinary build left AsprogrammerPN.exe sitting in
 # software\ and only the packaged copy carried the right name -- so the thing a
 # developer ran was never the thing a user ran.
-Copy-Item $exe (Join-Path $out "NVRAMancer.exe")
-Copy-Item $headlessExe (Join-Path $out "NVRAMancerCLI.exe")
+Copy-Item $exe (Join-Path $out "AsprogrammerPN.exe")
+Copy-Item $headlessExe (Join-Path $out "AsprogrammerPNCLI.exe")
 Remove-Item -LiteralPath $headlessDir -Recurse -Force
 Copy-Item "$root\chiplist.xml","$root\settings.xml" $out
 if (Test-Path "$root\chiplist-flashrom.xml") { Copy-Item "$root\chiplist-flashrom.xml" $out }
@@ -668,13 +668,13 @@ $sbom = [ordered]@{
   metadata     = [ordered]@{
     component = [ordered]@{
       type    = 'application'
-      name    = 'NVRAMancer'
+      name    = 'Asprogrammer PN'
       version = $Version
     }
   }
   components   = $sbomComponents
 }
-$sbomPath = Join-Path $out "nvramancer-$Version.cdx.json"
+$sbomPath = Join-Path $out "asprogrammer-pn-$Version.cdx.json"
 # WriteAllText with an explicit BOM-less encoder, not Set-Content -Encoding
 # utf8: Windows PowerShell 5.1 always prepends a byte order mark, and a BOM in
 # front of '{' makes the file invalid JSON to strict parsers -- which is most
@@ -685,7 +685,7 @@ $sbomPath = Join-Path $out "nvramancer-$Version.cdx.json"
 # list itself. That is the usual convention and avoids the obvious paradox.
 Write-Host "    $($sbomComponents.Count) components"
 
-$zipOut = "$root\release\NVRAMancer-$Version.zip"
+$zipOut = "$root\release\AsprogrammerPN-$Version.zip"
 Remove-Item $zipOut -ErrorAction SilentlyContinue
 
 # The entries are added one at a time so the paths inside the zip are written
@@ -727,7 +727,7 @@ try {
 # The checksum of the artefact people actually download. Written beside the
 # ZIP so a release upload carries both without a manual step.
 $zipHash = (Get-FileHash -LiteralPath $zipOut -Algorithm SHA256).Hash
-"$($zipHash.ToLowerInvariant())  NVRAMancer-$Version.zip" |
+"$($zipHash.ToLowerInvariant())  AsprogrammerPN-$Version.zip" |
   Set-Content -LiteralPath "$zipOut.sha256" -Encoding ascii
 Write-Host "    SHA-256 $zipHash"
 

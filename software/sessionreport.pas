@@ -385,11 +385,11 @@ var
 begin
   Lines := nil;
 
-  Add('# NVRAMancer session report');
+  Add('# AsprogrammerPN session report');
   Add('');
   Add('| | |');
   Add('|---|---|');
-  Add('| Program | NVRAMancer ' + OrNotRecorded(FProgramVersion) + ' |');
+  Add('| Program | AsprogrammerPN ' + OrNotRecorded(FProgramVersion) + ' |');
   Add('| Started (UTC) | ' + OrNotRecorded(FStartedUtc) + ' |');
   Add('| Programmer | ' + OrNotRecorded(FProgrammer) + ' |');
   Add('| Programmer firmware | ' + OrNotRecorded(FProgrammerFirmware) + ' |');

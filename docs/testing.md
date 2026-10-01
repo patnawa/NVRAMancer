@@ -33,6 +33,9 @@ chip profiles, automatic preparation without mutation, explicit Write, reopened
 verification, and recovery from a saved original with erased neighbouring bytes.
 It verifies that routine operations create no modal form. A simulator check
 precedes every device operation; it never selects or probes real hardware.
+Set `ASPROGRAMMER_PN_SCREENSHOT` to an absolute PNG path to capture the
+prepared simulator workspace during this smoke test.
+
 Settings, images, backups and logs live in a new temporary fixture directory,
 whose path is printed. No visual layout assertion or physical hardware claim
 is made by this test.
@@ -114,7 +117,7 @@ adds it to the builds.
 
 The build scripts also validate every chip-list XML file. On Linux they
 compile-check `tools/ch347smoke.lpr` and the LCL-free
-`software/NVRAMancerCLI.lpr` entrypoint with its real CH347/libusb and
+`software/AsprogrammerPNCLI.lpr` entrypoint with its real CH347/libusb and
 operation-engine dependency graph. Ordinary CI does not open hardware.
 
 ## Live hardware tests

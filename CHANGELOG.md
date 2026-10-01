@@ -1,7 +1,23 @@
 # Changelog
 
-All notable changes to NVRAMancer are recorded here. The version in the
+All notable changes to Asprogrammer PN are recorded here. The version in the
 first entry must match `software/appver.pas`; CI enforces that invariant.
+
+## 4.45.0.0 — Asprogrammer PN and safe firmware imports
+
+- Rename the application, executables, project files, reports, build artifacts,
+  and documentation to Asprogrammer PN.
+- Reject HEX/S-record data outside the selected chip instead of reporting a
+  successful load with skipped bytes. Compute address bounds without 32-bit wrap.
+- Validate HEX record types, fixed field lengths and trailing bytes, and S-record
+  address lengths before decoding. Rejected imports preserve the loaded image.
+- Repair an incomplete journal tail before appending new progress, so a second
+  interruption does not hide subsequent completed records.
+- Production station and hardware-validation environment variables now use
+  the `ASPROGRAMMER_PN_` prefix. Update launch scripts when upgrading.
+- Retain persisted project, signed-job and journal namespaces for compatibility. Existing
+  backups remain discoverable after upgrading. GitHub URLs retain their current
+  repository location.
 
 ## 4.44.0.0 — straight into the workspace, with English built in
 

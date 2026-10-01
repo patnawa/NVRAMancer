@@ -56,5 +56,5 @@ verify the attestation with GitHub CLI where policy requires it:
 
 ```bash
 sha256sum -c SHA256SUMS.txt
-gh attestation verify NVRAMancer-*.zip --repo patnawa/NVRAMancer
+gh attestation verify AsprogrammerPN-*.zip --repo patnawa/NVRAMancer
 ```

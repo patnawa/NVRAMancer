@@ -91,7 +91,7 @@ begin
 
   SetLength(Reply, Want);
   if Want > 0 then FillChar(Reply[0], Want, $FF);
-  Got := NVRAMancer.Programmer.SPIWriteRead(1, Length(Cmd), Cmd, Want, Reply);
+  Got := AsprogrammerPN.Programmer.SPIWriteRead(1, Length(Cmd), Cmd, Want, Reply);
   if Got < 0 then
   begin
     //-1 คือทั้ง "สายหลุด" และ "โหมดอ่านอย่างเดียวปฏิเสธ" แยกให้ผู้ใช้เห็น
@@ -225,7 +225,7 @@ var
   Row: string;
 begin
   if OperationRunning then Exit;
-  if NVRAMancer.Programmer = nil then Exit;
+  if AsprogrammerPN.Programmer = nil then Exit;
 
   Win := MakeToolWindow('I2C bus scanner', 560, 420, Memo);
   try
@@ -243,7 +243,7 @@ begin
         Exit;
       end;
       Opened := True;
-      NVRAMancer.Programmer.I2CInit;
+      AsprogrammerPN.Programmer.I2CInit;
 
       Memo.Lines.Add(Format('probing 0x%.2X..0x%.2X; the I2C reserved ' +
         'ranges are deliberately skipped',
@@ -255,8 +255,8 @@ begin
         if not I2CAddressIsProbeable(Addr) then Continue;
         Inc(Probed);
         //แหย่ด้วยไบต์แอดเดรสเปล่า ๆ แล้วดู ACK ไม่เขียนอะไรตามหลังเลย
-        NVRAMancer.Programmer.I2CStart;
-        if NVRAMancer.Programmer.I2CWriteByte(I2CWriteByteFor(Addr)) then
+        AsprogrammerPN.Programmer.I2CStart;
+        if AsprogrammerPN.Programmer.I2CWriteByte(I2CWriteByteFor(Addr)) then
         begin
           Inc(Found);
           Row := Format('  0x%.2X responds  (write byte 0x%.2X, read byte 0x%.2X)',
@@ -266,7 +266,7 @@ begin
             Row := Row + '  - typical 24-series EEPROM';
           Memo.Lines.Add(Row);
         end;
-        NVRAMancer.Programmer.I2CStop;
+        AsprogrammerPN.Programmer.I2CStop;
       end;
 
       Memo.Lines.Add('');
@@ -286,8 +286,8 @@ begin
     finally
       if Opened then
       begin
-        NVRAMancer.Programmer.I2CDeinit;
-        NVRAMancer.Programmer.DevClose;
+        AsprogrammerPN.Programmer.I2CDeinit;
+        AsprogrammerPN.Programmer.DevClose;
       end;
       UnlockControl;
     end;
@@ -313,7 +313,7 @@ var
   Opened: boolean;
 begin
   if OperationRunning then Exit;
-  if NVRAMancer.Programmer = nil then Exit;
+  if AsprogrammerPN.Programmer = nil then Exit;
 
   Ctl := TSPIConsoleController.Create;
   Win := MakeToolWindow('SPI console', 720, 460, Memo);
@@ -384,7 +384,7 @@ begin
       if Opened then
       begin
         ExitProgMode25;
-        NVRAMancer.Programmer.DevClose;
+        AsprogrammerPN.Programmer.DevClose;
       end;
       UnlockControl;
     end;

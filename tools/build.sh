@@ -28,16 +28,16 @@ die()  { printf '\033[31mFAILED: %s\033[0m\n' "$1" >&2; exit 1; }
 # --- the version has to agree in both places, same rule as the Windows build ---
 prox_version="$(sed -n "s/.*PROX_VERSION *= *'\([0-9.]*\)'.*/\1/p" software/appver.pas)"
 [ -n "$prox_version" ] || die "no PROX_VERSION in software/appver.pas"
-lpi_version="$(sed -n 's/.*ProductVersion="\([0-9.]*\)".*/\1/p' software/NVRAMancer.lpi | head -1)"
-[ -n "$lpi_version" ] || die "no ProductVersion in NVRAMancer.lpi"
+lpi_version="$(sed -n 's/.*ProductVersion="\([0-9.]*\)".*/\1/p' software/AsprogrammerPN.lpi | head -1)"
+[ -n "$lpi_version" ] || die "no ProductVersion in AsprogrammerPN.lpi"
 lpi_file_version="$(sed -n \
   -e 's/.*<MajorVersionNr Value="\([0-9]*\)".*/\1/p' \
   -e 's/.*<MinorVersionNr Value="\([0-9]*\)".*/.\1/p' \
   -e 's/.*<RevisionNr Value="\([0-9]*\)".*/.\1/p' \
   -e 's/.*<BuildNr Value="\([0-9]*\)".*/.\1/p' \
-  software/NVRAMancer.lpi | tr -d '\n')"
+  software/AsprogrammerPN.lpi | tr -d '\n')"
 [ "$prox_version" = "$lpi_version" ] && [ "$prox_version" = "$lpi_file_version" ] || \
-  die "version mismatch: appver.pas says $prox_version, NVRAMancer.lpi ProductVersion says $lpi_version and FileVersion says $lpi_file_version"
+  die "version mismatch: appver.pas says $prox_version, AsprogrammerPN.lpi ProductVersion says $lpi_version and FileVersion says $lpi_file_version"
 step "version $prox_version"
 
 # --- chip tables ---
@@ -327,14 +327,14 @@ headless="$tmp/headless-cli"
 mkdir -p "$headless/units"
 # -o names the binary for the program, not for the .lpr it was built from.
 fpc -Mobjfpc -Sh -Fusoftware -FU"$headless/units" -FE"$headless" \
-  -oNVRAMancerCLI software/NVRAMancerCLI.lpr >/dev/null \
+  -oAsprogrammerPNCLI software/AsprogrammerPNCLI.lpr >/dev/null \
   || die "the headless Linux CLI did not compile"
-[ -x "$headless/NVRAMancerCLI" ] \
+[ -x "$headless/AsprogrammerPNCLI" ] \
   || die "the headless Linux CLI executable was not produced"
 
 # These QWord values would wrap to plausible 32-bit geometry without an
 # explicit bound check. Both invocations must fail as usage before USB opens.
-if "$headless/NVRAMancerCLI" --smart-preview unused.bin --size 8388608 \
+if "$headless/AsprogrammerPNCLI" --smart-preview unused.bin --size 8388608 \
     --address 0 --page-size 4294967552 --erase-size 4096 \
     --erase-opcode 20 >/dev/null 2>&1; then
   die "headless CLI admitted overflowing page geometry"
@@ -342,7 +342,7 @@ else
   code=$?
   [ "$code" -eq 2 ] || die "headless CLI returned $code for overflowing page geometry"
 fi
-if "$headless/NVRAMancerCLI" --smart-preview unused.bin --size 8388608 \
+if "$headless/AsprogrammerPNCLI" --smart-preview unused.bin --size 8388608 \
     --address 0 --page-size 256 --erase-size 4294971392 \
     --erase-opcode 20 >/dev/null 2>&1; then
   die "headless CLI admitted overflowing erase geometry"
@@ -350,13 +350,13 @@ else
   code=$?
   [ "$code" -eq 2 ] || die "headless CLI returned $code for overflowing erase geometry"
 fi
-if "$headless/NVRAMancerCLI" --detect --speeed 1 >/dev/null 2>&1; then
+if "$headless/AsprogrammerPNCLI" --detect --speeed 1 >/dev/null 2>&1; then
   die "headless CLI ignored an unknown option"
 else
   code=$?
   [ "$code" -eq 2 ] || die "headless CLI returned $code for an unknown option"
 fi
-if "$headless/NVRAMancerCLI" --detect --detect >/dev/null 2>&1; then
+if "$headless/AsprogrammerPNCLI" --detect --detect >/dev/null 2>&1; then
   die "headless CLI accepted a duplicate option"
 else
   code=$?

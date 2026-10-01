@@ -27,7 +27,7 @@ uses basehw;
 
 function UsbAspMW_Busy(): boolean;
 begin
-  result := NVRAMancer.Programmer.MWIsBusy;
+  result := AsprogrammerPN.Programmer.MWIsBusy;
 end;
 
 function MWAddressValid(AddrBitLen: byte; Addr: cardinal): boolean;
@@ -96,10 +96,10 @@ begin
   if bufflen = 0 then Exit(0);
   if not BuildMWCommand(2, AddrBitLen, Addr, writebuff) then Exit(-1);
 
-  Sent := NVRAMancer.Programmer.MWWrite(0, AddrBitLen + 3, writebuff);
+  Sent := AsprogrammerPN.Programmer.MWWrite(0, AddrBitLen + 3, writebuff);
   if Sent <> AddrBitLen + 3 then Exit(-1);
 
-  Got := NVRAMancer.Programmer.MWRead(1, bufflen, buffer);
+  Got := AsprogrammerPN.Programmer.MWRead(1, bufflen, buffer);
   if Got <> bufflen then Exit(-1);
   Result := Got;
 end;
@@ -119,11 +119,11 @@ begin
   if bufflen > 31 then Exit(-1);
   if not BuildMWCommand(1, AddrBitLen, Addr, writebuff) then Exit(-1);
 
-  Sent := NVRAMancer.Programmer.MWWrite(0, AddrBitLen + 3, writebuff);
+  Sent := AsprogrammerPN.Programmer.MWWrite(0, AddrBitLen + 3, writebuff);
   if Sent <> AddrBitLen + 3 then Exit(-1);
 
   DataBits := bufflen * 8;
-  Sent := NVRAMancer.Programmer.MWWrite(1, DataBits, buffer);
+  Sent := AsprogrammerPN.Programmer.MWWrite(1, DataBits, buffer);
   if Sent <> DataBits then Exit(-1);
   Result := bufflen;
 end;
@@ -134,7 +134,7 @@ var
 begin
   if SafeModeBlocks(gaErase) then Exit(-1);
   if not BuildMWControl(2, AddrBitLen, writebuff) then Exit(-1); //ERAL
-  Result := NVRAMancer.Programmer.MWWrite(1, AddrBitLen + 3, writebuff);
+  Result := AsprogrammerPN.Programmer.MWWrite(1, AddrBitLen + 3, writebuff);
   if Result <> AddrBitLen + 3 then Result := -1;
 end;
 
@@ -145,7 +145,7 @@ begin
   //EWEN คือประตูของทุกการเขียน/ลบ ปิดที่นี่ด้วยเพื่อกันสคริปต์เรียกตรง
   if SafeModeBlocks(gaUnlock) then Exit(-1);
   if not BuildMWControl(3, AddrBitLen, writebuff) then Exit(-1); //EWEN
-  Result := NVRAMancer.Programmer.MWWrite(1, AddrBitLen + 3, writebuff);
+  Result := AsprogrammerPN.Programmer.MWWrite(1, AddrBitLen + 3, writebuff);
   if Result <> AddrBitLen + 3 then Result := -1;
 end;
 
@@ -154,7 +154,7 @@ var
   writebuff: array[0..3] of byte;
 begin
   if not BuildMWControl(0, AddrBitLen, writebuff) then Exit(-1); //EWDS
-  Result := NVRAMancer.Programmer.MWWrite(1, AddrBitLen + 3, writebuff);
+  Result := AsprogrammerPN.Programmer.MWWrite(1, AddrBitLen + 3, writebuff);
   if Result <> AddrBitLen + 3 then Result := -1;
 end;
 

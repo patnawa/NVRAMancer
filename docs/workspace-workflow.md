@@ -30,7 +30,7 @@ including OTP and explicit erase tools, retain their own interactions.
 ## Backups and recovery
 
 The default Windows backup directory is
-`%LOCALAPPDATA%\NVRAMancer\backups`. **Open backups** opens that directory.
+`%LOCALAPPDATA%\Asprogrammer PN\backups`. **Open backups** opens that directory.
 Ordinary reads are saved there too; the write workflow still establishes its
 own repeated-read trusted snapshot. A backup failure blocks the write.
 

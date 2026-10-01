@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for improving NVRAMancer. A programmer bug can erase the only
+Thank you for improving AsprogrammerPN. A programmer bug can erase the only
 copy of a device's firmware, so small, reviewable changes with explicit
 evidence are more valuable than broad rewrites.
 
@@ -54,7 +54,7 @@ responsibilities are in [docs/testing.md](docs/testing.md).
 Prefer live SFDP facts and the manufacturer's datasheet. From a detected chip:
 
 ```powershell
-NVRAMancer.exe --export-chip PART_NAME --sfdp
+AsprogrammerPN.exe --export-chip PART_NAME --sfdp
 ```
 
 A chip-support pull request should include:

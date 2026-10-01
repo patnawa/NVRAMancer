@@ -39,7 +39,7 @@ The implementation is LCL-free below the command-line adapter:
 opened unless all of these conditions hold:
 
 1. A bench that has completed the live-validation checklist sets
-   `NVRAMANCER_NAND_LIVE_VALIDATED=1`.
+   `ASPROGRAMMER_PN_NAND_LIVE_VALIDATED=1`.
 2. The invocation includes `--force`.
 3. `--nand-backup FILE` names a new file in an existing directory. Existing
    files are never overwritten.
@@ -70,9 +70,9 @@ success only when the full main area is blank.
 The read-only surface remains usable without the station gate:
 
 ```powershell
-NVRAMancer.exe --nand-info --hw ch347
-NVRAMancer.exe --nand-read recovery.bin --hw ch347
-NVRAMancer.exe --nand-read raw.bin --nand-raw --hw ch347
+AsprogrammerPN.exe --nand-info --hw ch347
+AsprogrammerPN.exe --nand-read recovery.bin --hw ch347
+AsprogrammerPN.exe --nand-read raw.bin --nand-raw --hw ch347
 ```
 
 After a station has independently satisfied the validation checklist, a
@@ -80,8 +80,8 @@ mutation invocation has this shape (do not set the environment gate merely to
 bypass the refusal):
 
 ```powershell
-$env:NVRAMANCER_NAND_LIVE_VALIDATED = '1'
-NVRAMancer.exe --nand-write image.bin --nand-backup recovery.bin `
+$env:ASPROGRAMMER_PN_NAND_LIVE_VALIDATED = '1'
+AsprogrammerPN.exe --nand-write image.bin --nand-backup recovery.bin `
   --nand-bad-policy refuse --force --hw ch347
 ```
 
@@ -135,7 +135,7 @@ silicon.
 
 The seven items above are not prose. They are the contents of
 `NAND_CHECKLIST` in `software/validationgate.pas`, and the gate in `cli.pas`
-reads them: `NVRAMancerCLI --gates` prints the list with the covered items
+reads them: `AsprogrammerPNCLI --gates` prints the list with the covered items
 ticked, and a refused `--nand-write` names the outstanding ones rather than
 saying "pending live validation".
 
@@ -151,7 +151,7 @@ and 7 is that they happened to the same part in the same session as items 1
 to 3 — a restore verified against a backup some other run took last month is
 not a verified restore.
 
-The `NVRAMANCER_NAND_LIVE_VALIDATED` token is not a second way through the
+The `ASPROGRAMMER_PN_NAND_LIVE_VALIDATED` token is not a second way through the
 gate. It is how the validation run itself is performed, since somebody has to
 issue destructive commands before any evidence can exist; a run that uses it
 while the capability is gated says so in as many words.
